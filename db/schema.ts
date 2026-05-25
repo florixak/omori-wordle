@@ -1,4 +1,5 @@
 import { relations } from "drizzle-orm";
+import { sql } from "drizzle-orm";
 import {
   pgTable,
   text,
@@ -9,6 +10,7 @@ import {
   integer,
   json,
 } from "drizzle-orm/pg-core";
+import { check } from "drizzle-orm/pg-core";
 import { uniqueIndex } from "drizzle-orm/pg-core/indexes";
 
 export const user = pgTable("user", {
@@ -130,29 +132,50 @@ export const gameResult = pgTable(
     completedAt: timestamp("completed_at").defaultNow(),
   },
   (t) => [
+    check(
+      "game_result_date_format_check",
+      sql`${t.date} ~ '^\d{4}-\d{2}-\d{2}$'`,
+    ),
+    check(
+      "game_result_word_uppercase_check",
+      sql`${t.word} = upper(${t.word})`,
+    ),
+    check(
+      "game_result_word_length_matches_check",
+      sql`${t.wordLength} = char_length(${t.word})`,
+    ),
     uniqueIndex("unique_user_date").on(t.userId, t.date),
     index("idx_game_result_date").on(t.date),
   ],
 );
 
-export const userStats = pgTable("user_stats", {
-  userId: text("user_id")
-    .primaryKey()
-    .references(() => user.id, { onDelete: "cascade" }),
+export const userStats = pgTable(
+  "user_stats",
+  {
+    userId: text("user_id")
+      .primaryKey()
+      .references(() => user.id, { onDelete: "cascade" }),
 
-  gamesPlayed: integer("games_played").default(0).notNull(),
-  gamesWon: integer("games_won").default(0).notNull(),
-  currentStreak: integer("current_streak").default(0).notNull(),
-  maxStreak: integer("max_streak").default(0).notNull(),
+    gamesPlayed: integer("games_played").default(0).notNull(),
+    gamesWon: integer("games_won").default(0).notNull(),
+    currentStreak: integer("current_streak").default(0).notNull(),
+    maxStreak: integer("max_streak").default(0).notNull(),
 
-  // Guess distribution keys: '1'..'6' for wins, '0' for losses.
-  guessDistribution: json("guess_distribution")
-    .$type<Record<string, number>>()
-    .default({})
-    .notNull(),
-  // lastPlayedDate used to determine streak resets.
-  lastPlayedDate: text("last_played_date"),
-});
+    // Guess distribution keys: '1'..'6' for wins, '0' for losses.
+    guessDistribution: json("guess_distribution")
+      .$type<Record<string, number>>()
+      .default({})
+      .notNull(),
+    // lastPlayedDate used to determine streak resets.
+    lastPlayedDate: text("last_played_date"),
+  },
+  (t) => [
+    check(
+      "user_stats_last_played_date_format_check",
+      sql`${t.lastPlayedDate} ~ '^\d{4}-\d{2}-\d{2}$'`,
+    ),
+  ],
+);
 
 export const friendship = pgTable(
   "friendship",
@@ -174,6 +197,10 @@ export const friendship = pgTable(
     createdAt: timestamp("created_at").defaultNow(),
   },
   (t) => [
+    check(
+      "friendship_no_self_friend_check",
+      sql`${t.requesterId} <> ${t.addresseeId}`,
+    ),
     uniqueIndex("unique_friendship").on(t.requesterId, t.addresseeId),
     index("idx_friendship_requester").on(t.requesterId),
     index("idx_friendship_addressee").on(t.addresseeId),
