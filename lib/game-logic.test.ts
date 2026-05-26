@@ -4,6 +4,7 @@ import {
   evaluateGuess,
   getGameStatus,
   getKeyboardState,
+  getKeyboardStateFromResults,
   isLost,
   isWon,
 } from "./game-logic";
@@ -23,6 +24,23 @@ describe("evaluateGuess", () => {
 describe("getKeyboardState", () => {
   it("keeps the highest-priority state for letters across multiple guesses", () => {
     expect(getKeyboardState(["APPLE", "PAPER"], "PAPER")).toEqual({
+      A: "correct",
+      P: "correct",
+      L: "absent",
+      E: "correct",
+      R: "correct",
+    });
+  });
+});
+
+describe("getKeyboardStateFromResults", () => {
+  it("derives keyboard state from stored guess results", () => {
+    const results = [
+      evaluateGuess("APPLE", "PAPER"),
+      evaluateGuess("PAPER", "PAPER"),
+    ];
+
+    expect(getKeyboardStateFromResults(results)).toEqual({
       A: "correct",
       P: "correct",
       L: "absent",

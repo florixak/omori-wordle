@@ -40,24 +40,26 @@ export const getKeyboardState = (
   guesses: string[],
   answer: string,
 ): Record<string, TileState> => {
+  return getKeyboardStateFromResults(
+    guesses.map((guess) => evaluateGuess(guess, answer)),
+  );
+};
+
+export const getKeyboardStateFromResults = (
+  results: GuessResult[],
+): Record<string, TileState> => {
   const state: Record<string, TileState> = {};
 
-  // priority for states: correct > present > absent
   const priority: Record<TileState, number> = {
     absent: 1,
     present: 2,
     correct: 3,
   };
-  // Iterate through all guesses and update the state of each letter
-  for (const guess of guesses) {
-    // Evaluate the guess to get the state of each letter
-    const result = evaluateGuess(guess, answer);
 
-    // Update the keyboard state based on the result, keeping the highest-priority state for each letter
+  for (const result of results) {
     for (const { letter, state: tileState } of result) {
       const current = state[letter];
 
-      // Only update if the new state has higher priority than the current state
       if (!current || priority[tileState] > priority[current]) {
         state[letter] = tileState;
       }
