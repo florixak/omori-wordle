@@ -70,8 +70,11 @@ export const getKeyboardStateFromResults = (
 };
 
 export const isWon = (guesses: string[], answer: string): boolean => {
-  if (guesses.length === 0) return false;
-  return guesses[guesses.length - 1].toUpperCase() === answer.toUpperCase();
+  if (guesses.length === 0) {
+    return false;
+  }
+  const normalizedAnswer = answer.toUpperCase();
+  return guesses.some((guess) => guess.toUpperCase() === normalizedAnswer);
 };
 
 export const isLost = (
