@@ -1,3 +1,5 @@
+"use client";
+
 import { processGuess } from "@/actions/game-actions";
 import { getKeyboardStateFromResults } from "@/lib/game-logic";
 import {
@@ -7,7 +9,7 @@ import {
 } from "@/lib/local-game-state";
 import { GameState, GuessResult, TileState } from "@/types/game-types";
 import { useHotkey } from "@tanstack/react-hotkeys";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useLocalStorage } from "./use-local-storage";
 
 type UseGameProps = {
@@ -23,10 +25,20 @@ type UseGameStateReturn = {
   removeLetter: () => void;
   submitGuess: () => Promise<void>;
   error: string | null;
+  isSubmitting: boolean;
 };
 
 const hasStoredResults = (storedState: GameState): boolean =>
   storedState.guessResults.length === storedState.guesses.length;
+
+const isStoredStateValid = (
+  storedState: GameState,
+  date: string,
+  wordLength: number,
+): boolean =>
+  isStateForToday(storedState, date) &&
+  storedState.wordLength === wordLength &&
+  hasStoredResults(storedState);
 
 const useGameState = ({
   date,
@@ -37,11 +49,7 @@ const useGameState = ({
   const [state, setState] = useState<GameState>(() => {
     const storedState = storage.getItem();
 
-    if (
-      storedState &&
-      isStateForToday(storedState, date) &&
-      hasStoredResults(storedState)
-    ) {
+    if (storedState && isStoredStateValid(storedState, date, wordLength)) {
       return storedState;
     }
 
@@ -49,54 +57,88 @@ const useGameState = ({
   });
 
   const [error, setError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const stateRef = useRef(state);
 
-  const updateState = (newState: Partial<GameState>) => {
-    setState((prev) => {
-      const next = { ...prev, ...newState };
-      storage.setItem(next);
-      return next;
-    });
+  useEffect(() => {
+    stateRef.current = state;
+  }, [state]);
+
+  const persistState = (next: GameState) => {
+    storage.setItem(next);
+    return next;
   };
 
   const addLetter = (letter: string) => {
-    if (state.status !== "playing") return;
-    if (letter.length !== 1) return;
-    if (state.currentInput.length >= state.wordLength) return;
-    updateState({ currentInput: state.currentInput + letter.toUpperCase() });
+    setError(null);
+    setState((prev) => {
+      if (prev.status !== "playing") return prev;
+      if (letter.length !== 1) return prev;
+      if (prev.currentInput.length >= prev.wordLength) return prev;
+
+      return persistState({
+        ...prev,
+        currentInput: prev.currentInput + letter.toUpperCase(),
+      });
+    });
   };
 
   const removeLetter = () => {
-    if (state.status !== "playing") return;
-    if (state.currentInput.length === 0) return;
-    updateState({ currentInput: state.currentInput.slice(0, -1) });
+    setError(null);
+    setState((prev) => {
+      if (prev.status !== "playing") return prev;
+      if (prev.currentInput.length === 0) return prev;
+
+      return persistState({
+        ...prev,
+        currentInput: prev.currentInput.slice(0, -1),
+      });
+    });
   };
 
   const submitGuess = async () => {
-    if (state.status !== "playing") return;
-    if (state.currentInput.length !== state.wordLength) {
+    if (isSubmitting) return;
+
+    const current = stateRef.current;
+
+    if (current.status !== "playing") return;
+    if (current.currentInput.length !== current.wordLength) {
       setError("Not enough letters");
       return;
     }
 
-    const response = await processGuess(state.currentInput, state.guesses);
-    if (!response.ok) {
-      setError(response.error);
-      return;
-    }
-
+    setIsSubmitting(true);
     setError(null);
-    const now = new Date().getTime();
-    updateState({
-      guesses: [...state.guesses, state.currentInput],
-      guessResults: [...state.guessResults, response.result],
-      currentInput: "",
-      startedAt: state.startedAt ?? now,
-      status: response.status,
-    });
+
+    try {
+      const response = await processGuess(
+        current.currentInput,
+        current.guesses,
+      );
+
+      if (!response.ok) {
+        setError(response.error);
+        return;
+      }
+
+      const now = Date.now();
+      setState((prev) =>
+        persistState({
+          ...prev,
+          guesses: [...prev.guesses, response.guess],
+          guessResults: [...prev.guessResults, response.result],
+          currentInput: "",
+          startedAt: prev.startedAt ?? now,
+          status: response.status,
+        }),
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
-  useHotkey("Enter", async () => {
-    await submitGuess();
+  useHotkey("Enter", () => {
+    void submitGuess();
   });
 
   const keyboardState = getKeyboardStateFromResults(state.guessResults);
@@ -109,6 +151,7 @@ const useGameState = ({
     removeLetter,
     submitGuess,
     error,
+    isSubmitting,
   };
 };
 
