@@ -1,12 +1,16 @@
 export type GameStatus = "playing" | "won" | "lost";
 
+export type SubmittedGuess = {
+  word: string; // for easy lookup in history
+  result: GuessResult;
+};
+
 export type GameState = {
   date: string;
   wordLength: number;
-  guesses: string[];
-  guessResults: GuessResult[];
+  submittedGuesses: SubmittedGuess[];
   currentInput: string;
-  status: "playing" | "won" | "lost";
+  status: GameStatus;
   startedAt: number | null;
 };
 
