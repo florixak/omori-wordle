@@ -1,13 +1,12 @@
 import "server-only";
 import { WORDS } from "@/data/answer-pool";
-import { getTodayString } from "./local-game-state";
 
-const EPOCH = new Date("2025-01-01").getTime();
+const EPOCH_UTC_MS = Date.UTC(2025, 0, 1);
+const DAY_MS = 24 * 60 * 60 * 1000;
 
 const getDayIndex = (): number => {
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  return Math.floor((today.getTime() - EPOCH) / (1000 * 60 * 60 * 24));
+  const index = Math.floor((Date.now() - EPOCH_UTC_MS) / DAY_MS);
+  return Math.max(0, index);
 };
 
 export const getDailyWord = (): string => {
@@ -23,7 +22,7 @@ export const getDayNumber = (): number => {
 };
 
 export const getDailyDate = (): string => {
-  return getTodayString();
+  return new Date().toISOString().slice(0, 10);
 };
 
 export const isValidGuess = (guess: string): boolean => {
