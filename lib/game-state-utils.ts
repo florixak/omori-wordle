@@ -41,16 +41,20 @@ const isSubmittedGuessValid = (
 
   const value = guess as SubmittedGuess;
 
-  if (typeof value.word !== "string" || value.word.length !== wordLength) {
+  if (
+    typeof value.word !== "string" ||
+    value.word.length !== wordLength ||
+    value.word !== value.word.toUpperCase()
+  ) {
     return false;
   }
-
   if (!isGuessResultValid(value.result, wordLength)) {
     return false;
   }
-
   return value.result.every(
-    (tile, index) => tile.letter === value.word[index],
+    (tile, index) =>
+      tile.letter === value.word[index] &&
+      tile.letter === tile.letter.toUpperCase(),
   );
 };
 
@@ -94,7 +98,9 @@ export const loadStoredGameState = (
   }
 
   const status =
-    value.status === "won" || value.status === "lost" ? value.status : "playing";
+    value.status === "won" || value.status === "lost"
+      ? value.status
+      : "playing";
 
   if (status !== "playing" && submittedGuesses.length === 0) {
     return undefined;

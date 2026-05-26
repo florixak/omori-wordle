@@ -36,7 +36,11 @@ const useGameState = ({
   const storage = useLocalStorage<GameState>(GAME_STORAGE_KEY);
 
   const [state, setState] = useState<GameState>(() => {
-    const storedState = loadStoredGameState(storage.getItem(), date, wordLength);
+    const storedState = loadStoredGameState(
+      storage.getItem(),
+      date,
+      wordLength,
+    );
 
     if (storedState) {
       return storedState;
@@ -115,7 +119,10 @@ const useGameState = ({
 
       if (!response.ok) {
         // If the server indicates the client history is invalid, clear local progress.
-        if (response.error === "Invalid game state") {
+        if (
+          response.error === "Invalid game state" ||
+          response.error === "Progress out of sync — local progress cleared."
+        ) {
           storage.removeItem();
           setState(createInitialState(date, wordLength));
           setError("Progress out of sync — local progress cleared.");
