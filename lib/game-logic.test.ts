@@ -7,7 +7,7 @@ import {
   getKeyboardStateFromResults,
   isLost,
   isWon,
-} from "./game-logic";
+} from "@/lib/game-logic";
 
 describe("evaluateGuess", () => {
   it("marks correct, present, and absent tiles", () => {

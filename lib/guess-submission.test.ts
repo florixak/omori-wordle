@@ -1,7 +1,7 @@
 import { createHmac } from "crypto";
 import { beforeAll, describe, expect, it } from "vitest";
 
-import { processGuessSubmission } from "./guess-submission";
+import { processGuessSubmission } from "@/lib/guess-submission";
 
 const TEST_DATE = "2026-05-26";
 const TEST_SECRET = "test-game-history-secret";
