@@ -1,12 +1,14 @@
 "use client";
 
 import { processGuess } from "@/actions/game-actions";
-import { getKeyboardStateFromResults } from "@/lib/game-logic";
 import {
-  createInitialState,
-  GAME_STORAGE_KEY,
-  isStateForToday,
-} from "@/lib/local-game-state";
+  getGuessResults,
+  getGuessWords,
+  isStoredGameStateValid,
+  parseStoredGameState,
+} from "@/lib/game-state-utils";
+import { getKeyboardStateFromResults } from "@/lib/game-logic";
+import { createInitialState, GAME_STORAGE_KEY } from "@/lib/local-game-state";
 import { GameState, GuessResult, TileState } from "@/types/game-types";
 import { useHotkey } from "@tanstack/react-hotkeys";
 import { useEffect, useRef, useState } from "react";
@@ -28,18 +30,6 @@ type UseGameStateReturn = {
   isSubmitting: boolean;
 };
 
-const hasStoredResults = (storedState: GameState): boolean =>
-  storedState.guessResults.length === storedState.guesses.length;
-
-const isStoredStateValid = (
-  storedState: GameState,
-  date: string,
-  wordLength: number,
-): boolean =>
-  isStateForToday(storedState, date) &&
-  storedState.wordLength === wordLength &&
-  hasStoredResults(storedState);
-
 const useGameState = ({
   date,
   wordLength,
@@ -47,9 +37,9 @@ const useGameState = ({
   const storage = useLocalStorage<GameState>(GAME_STORAGE_KEY);
 
   const [state, setState] = useState<GameState>(() => {
-    const storedState = storage.getItem();
+    const storedState = parseStoredGameState(storage.getItem());
 
-    if (storedState && isStoredStateValid(storedState, date, wordLength)) {
+    if (storedState && isStoredGameStateValid(storedState, date, wordLength)) {
       return storedState;
     }
 
@@ -59,14 +49,15 @@ const useGameState = ({
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const stateRef = useRef(state);
+  const isSubmittingRef = useRef(false);
 
   useEffect(() => {
     stateRef.current = state;
   }, [state]);
 
-  const persistState = (next: GameState) => {
-    storage.setItem(next);
-    return next;
+  const persistState = (updatedState: GameState) => {
+    storage.setItem(updatedState);
+    return updatedState;
   };
 
   const addLetter = (letter: string) => {
@@ -97,24 +88,25 @@ const useGameState = ({
   };
 
   const submitGuess = async () => {
-    if (isSubmitting) return;
+    if (isSubmittingRef.current) return;
 
-    const current = stateRef.current;
+    const snapshot = stateRef.current;
 
-    if (current.status !== "playing") return;
-    if (current.currentInput.length !== current.wordLength) {
+    if (snapshot.status !== "playing") return;
+    if (snapshot.currentInput.length !== snapshot.wordLength) {
       setError("Not enough letters");
       return;
     }
 
+    isSubmittingRef.current = true;
     setIsSubmitting(true);
     setError(null);
 
+    const submittedInput = snapshot.currentInput;
+    const previousGuesses = getGuessWords(snapshot.submittedGuesses);
+
     try {
-      const response = await processGuess(
-        current.currentInput,
-        current.guesses,
-      );
+      const response = await processGuess(submittedInput, previousGuesses);
 
       if (!response.ok) {
         setError(response.error);
@@ -125,14 +117,17 @@ const useGameState = ({
       setState((prev) =>
         persistState({
           ...prev,
-          guesses: [...prev.guesses, response.guess],
-          guessResults: [...prev.guessResults, response.result],
+          submittedGuesses: [
+            ...prev.submittedGuesses,
+            { word: response.guess, result: response.result },
+          ],
           currentInput: "",
           startedAt: prev.startedAt ?? now,
           status: response.status,
         }),
       );
     } finally {
+      isSubmittingRef.current = false;
       setIsSubmitting(false);
     }
   };
@@ -141,11 +136,12 @@ const useGameState = ({
     void submitGuess();
   });
 
-  const keyboardState = getKeyboardStateFromResults(state.guessResults);
+  const results = getGuessResults(state.submittedGuesses);
+  const keyboardState = getKeyboardStateFromResults(results);
 
   return {
     state,
-    results: state.guessResults,
+    results,
     keyboardState,
     addLetter,
     removeLetter,
