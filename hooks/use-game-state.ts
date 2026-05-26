@@ -4,15 +4,14 @@ import { processGuess } from "@/actions/game-actions";
 import {
   getGuessResults,
   getGuessWords,
-  isStoredGameStateValid,
-  parseStoredGameState,
+  loadStoredGameState,
 } from "@/lib/game-state-utils";
 import { getKeyboardStateFromResults } from "@/lib/game-logic";
 import { createInitialState, GAME_STORAGE_KEY } from "@/lib/local-game-state";
 import { GameState, GuessResult, TileState } from "@/types/game-types";
 import { useHotkey } from "@tanstack/react-hotkeys";
 import { useEffect, useRef, useState } from "react";
-import { useLocalStorage } from "./use-local-storage";
+import { useLocalStorage } from "@/hooks/use-local-storage";
 
 type UseGameProps = {
   date: string;
@@ -37,9 +36,9 @@ const useGameState = ({
   const storage = useLocalStorage<GameState>(GAME_STORAGE_KEY);
 
   const [state, setState] = useState<GameState>(() => {
-    const storedState = parseStoredGameState(storage.getItem());
+    const storedState = loadStoredGameState(storage.getItem(), date, wordLength);
 
-    if (storedState && isStoredGameStateValid(storedState, date, wordLength)) {
+    if (storedState) {
       return storedState;
     }
 
@@ -141,6 +140,8 @@ const useGameState = ({
           historySignature: response.signature,
         }),
       );
+    } catch {
+      setError("Unable to submit guess right now. Please try again.");
     } finally {
       isSubmittingRef.current = false;
       setIsSubmitting(false);
