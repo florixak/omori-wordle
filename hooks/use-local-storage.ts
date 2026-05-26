@@ -4,7 +4,7 @@ export const useLocalStorage = <T>(key: string) => {
       if (typeof window === "undefined") return;
       window.localStorage.setItem(key, JSON.stringify(value));
     } catch (error) {
-      if (process.env.DEV) {
+      if (process.env.NODE_ENV === "development") {
         console.log(error);
       }
     }
@@ -16,7 +16,7 @@ export const useLocalStorage = <T>(key: string) => {
       const item = window.localStorage.getItem(key);
       return item ? JSON.parse(item) : undefined;
     } catch (error) {
-      if (process.env.DEV) {
+      if (process.env.NODE_ENV === "development") {
         console.log(error);
       }
     }
@@ -27,7 +27,7 @@ export const useLocalStorage = <T>(key: string) => {
       if (typeof window === "undefined") return;
       window.localStorage.removeItem(key);
     } catch (error) {
-      if (process.env.DEV) {
+      if (process.env.NODE_ENV === "development") {
         console.log(error);
       }
     }
