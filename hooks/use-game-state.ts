@@ -104,11 +104,25 @@ const useGameState = ({
 
     const submittedInput = snapshot.currentInput;
     const previousGuesses = getGuessWords(snapshot.submittedGuesses);
+    const previousSignature = snapshot.historySignature;
 
     try {
-      const response = await processGuess(submittedInput, previousGuesses);
+      const response = await processGuess(
+        submittedInput,
+        previousGuesses,
+        snapshot.date,
+        previousSignature,
+      );
 
       if (!response.ok) {
+        // If the server indicates the client history is invalid, clear local progress.
+        if (response.error === "Invalid game state") {
+          storage.removeItem();
+          setState(createInitialState(date, wordLength));
+          setError("Progress out of sync — local progress cleared.");
+          return;
+        }
+
         setError(response.error);
         return;
       }
@@ -124,6 +138,7 @@ const useGameState = ({
           currentInput: "",
           startedAt: prev.startedAt ?? now,
           status: response.status,
+          historySignature: response.signature,
         }),
       );
     } finally {

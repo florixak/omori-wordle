@@ -12,6 +12,7 @@ export type GameState = {
   currentInput: string;
   status: GameStatus;
   startedAt: number | null;
+  historySignature?: string;
 };
 
 export type TileState = "correct" | "present" | "absent";

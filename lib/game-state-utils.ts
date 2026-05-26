@@ -15,6 +15,7 @@ type LegacyStoredGameState = {
   currentInput?: string;
   status?: GameState["status"];
   startedAt?: number | null;
+  historySignature?: string;
 };
 
 const isSubmittedGuessValid = (
@@ -25,9 +26,7 @@ const isSubmittedGuessValid = (
     return false;
   }
 
-  return guess.result.every(
-    (tile, index) => tile.letter === guess.word[index],
-  );
+  return guess.result.every((tile, index) => tile.letter === guess.word[index]);
 };
 
 export const parseStoredGameState = (
@@ -50,6 +49,10 @@ export const parseStoredGameState = (
         ? value.status
         : "playing",
     startedAt: typeof value.startedAt === "number" ? value.startedAt : null,
+    historySignature:
+      typeof value.historySignature === "string"
+        ? value.historySignature
+        : undefined,
   } satisfies Omit<GameState, "submittedGuesses">;
 
   if (Array.isArray(value.submittedGuesses)) {

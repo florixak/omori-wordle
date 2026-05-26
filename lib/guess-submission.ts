@@ -1,8 +1,36 @@
 import { evaluateGuess, getGameStatus } from "@/lib/game-logic";
 import { GameStatus, GuessResult } from "@/types/game-types";
+import { createHmac, timingSafeEqual } from "crypto";
+
+const signHistory = (date: string, guesses: string[]): string => {
+  const secret = process.env.GAME_HISTORY_SECRET;
+  if (!secret) throw new Error("Missing GAME_HISTORY_SECRET");
+
+  return createHmac("sha256", secret)
+    .update(JSON.stringify({ date, guesses }))
+    .digest("hex");
+};
+
+const isHistorySigned = (
+  date: string,
+  guesses: string[],
+  signature?: string,
+): boolean => {
+  // If no signature provided, only accept empty histories.
+  if (!signature) return guesses.length === 0;
+  const expected = signHistory(date, guesses);
+  if (expected.length !== signature.length) return false;
+  return timingSafeEqual(Buffer.from(expected), Buffer.from(signature));
+};
 
 export type ProcessGuessResult =
-  | { ok: true; result: GuessResult; status: GameStatus; guess: string }
+  | {
+      ok: true;
+      result: GuessResult;
+      status: GameStatus;
+      guess: string;
+      signature?: string;
+    }
   | { ok: false; error: string };
 
 export const processGuessSubmission = (
@@ -11,7 +39,27 @@ export const processGuessSubmission = (
   answer: string,
   maxAttempts: number,
   isGuessValid: (word: string) => boolean,
+  date?: string,
+  previousSignature?: string,
 ): ProcessGuessResult => {
+  if (previousGuesses.length > 0) {
+    if (!date || !previousSignature) {
+      return { ok: false, error: "Invalid game state" };
+    }
+    if (!isHistorySigned(date, previousGuesses, previousSignature)) {
+      return { ok: false, error: "Invalid game state" };
+    }
+  }
+
+  if (
+    previousGuesses.length > 0 &&
+    (!date ||
+      !previousSignature ||
+      !isHistorySigned(date, previousGuesses, previousSignature))
+  ) {
+    return { ok: false, error: "Invalid game state" };
+  }
+
   const upper = guess.toUpperCase();
   const normalizedPrevious = previousGuesses.map((priorGuess) =>
     priorGuess.toUpperCase(),
@@ -40,5 +88,20 @@ export const processGuessSubmission = (
   const result = evaluateGuess(upper, answer);
   const status = getGameStatus(allGuesses, answer, maxAttempts);
 
-  return { ok: true, result, status, guess: upper };
+  let newSignature: string | undefined;
+  try {
+    if (date && process.env.GAME_HISTORY_SECRET) {
+      newSignature = signHistory(date, allGuesses);
+    }
+  } catch {
+    newSignature = undefined;
+  }
+
+  return {
+    ok: true,
+    result,
+    status,
+    guess: upper,
+    signature: newSignature,
+  };
 };

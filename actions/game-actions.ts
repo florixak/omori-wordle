@@ -12,6 +12,8 @@ export type { ProcessGuessResult };
 export async function processGuess(
   guess: string,
   previousGuesses: string[],
+  date?: string,
+  previousSignature?: string,
 ): Promise<ProcessGuessResult> {
   return processGuessSubmission(
     guess,
@@ -19,5 +21,7 @@ export async function processGuess(
     getDailyWord(),
     MAX_ATTEMPTS,
     isValidGuess,
+    date,
+    previousSignature,
   );
 }
