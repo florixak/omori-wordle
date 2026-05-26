@@ -3,90 +3,125 @@ import { describe, expect, it } from "vitest";
 import {
   getGuessResults,
   getGuessWords,
-  isStoredGameStateValid,
-  parseStoredGameState,
+  loadStoredGameState,
 } from "./game-state-utils";
+
+const validGuess = {
+  word: "APPLE",
+  result: [
+    { letter: "A", state: "present" as const },
+    { letter: "P", state: "absent" as const },
+    { letter: "P", state: "correct" as const },
+    { letter: "L", state: "absent" as const },
+    { letter: "E", state: "present" as const },
+  ],
+};
 
 describe("game-state utils", () => {
   it("extracts words and results from submitted guesses", () => {
-    const submitted = [
-      {
-        word: "APPLE",
-        result: [
-          { letter: "A", state: "present" as const },
-          { letter: "P", state: "absent" as const },
-          { letter: "P", state: "correct" as const },
-          { letter: "L", state: "absent" as const },
-          { letter: "E", state: "present" as const },
-        ],
-      },
-    ];
+    const submitted = [validGuess];
 
     expect(getGuessWords(submitted)).toEqual(["APPLE"]);
-    expect(getGuessResults(submitted)).toEqual([submitted[0].result]);
+    expect(getGuessResults(submitted)).toEqual([validGuess.result]);
   });
 
-  it("migrates legacy stored state with parallel arrays", () => {
+  it("loads a valid stored game state for the current puzzle", () => {
     expect(
-      parseStoredGameState({
-        date: "2026-05-26",
-        wordLength: 5,
-        guesses: ["APPLE"],
-        guessResults: [
-          [
-            { letter: "A", state: "present" },
-            { letter: "P", state: "absent" },
-            { letter: "P", state: "correct" },
-            { letter: "L", state: "absent" },
-            { letter: "E", state: "present" },
-          ],
-        ],
-        currentInput: "",
-        status: "playing",
-        startedAt: null,
-      }),
+      loadStoredGameState(
+        {
+          date: "2026-05-26",
+          wordLength: 5,
+          submittedGuesses: [validGuess],
+          currentInput: "",
+          status: "playing",
+          startedAt: null,
+        },
+        "2026-05-26",
+        5,
+      ),
     ).toEqual({
       date: "2026-05-26",
       wordLength: 5,
-      submittedGuesses: [
-        {
-          word: "APPLE",
-          result: [
-            { letter: "A", state: "present" },
-            { letter: "P", state: "absent" },
-            { letter: "P", state: "correct" },
-            { letter: "L", state: "absent" },
-            { letter: "E", state: "present" },
-          ],
-        },
-      ],
+      submittedGuesses: [validGuess],
       currentInput: "",
       status: "playing",
       startedAt: null,
     });
   });
 
-  it("rejects stored guesses whose result letters do not match the word", () => {
-    const invalidState = {
+  it("rejects stored state for a different day or word length", () => {
+    const stored = {
       date: "2026-05-26",
       wordLength: 5,
-      submittedGuesses: [
-        {
-          word: "APPLE",
-          result: [
-            { letter: "G", state: "present" as const },
-            { letter: "R", state: "absent" as const },
-            { letter: "A", state: "correct" as const },
-            { letter: "P", state: "absent" as const },
-            { letter: "E", state: "present" as const },
-          ],
-        },
-      ],
+      submittedGuesses: [validGuess],
       currentInput: "",
       status: "playing" as const,
       startedAt: null,
     };
 
-    expect(isStoredGameStateValid(invalidState, "2026-05-26", 5)).toBe(false);
+    expect(loadStoredGameState(stored, "2026-05-27", 5)).toBeUndefined();
+    expect(loadStoredGameState(stored, "2026-05-26", 6)).toBeUndefined();
+  });
+
+  it("rejects finished games with no submitted guesses", () => {
+    expect(
+      loadStoredGameState(
+        {
+          date: "2026-05-26",
+          wordLength: 5,
+          submittedGuesses: [],
+          currentInput: "",
+          status: "won",
+          startedAt: null,
+        },
+        "2026-05-26",
+        5,
+      ),
+    ).toBeUndefined();
+  });
+
+  it("rejects stored guesses whose result letters do not match the word", () => {
+    expect(
+      loadStoredGameState(
+        {
+          date: "2026-05-26",
+          wordLength: 5,
+          submittedGuesses: [
+            {
+              word: "APPLE",
+              result: [
+                { letter: "G", state: "present" as const },
+                { letter: "R", state: "absent" as const },
+                { letter: "A", state: "correct" as const },
+                { letter: "P", state: "absent" as const },
+                { letter: "E", state: "present" as const },
+              ],
+            },
+          ],
+          currentInput: "",
+          status: "playing",
+          startedAt: null,
+        },
+        "2026-05-26",
+        5,
+      ),
+    ).toBeUndefined();
+  });
+
+  it("rejects malformed submitted guesses without throwing", () => {
+    expect(
+      loadStoredGameState(
+        {
+          date: "2026-05-26",
+          wordLength: 5,
+          submittedGuesses: [{ word: null, result: null }],
+          currentInput: "",
+          status: "playing",
+          startedAt: null,
+        },
+        "2026-05-26",
+        5,
+      ),
+    ).toBeUndefined();
   });
 });

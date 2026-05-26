@@ -1,4 +1,9 @@
-import { GameState, GuessResult, SubmittedGuess } from "@/types/game-types";
+import {
+  GameState,
+  GuessResult,
+  SubmittedGuess,
+  TileState,
+} from "@/types/game-types";
 
 export const getGuessWords = (submitted: SubmittedGuess[]): string[] =>
   submitted.map((guess) => guess.word);
@@ -6,93 +11,106 @@ export const getGuessWords = (submitted: SubmittedGuess[]): string[] =>
 export const getGuessResults = (submitted: SubmittedGuess[]): GuessResult[] =>
   submitted.map((guess) => guess.result);
 
-type LegacyStoredGameState = {
-  date: string;
-  wordLength: number;
-  guesses?: string[];
-  guessResults?: GuessResult[];
-  submittedGuesses?: SubmittedGuess[];
-  currentInput?: string;
-  status?: GameState["status"];
-  startedAt?: number | null;
-  historySignature?: string;
-};
+const TILE_STATES = new Set<TileState>(["correct", "present", "absent"]);
 
-const isSubmittedGuessValid = (
-  guess: SubmittedGuess,
+const isGuessResultValid = (
+  result: unknown,
   wordLength: number,
-): boolean => {
-  if (guess.word.length !== wordLength || guess.result.length !== wordLength) {
+): result is GuessResult => {
+  if (!Array.isArray(result) || result.length !== wordLength) {
     return false;
   }
 
-  return guess.result.every((tile, index) => tile.letter === guess.word[index]);
+  return result.every(
+    (tile) =>
+      tile !== null &&
+      typeof tile === "object" &&
+      typeof tile.letter === "string" &&
+      typeof tile.state === "string" &&
+      TILE_STATES.has(tile.state as TileState),
+  );
 };
 
-export const parseStoredGameState = (
-  stored: unknown,
-): GameState | undefined => {
-  if (!stored || typeof stored !== "object") return undefined;
+const isSubmittedGuessValid = (
+  guess: unknown,
+  wordLength: number,
+): guess is SubmittedGuess => {
+  if (guess === null || typeof guess !== "object") {
+    return false;
+  }
 
-  const value = stored as LegacyStoredGameState;
-  if (typeof value.date !== "string" || typeof value.wordLength !== "number") {
+  const value = guess as SubmittedGuess;
+
+  if (typeof value.word !== "string" || value.word.length !== wordLength) {
+    return false;
+  }
+
+  if (!isGuessResultValid(value.result, wordLength)) {
+    return false;
+  }
+
+  return value.result.every(
+    (tile, index) => tile.letter === value.word[index],
+  );
+};
+
+const parseSubmittedGuesses = (
+  submittedGuesses: unknown,
+  wordLength: number,
+): SubmittedGuess[] | undefined => {
+  if (!Array.isArray(submittedGuesses)) {
     return undefined;
   }
 
-  const base = {
-    date: value.date,
-    wordLength: value.wordLength,
+  for (const guess of submittedGuesses) {
+    if (!isSubmittedGuessValid(guess, wordLength)) {
+      return undefined;
+    }
+  }
+
+  return submittedGuesses;
+};
+
+export const loadStoredGameState = (
+  stored: unknown,
+  date: string,
+  wordLength: number,
+): GameState | undefined => {
+  if (!stored || typeof stored !== "object") {
+    return undefined;
+  }
+
+  const value = stored as Partial<GameState>;
+  if (value.date !== date || value.wordLength !== wordLength) {
+    return undefined;
+  }
+
+  const submittedGuesses = parseSubmittedGuesses(
+    value.submittedGuesses,
+    wordLength,
+  );
+  if (!submittedGuesses) {
+    return undefined;
+  }
+
+  const status =
+    value.status === "won" || value.status === "lost" ? value.status : "playing";
+
+  if (status !== "playing" && submittedGuesses.length === 0) {
+    return undefined;
+  }
+
+  return {
+    date,
+    wordLength,
+    submittedGuesses,
     currentInput:
       typeof value.currentInput === "string" ? value.currentInput : "",
-    status:
-      value.status === "won" || value.status === "lost"
-        ? value.status
-        : "playing",
+    status,
     startedAt: typeof value.startedAt === "number" ? value.startedAt : null,
     historySignature:
       typeof value.historySignature === "string"
         ? value.historySignature
         : undefined,
-  } satisfies Omit<GameState, "submittedGuesses">;
-
-  if (Array.isArray(value.submittedGuesses)) {
-    return { ...base, submittedGuesses: value.submittedGuesses };
-  }
-
-  if (!Array.isArray(value.guesses) || !Array.isArray(value.guessResults)) {
-    return undefined;
-  }
-
-  if (value.guesses.length !== value.guessResults.length) {
-    return undefined;
-  }
-
-  return {
-    ...base,
-    submittedGuesses: value.guesses.map((word, index) => ({
-      word,
-      result: value.guessResults![index],
-    })),
   };
-};
-
-export const isStoredGameStateValid = (
-  storedState: GameState,
-  date: string,
-  wordLength: number,
-): boolean => {
-  if (storedState.date !== date || storedState.wordLength !== wordLength) {
-    return false;
-  }
-
-  if (
-    storedState.status !== "playing" &&
-    storedState.submittedGuesses.length === 0
-  ) {
-    return false;
-  }
-
-  return storedState.submittedGuesses.every((guess) =>
-    isSubmittedGuessValid(guess, wordLength),
-  );
 };
