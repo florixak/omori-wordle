@@ -1,3 +1,5 @@
+export type GameStatus = "playing" | "won" | "lost";
+
 export type GameState = {
   date: string;
   wordLength: number;
@@ -6,3 +8,10 @@ export type GameState = {
   status: "playing" | "won" | "lost";
   startedAt: number;
 };
+
+export type TileState = "correct" | "present" | "absent";
+
+export type GuessResult = {
+  letter: string;
+  state: TileState;
+}[];
