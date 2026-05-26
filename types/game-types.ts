@@ -4,9 +4,10 @@ export type GameState = {
   date: string;
   wordLength: number;
   guesses: string[];
+  guessResults: GuessResult[];
   currentInput: string;
   status: "playing" | "won" | "lost";
-  startedAt: number;
+  startedAt: number | null;
 };
 
 export type TileState = "correct" | "present" | "absent";
