@@ -1,7 +1,7 @@
 "use server";
 
 import { MAX_ATTEMPTS } from "@/constants";
-import { getDailyWord, isValidGuess } from "@/lib/daily-word";
+import { getDailyDate, getDailyWord, isValidGuess } from "@/lib/daily-word";
 import {
   processGuessSubmission,
   type ProcessGuessResult,
@@ -15,6 +15,13 @@ export async function processGuess(
   date?: string,
   previousSignature?: string,
 ): Promise<ProcessGuessResult> {
+  if (date && date !== getDailyDate()) {
+    return {
+      ok: false,
+      error: "Progress out of sync — local progress cleared.",
+    };
+  }
+
   return processGuessSubmission(
     guess,
     previousGuesses,
