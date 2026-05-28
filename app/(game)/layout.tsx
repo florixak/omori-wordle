@@ -3,5 +3,9 @@ export default function GameLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  return <div></div>;
+  return (
+    <main className="flex flex-col items-center justify-center h-screen">
+      {children}
+    </main>
+  );
 }
