@@ -1,5 +1,5 @@
 import { evaluateGuess, getGameStatus } from "@/lib/game-logic";
-import { GameStatus, GuessResult } from "@/types/game-types";
+import { GameStatus, TileEvaluation } from "@/types/game-types";
 import { createHmac, timingSafeEqual } from "crypto";
 
 const signHistory = (date: string, guesses: string[]): string => {
@@ -26,7 +26,7 @@ const isHistorySigned = (
 export type ProcessGuessResult =
   | {
       ok: true;
-      result: GuessResult;
+      evaluations: TileEvaluation[];
       status: GameStatus;
       guess: string;
       signature?: string;
@@ -85,7 +85,7 @@ export const processGuessSubmission = (
   }
 
   const allGuesses = [...normalizedPrevious, upper];
-  const result = evaluateGuess(upper, answer);
+  const evaluations = evaluateGuess(upper, answer);
   const status = getGameStatus(allGuesses, answer, maxAttempts);
 
   let newSignature: string | undefined;
@@ -99,7 +99,7 @@ export const processGuessSubmission = (
 
   return {
     ok: true,
-    result,
+    evaluations,
     status,
     guess: upper,
     signature: newSignature,

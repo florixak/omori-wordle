@@ -3,11 +3,9 @@
 import { MAX_ATTEMPTS } from "@/constants";
 import { getDailyDate, getDailyWord, isValidGuess } from "@/lib/daily-word";
 import {
+  ProcessGuessResult,
   processGuessSubmission,
-  type ProcessGuessResult,
 } from "@/lib/guess-submission";
-
-export type { ProcessGuessResult };
 
 export async function processGuess(
   guess: string,
