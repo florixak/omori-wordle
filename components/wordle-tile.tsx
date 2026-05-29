@@ -1,5 +1,7 @@
 "use client";
 
+import { omoriBorderLg, omoriFont } from "@/lib/omori-styles";
+import { cn } from "@/lib/utils";
 import { TileDisplayState } from "@/types/game-types";
 
 interface WordleTileProps {
@@ -26,15 +28,13 @@ const WordleTile = ({ letter, display, delay = 0 }: WordleTileProps) => {
 
   return (
     <div
-      className={`
-        relative flex h-[var(--tile-size,3.5rem)] w-[var(--tile-size,3.5rem)] items-center justify-center
-        border-2 border-black
-        shadow-[2px_2px_0px_var(--omori-shadow)] sm:shadow-[3px_3px_0px_var(--omori-shadow)]
-        transition-all duration-200
-        ${getBgColor()}
-      `}
+      className={cn(
+        omoriBorderLg,
+        omoriFont,
+        "relative flex h-[var(--tile-size,3.5rem)] w-[var(--tile-size,3.5rem)] items-center justify-center transition-all duration-200",
+        getBgColor(),
+      )}
       style={{
-        fontFamily: "var(--font-pixel)",
         imageRendering: "pixelated",
         transitionDelay: `${delay}ms`,
       }}

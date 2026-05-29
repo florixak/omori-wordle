@@ -24,7 +24,6 @@ const WordleKeyboard = ({
 }: WordleKeyboardProps) => {
   const isGameOver = status === "won" || status === "lost";
   const isLocked = isGameOver || isSubmitting;
-  const disableAbsentLetters = status === "lost";
 
   const handleAddLetter = (letter: string) => {
     if (isLocked) return;
@@ -67,11 +66,7 @@ const WordleKeyboard = ({
                   <WordleButton
                     key={letter}
                     onClick={() => handleAddLetter(letter)}
-                    disabled={
-                      isLocked ||
-                      (disableAbsentLetters &&
-                        keyboardState[letter] === "absent")
-                    }
+                    disabled={isLocked || keyboardState[letter] === "absent"}
                     className="letter-button"
                   >
                     {letter}
@@ -90,10 +85,7 @@ const WordleKeyboard = ({
                 <WordleButton
                   key={letter}
                   onClick={() => handleAddLetter(letter)}
-                  disabled={
-                    isLocked ||
-                    (disableAbsentLetters && keyboardState[letter] === "absent")
-                  }
+                  disabled={isLocked || keyboardState[letter] === "absent"}
                   className="letter-button"
                 >
                   {letter}
