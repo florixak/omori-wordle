@@ -1,17 +1,15 @@
 "use client";
 
 import { processGuess } from "@/actions/game-actions";
-import {
-  getGuessResults,
-  getGuessWords,
-  loadStoredGameState,
-} from "@/lib/game-state-utils";
-import { getKeyboardStateFromResults } from "@/lib/game-logic";
+import { getGuessWords, loadStoredGameState } from "@/lib/game-state-utils";
+import { getKeyboardStateFromGuesses } from "@/lib/game-logic";
+import { buildGridRows } from "@/lib/grid-view";
 import { createInitialState, GAME_STORAGE_KEY } from "@/lib/local-game-state";
-import { GameState, GuessResult, TileState } from "@/types/game-types";
+import { GameState, GridTile, TileEvaluation } from "@/types/game-types";
 import { useHotkey } from "@tanstack/react-hotkeys";
 import { useEffect, useRef, useState } from "react";
 import { useLocalStorage } from "@/hooks/use-local-storage";
+import { MAX_ATTEMPTS } from "@/constants";
 
 type UseGameProps = {
   date: string;
@@ -20,8 +18,8 @@ type UseGameProps = {
 
 type UseGameStateReturn = {
   state: GameState;
-  results: GuessResult[];
-  keyboardState: Record<string, TileState>;
+  gridRows: GridTile[][];
+  keyboardState: Record<string, TileEvaluation>;
   addLetter: (letter: string) => void;
   removeLetter: () => void;
   submitGuess: () => Promise<void>;
@@ -118,7 +116,6 @@ const useGameState = ({
       );
 
       if (!response.ok) {
-        // If the server indicates the client history is invalid, clear local progress.
         if (
           response.error === "Invalid game state" ||
           response.error === "Progress out of sync — local progress cleared."
@@ -139,7 +136,10 @@ const useGameState = ({
           ...prev,
           submittedGuesses: [
             ...prev.submittedGuesses,
-            { word: response.guess, result: response.result },
+            {
+              word: response.guess,
+              evaluations: response.evaluations,
+            },
           ],
           currentInput: "",
           startedAt: prev.startedAt ?? now,
@@ -159,12 +159,17 @@ const useGameState = ({
     void submitGuess();
   });
 
-  const results = getGuessResults(state.submittedGuesses);
-  const keyboardState = getKeyboardStateFromResults(results);
+  const gridRows = buildGridRows(
+    state.submittedGuesses,
+    state.currentInput,
+    state.wordLength,
+    MAX_ATTEMPTS,
+  );
+  const keyboardState = getKeyboardStateFromGuesses(state.submittedGuesses);
 
   return {
     state,
-    results,
+    gridRows,
     keyboardState,
     addLetter,
     removeLetter,

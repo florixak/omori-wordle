@@ -4,7 +4,7 @@ import {
   evaluateGuess,
   getGameStatus,
   getKeyboardState,
-  getKeyboardStateFromResults,
+  getKeyboardStateFromGuesses,
   isLost,
   isWon,
 } from "@/lib/game-logic";
@@ -12,11 +12,11 @@ import {
 describe("evaluateGuess", () => {
   it("marks correct, present, and absent tiles", () => {
     expect(evaluateGuess("APPLE", "PAPER")).toEqual([
-      { letter: "A", state: "present" },
-      { letter: "P", state: "present" },
-      { letter: "P", state: "correct" },
-      { letter: "L", state: "absent" },
-      { letter: "E", state: "present" },
+      "present",
+      "present",
+      "correct",
+      "absent",
+      "present",
     ]);
   });
 });
@@ -33,14 +33,14 @@ describe("getKeyboardState", () => {
   });
 });
 
-describe("getKeyboardStateFromResults", () => {
-  it("derives keyboard state from stored guess results", () => {
-    const results = [
-      evaluateGuess("APPLE", "PAPER"),
-      evaluateGuess("PAPER", "PAPER"),
+describe("getKeyboardStateFromGuesses", () => {
+  it("derives keyboard state from stored guesses", () => {
+    const guesses = [
+      { word: "APPLE", evaluations: evaluateGuess("APPLE", "PAPER") },
+      { word: "PAPER", evaluations: evaluateGuess("PAPER", "PAPER") },
     ];
 
-    expect(getKeyboardStateFromResults(results)).toEqual({
+    expect(getKeyboardStateFromGuesses(guesses)).toEqual({
       A: "correct",
       P: "correct",
       L: "absent",

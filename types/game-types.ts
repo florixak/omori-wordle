@@ -1,8 +1,17 @@
 export type GameStatus = "playing" | "won" | "lost";
 
+export type TileEvaluation = "correct" | "present" | "absent";
+
+export type TileDisplayState = "empty" | "active" | TileEvaluation;
+
 export type SubmittedGuess = {
-  word: string; // for easy lookup in history
-  result: GuessResult;
+  word: string;
+  evaluations: TileEvaluation[];
+};
+
+export type GridTile = {
+  letter: string;
+  display: TileDisplayState;
 };
 
 export type GameState = {
@@ -14,10 +23,3 @@ export type GameState = {
   startedAt: number | null;
   historySignature?: string;
 };
-
-export type TileState = "correct" | "present" | "absent";
-
-export type GuessResult = {
-  letter: string;
-  state: TileState;
-}[];

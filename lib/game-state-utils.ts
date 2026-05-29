@@ -1,61 +1,74 @@
 import {
   GameState,
-  GuessResult,
   SubmittedGuess,
-  TileState,
+  TileEvaluation,
 } from "@/types/game-types";
 
 export const getGuessWords = (submitted: SubmittedGuess[]): string[] =>
   submitted.map((guess) => guess.word);
 
-export const getGuessResults = (submitted: SubmittedGuess[]): GuessResult[] =>
-  submitted.map((guess) => guess.result);
+const TILE_EVALUATIONS = new Set<TileEvaluation>([
+  "correct",
+  "present",
+  "absent",
+]);
 
-const TILE_STATES = new Set<TileState>(["correct", "present", "absent"]);
-
-const isGuessResultValid = (
-  result: unknown,
+const isEvaluationsValid = (
+  evaluations: unknown,
   wordLength: number,
-): result is GuessResult => {
-  if (!Array.isArray(result) || result.length !== wordLength) {
+): evaluations is TileEvaluation[] => {
+  if (!Array.isArray(evaluations) || evaluations.length !== wordLength) {
     return false;
   }
 
-  return result.every(
-    (tile) =>
-      tile !== null &&
-      typeof tile === "object" &&
-      typeof tile.letter === "string" &&
-      typeof tile.state === "string" &&
-      TILE_STATES.has(tile.state as TileState),
+  return evaluations.every((evaluation) =>
+    TILE_EVALUATIONS.has(evaluation as TileEvaluation),
   );
 };
 
-const isSubmittedGuessValid = (
+const normalizeSubmittedGuess = (
   guess: unknown,
   wordLength: number,
-): guess is SubmittedGuess => {
+): SubmittedGuess | undefined => {
   if (guess === null || typeof guess !== "object") {
-    return false;
+    return undefined;
   }
 
-  const value = guess as SubmittedGuess;
+  const value = guess as {
+    word?: unknown;
+    evaluations?: unknown;
+    result?: unknown;
+  };
 
-  if (
-    typeof value.word !== "string" ||
-    value.word.length !== wordLength ||
-    value.word !== value.word.toUpperCase()
-  ) {
-    return false;
+  if (typeof value.word !== "string" || value.word.length !== wordLength) {
+    return undefined;
   }
-  if (!isGuessResultValid(value.result, wordLength)) {
-    return false;
+
+  const word = value.word.toUpperCase();
+  if (word !== value.word) {
+    return undefined;
   }
-  return value.result.every(
-    (tile, index) =>
-      tile.letter === value.word[index] &&
-      tile.letter === tile.letter.toUpperCase(),
-  );
+
+  let evaluations: unknown = value.evaluations;
+
+  if (!evaluations && Array.isArray(value.result)) {
+    evaluations = value.result.map((tile) => {
+      if (tile === null || typeof tile !== "object") {
+        return undefined;
+      }
+
+      return "state" in tile &&
+        typeof (tile as { state?: unknown }).state === "string"
+        ? (tile as { state: string }).state
+        : undefined;
+    });
+  }
+
+  if (!isEvaluationsValid(evaluations, wordLength)) {
+    return undefined;
+  }
+
+  return { word, evaluations };
 };
 
 const parseSubmittedGuesses = (
@@ -66,13 +79,18 @@ const parseSubmittedGuesses = (
     return undefined;
   }
 
+  const parsed: SubmittedGuess[] = [];
+
   for (const guess of submittedGuesses) {
-    if (!isSubmittedGuessValid(guess, wordLength)) {
+    const normalized = normalizeSubmittedGuess(guess, wordLength);
+    if (!normalized) {
       return undefined;
     }
+
+    parsed.push(normalized);
   }
 
-  return submittedGuesses;
+  return parsed;
 };
 
 export const loadStoredGameState = (
