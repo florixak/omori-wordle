@@ -1,6 +1,5 @@
-import { MAX_ATTEMPTS } from "@/constants";
-import { getGameStatus } from "@/lib/game-logic";
 import { UserStats } from "@/db/schema";
+import { getGameStatus } from "@/lib/game-logic";
 
 export type ValidateCompletedGameResult =
   | {
