@@ -3,6 +3,8 @@ import { cn } from "@/lib/utils";
 import type { Metadata } from "next";
 import "./globals.css";
 import { Silkscreen } from "next/font/google";
+import Footer from "@/components/footer";
+import { Suspense } from "react";
 
 const pixelFont = Silkscreen({
   subsets: ["latin"],
@@ -25,6 +27,9 @@ export default function RootLayout({
       <body>
         <Header />
         {children}
+        <Suspense fallback={<div>Loading...</div>}>
+          <Footer />
+        </Suspense>
       </body>
     </html>
   );
