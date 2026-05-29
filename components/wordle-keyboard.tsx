@@ -3,7 +3,6 @@
 import { KEYBOARD_LAYOUT } from "@/constants";
 import { GameStatus, TileEvaluation } from "@/types/game-types";
 import WordleButton from "./wordle-button";
-import { cn } from "@/lib/utils";
 
 type WordleKeyboardProps = {
   keyboardState: Record<string, TileEvaluation>;
