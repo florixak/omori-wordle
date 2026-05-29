@@ -140,4 +140,29 @@ describe("processGuessSubmission", () => {
       status: "won",
     });
   });
+
+  it("accepts follow-up guesses when history signing is disabled", () => {
+    const previousSecret = process.env.GAME_HISTORY_SECRET;
+    delete process.env.GAME_HISTORY_SECRET;
+
+    try {
+      expect(
+        processGuessSubmission(
+          "GRAPE",
+          ["APPLE"],
+          answer,
+          maxAttempts,
+          isGuessValid,
+          TEST_DATE,
+        ),
+      ).toMatchObject({
+        ok: true,
+        guess: "GRAPE",
+        status: "playing",
+        signature: undefined,
+      });
+    } finally {
+      process.env.GAME_HISTORY_SECRET = previousSecret;
+    }
+  });
 });

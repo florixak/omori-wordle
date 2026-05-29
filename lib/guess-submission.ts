@@ -2,6 +2,9 @@ import { evaluateGuess, getGameStatus } from "@/lib/game-logic";
 import { GameStatus, TileEvaluation } from "@/types/game-types";
 import { createHmac, timingSafeEqual } from "crypto";
 
+const isHistorySigningEnabled = (): boolean =>
+  Boolean(process.env.GAME_HISTORY_SECRET);
+
 const signHistory = (date: string, guesses: string[]): string => {
   const secret = process.env.GAME_HISTORY_SECRET;
   if (!secret) throw new Error("Missing GAME_HISTORY_SECRET");
@@ -33,7 +36,7 @@ export type ProcessGuessResult =
     }
   | { ok: false; error: string };
 
-export const processGuessSubmission = (
+export const processGuessSubmission = async (
   guess: string,
   previousGuesses: string[],
   answer: string,
@@ -41,23 +44,14 @@ export const processGuessSubmission = (
   isGuessValid: (word: string) => boolean,
   date?: string,
   previousSignature?: string,
-): ProcessGuessResult => {
-  if (previousGuesses.length > 0) {
+): Promise<ProcessGuessResult> => {
+  if (previousGuesses.length > 0 && isHistorySigningEnabled()) {
     if (!date || !previousSignature) {
       return { ok: false, error: "Invalid game state" };
     }
     if (!isHistorySigned(date, previousGuesses, previousSignature)) {
       return { ok: false, error: "Invalid game state" };
     }
-  }
-
-  if (
-    previousGuesses.length > 0 &&
-    (!date ||
-      !previousSignature ||
-      !isHistorySigned(date, previousGuesses, previousSignature))
-  ) {
-    return { ok: false, error: "Invalid game state" };
   }
 
   const upper = guess.toUpperCase();
