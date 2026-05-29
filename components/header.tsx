@@ -28,7 +28,7 @@ const Header = () => {
       <WordleButton className="py-0" onClick={handleLogin}>
         <User size={24} />
       </WordleButton>
-      <WordleButton className="py-0" onClick={handleLogout}>
+      <WordleButton className="py-0">
         <BarChart size={24} />
       </WordleButton>
     </header>
