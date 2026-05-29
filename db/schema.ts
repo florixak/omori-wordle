@@ -134,7 +134,7 @@ export const gameResult = pgTable(
   (t) => [
     check(
       "game_result_date_format_check",
-      sql`${t.date} ~ '^\d{4}-\d{2}-\d{2}$'`,
+      sql`${t.date} ~ '^[0-9]{4}-[0-9]{2}-[0-9]{2}$'`,
     ),
     check(
       "game_result_word_uppercase_check",
@@ -172,7 +172,7 @@ export const userStats = pgTable(
   (t) => [
     check(
       "user_stats_last_played_date_format_check",
-      sql`${t.lastPlayedDate} ~ '^\d{4}-\d{2}-\d{2}$'`,
+      sql`${t.lastPlayedDate} ~ '^[0-9]{4}-[0-9]{2}-[0-9]{2}$'`,
     ),
   ],
 );
