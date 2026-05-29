@@ -36,7 +36,7 @@ export type ProcessGuessResult =
     }
   | { ok: false; error: string };
 
-export const processGuessSubmission = async (
+export const processGuessSubmission = (
   guess: string,
   previousGuesses: string[],
   answer: string,
@@ -44,7 +44,7 @@ export const processGuessSubmission = async (
   isGuessValid: (word: string) => boolean,
   date?: string,
   previousSignature?: string,
-): Promise<ProcessGuessResult> => {
+): ProcessGuessResult => {
   if (previousGuesses.length > 0 && isHistorySigningEnabled()) {
     if (!date || !previousSignature) {
       return { ok: false, error: "Invalid game state" };
