@@ -1,30 +1,45 @@
 "use client";
 
-import useGameState from "@/hooks/use-game-state";
+import { CSSProperties } from "react";
+import { GridTile } from "@/types/game-types";
 import WordleTile from "./wordle-tile";
 
 type WordleGridProps = {
-  date: string;
+  gridRows: GridTile[][];
+  error: string | null;
   wordLength: number;
 };
 
-const WordleGrid = ({ date, wordLength }: WordleGridProps) => {
-  const { state, gridRows, error } = useGameState({ date, wordLength });
+const WordleGrid = ({ gridRows, error, wordLength }: WordleGridProps) => {
+  const tileGapRem = 0.375;
 
   return (
-    <div className="flex flex-col gap-2" data-state={state.status}>
-      {gridRows.map((row, rowIndex) => (
-        <div key={rowIndex} className="flex gap-2">
-          {row.map((tile, colIndex) => (
-            <WordleTile
-              key={`${rowIndex}-${colIndex}`}
-              letter={tile.letter}
-              display={tile.display}
-            />
-          ))}
-        </div>
-      ))}
-      {error ? <p className="text-sm text-red-600">{error}</p> : null}
+    <div
+      className="flex w-full flex-col gap-3 sm:gap-4"
+      style={
+        {
+          "--cols": wordLength,
+          "--tile-gap": `${tileGapRem}rem`,
+          "--tile-size": `min(3.5rem, calc((100vw - 2rem - (${wordLength} - 1) * var(--tile-gap)) / ${wordLength}))`,
+        } as CSSProperties
+      }
+    >
+      <div className="flex flex-col items-center gap-(--tile-gap)">
+        {gridRows.map((row, rowIndex) => (
+          <div key={rowIndex} className="flex gap-(--tile-gap)">
+            {row.map((tile, colIndex) => (
+              <WordleTile
+                key={`${rowIndex}-${colIndex}`}
+                letter={tile.letter}
+                display={tile.display}
+              />
+            ))}
+          </div>
+        ))}
+      </div>
+      {error ? (
+        <p className="text-center text-xs text-red-600 sm:text-sm">{error}</p>
+      ) : null}
     </div>
   );
 };

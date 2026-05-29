@@ -1,6 +1,6 @@
 import { getDailyDate, getDailyWordLength } from "@/lib/daily-word";
 import { connection } from "next/server";
-import WordleGrid from "./wordle-grid";
+import WordleLayout from "./wordle-layout";
 
 const DailyGame = async () => {
   await connection();
@@ -8,11 +8,7 @@ const DailyGame = async () => {
   const wordLength = getDailyWordLength();
   const date = getDailyDate();
 
-  return (
-    <>
-      <WordleGrid date={date} wordLength={wordLength} />
-    </>
-  );
+  return <WordleLayout date={date} wordLength={wordLength} />;
 };
 
 export default DailyGame;

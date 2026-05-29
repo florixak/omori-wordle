@@ -1,3 +1,5 @@
+"use client";
+
 import { TileDisplayState } from "@/types/game-types";
 
 interface WordleTileProps {
@@ -25,12 +27,11 @@ const WordleTile = ({ letter, display, delay = 0 }: WordleTileProps) => {
   return (
     <div
       className={`
-        w-14 h-14 flex items-center justify-center
-        ${getBgColor()}
-        transition-all duration-200
-        shadow-[3px_3px_0px_var(--omori-shadow)]
+        relative flex h-[var(--tile-size,3.5rem)] w-[var(--tile-size,3.5rem)] items-center justify-center
         border-2 border-black
-        relative
+        shadow-[2px_2px_0px_var(--omori-shadow)] sm:shadow-[3px_3px_0px_var(--omori-shadow)]
+        transition-all duration-200
+        ${getBgColor()}
       `}
       style={{
         fontFamily: "var(--font-pixel)",
@@ -38,10 +39,15 @@ const WordleTile = ({ letter, display, delay = 0 }: WordleTileProps) => {
         transitionDelay: `${delay}ms`,
       }}
     >
-      <span className="text-2xl uppercase select-none">{letter}</span>
+      <span
+        className="select-none uppercase leading-none"
+        style={{ fontSize: "calc(var(--tile-size, 3.5rem) * 0.45)" }}
+      >
+        {letter}
+      </span>
       {display !== "empty" ? (
         <div
-          className="absolute inset-0 opacity-10 pointer-events-none"
+          className="pointer-events-none absolute inset-0 opacity-10"
           style={{
             backgroundImage: `repeating-linear-gradient(
               45deg,

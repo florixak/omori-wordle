@@ -195,4 +195,12 @@
     font-weight: var(--font-weight-normal);
     line-height: 1.5;
   }
+
+  .action-button {
+    @apply min-w-0 flex-[1.4] px-0.5 sm:flex-[1.5] sm:px-1 disabled:cursor-not-allowed disabled:opacity-50;
+  }
+
+  .letter-button {
+    @apply min-w-0 flex-1 disabled:cursor-not-allowed disabled:opacity-50;
+  }
 }
