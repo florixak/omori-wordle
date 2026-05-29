@@ -1,7 +1,7 @@
 "use client";
 
-import * as React from "react";
 import { X } from "lucide-react";
+import * as React from "react";
 
 import {
   omoriBorder,
@@ -10,7 +10,7 @@ import {
   omoriPress,
 } from "@/lib/omori-styles";
 import { cn } from "@/lib/utils";
-import { Button } from "./ui/button";
+import { Button } from "../ui/button";
 import {
   Dialog,
   DialogClose,
@@ -19,8 +19,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "./ui/dialog";
-import WordleButton from "./wordle-button";
+} from "../ui/dialog";
 
 function OmoriDialogContent({
   className,
@@ -107,47 +106,6 @@ function OmoriDialogFooter({
   );
 }
 
-type OmoriLoginDialogProps = {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  onLogin: () => void | Promise<void>;
-  isLoading?: boolean;
-};
-
-function OmoriLoginDialog({
-  open,
-  onOpenChange,
-  onLogin,
-  isLoading = false,
-}: OmoriLoginDialogProps) {
-  const handleLogin = () => {
-    void onLogin();
-  };
-
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <OmoriDialogContent>
-        <OmoriDialogHeader>
-          <OmoriDialogTitle>Sign in</OmoriDialogTitle>
-          <OmoriDialogDescription>
-            Save your daily results, track streaks, and compete on the
-            friends-only leaderboard.
-          </OmoriDialogDescription>
-        </OmoriDialogHeader>
-        <OmoriDialogFooter>
-          <WordleButton
-            className="w-full gap-2"
-            onClick={handleLogin}
-            disabled={isLoading}
-          >
-            Continue with Discord
-          </WordleButton>
-        </OmoriDialogFooter>
-      </OmoriDialogContent>
-    </Dialog>
-  );
-}
-
 export {
   Dialog as OmoriDialog,
   OmoriDialogContent,
@@ -155,5 +113,4 @@ export {
   OmoriDialogFooter,
   OmoriDialogHeader,
   OmoriDialogTitle,
-  OmoriLoginDialog,
 };

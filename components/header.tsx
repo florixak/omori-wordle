@@ -3,7 +3,7 @@
 import { authClient } from "@/lib/auth-client";
 import { BarChart, LogOut, User } from "lucide-react";
 import { useState } from "react";
-import { OmoriLoginDialog } from "./omori-dialog";
+import OmoriLoginDialog from "./login-dialog";
 import WordleButton from "./wordle-button";
 
 const Header = () => {
@@ -26,13 +26,20 @@ const Header = () => {
         <BarChart size={24} />
       </WordleButton>
       <div className="flex items-center gap-2">
-        {session ? <span className="font-pixel text-xs sm:text-sm">{session.user.name}</span> : null}
+        {session ? (
+          <span className="font-pixel text-xs sm:text-sm">
+            {session.user.name}
+          </span>
+        ) : null}
         {session ? (
           <WordleButton className="py-0" onClick={handleLogout}>
             <LogOut size={24} />
           </WordleButton>
         ) : (
-          <WordleButton className="py-0" onClick={() => setShowLoginDialog(true)}>
+          <WordleButton
+            className="py-0"
+            onClick={() => setShowLoginDialog(true)}
+          >
             <User size={24} />
           </WordleButton>
         )}
