@@ -1,69 +1,102 @@
 "use client";
 
-import { GameStatus } from "@/types/game-types";
 import {
   createContext,
+  useCallback,
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
   type ReactNode,
 } from "react";
 
-export type GameActions = {
-  hintUsed: boolean;
-  hint: string | null;
-  status: GameStatus;
-  requestHint: () => Promise<string | null>;
-};
+type RequestHintFn = () => Promise<string | null>;
 
 type GameActionsContextValue = {
-  actions: GameActions | null;
-  setActions: (actions: GameActions | null) => void;
+  requestHint: () => Promise<string | null>;
+  isAvailable: boolean;
+};
+
+type GameActionsRegistryContextValue = {
+  registerRequestHint: (fn: RequestHintFn) => void;
+  unregisterRequestHint: () => void;
 };
 
 const GameActionsContext = createContext<GameActionsContextValue | null>(null);
+const GameActionsRegistryContext =
+  createContext<GameActionsRegistryContextValue | null>(null);
 
 export const GameActionsProvider = ({ children }: { children: ReactNode }) => {
-  const [actions, setActions] = useState<GameActions | null>(null);
-  const value = useMemo(
+  const requestHintRef = useRef<RequestHintFn | null>(null);
+  const [isAvailable, setIsAvailable] = useState(false);
+
+  const registerRequestHint = useCallback((fn: RequestHintFn) => {
+    requestHintRef.current = fn;
+    setIsAvailable(true);
+  }, []);
+
+  const unregisterRequestHint = useCallback(() => {
+    requestHintRef.current = null;
+    setIsAvailable(false);
+  }, []);
+
+  const registryValue = useMemo(
     () => ({
-      actions,
-      setActions,
+      registerRequestHint,
+      unregisterRequestHint,
     }),
-    [actions],
+    [registerRequestHint, unregisterRequestHint],
+  );
+
+  const requestHint = useCallback(async () => {
+    if (!requestHintRef.current) {
+      return null;
+    }
+
+    return requestHintRef.current();
+  }, []);
+
+  const actionsValue = useMemo(
+    () => ({
+      requestHint,
+      isAvailable,
+    }),
+    [requestHint, isAvailable],
   );
 
   return (
-    <GameActionsContext.Provider value={value}>
-      {children}
-    </GameActionsContext.Provider>
+    <GameActionsRegistryContext.Provider value={registryValue}>
+      <GameActionsContext.Provider value={actionsValue}>
+        {children}
+      </GameActionsContext.Provider>
+    </GameActionsRegistryContext.Provider>
   );
 };
 
-export const useGameActions = (): GameActions | null => {
-  const context = useContext(GameActionsContext);
-  return context?.actions ?? null;
+export const useGameActions = (): GameActionsContextValue | null => {
+  return useContext(GameActionsContext);
 };
 
-export const useRegisterGameActions = (actions: GameActions | null): void => {
-  const setActions = useContext(GameActionsContext)?.setActions;
+export const useRegisterRequestHint = (requestHint: RequestHintFn): void => {
+  const registry = useContext(GameActionsRegistryContext);
+  const requestHintRef = useRef(requestHint);
 
   useEffect(() => {
-    if (!setActions) {
+    requestHintRef.current = requestHint;
+  });
+
+  useEffect(() => {
+    if (!registry) {
       return;
     }
 
-    setActions(actions);
-  }, [setActions, actions]);
+    const invokeLatestRequestHint = () => requestHintRef.current();
 
-  useEffect(() => {
-    if (!setActions) {
-      return;
-    }
+    registry.registerRequestHint(invokeLatestRequestHint);
 
     return () => {
-      setActions(null);
+      registry.unregisterRequestHint();
     };
-  }, [setActions]);
+  }, [registry]);
 };

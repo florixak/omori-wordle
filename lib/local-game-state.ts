@@ -84,6 +84,7 @@ export const subscribeToGameStorage = (listener: () => void): (() => void) => {
 
 export const notifyGameStorageChange = (): void => {
   storedSnapshotCache = null;
+  hintSnapshotCache = null;
   gameStorageListeners.forEach((listener) => listener());
 };
 
@@ -129,3 +130,61 @@ export const isStateForToday: (state: GameState, today: string) => boolean = (
 export const getTodayString: () => string = () => {
   return new Date().toISOString().slice(0, 10);
 };
+
+export type GameHintState = Pick<GameState, "hintUsed" | "hint">;
+
+const emptyHintState: GameHintState = {
+  hintUsed: false,
+  hint: null,
+};
+
+let hintSnapshotCache: { raw: string | null; state: GameHintState } | null =
+  null;
+
+export const readStoredHintState = (): GameHintState => {
+  if (typeof window === "undefined") {
+    return emptyHintState;
+  }
+
+  try {
+    const raw = window.localStorage.getItem(GAME_STORAGE_KEY);
+
+    if (hintSnapshotCache && hintSnapshotCache.raw === raw) {
+      return hintSnapshotCache.state;
+    }
+
+    if (!raw) {
+      return emptyHintState;
+    }
+
+    const parsed = JSON.parse(raw) as Partial<GameState>;
+
+    if (parsed.date !== getTodayString()) {
+      return emptyHintState;
+    }
+
+    const hintUsed = parsed.hintUsed === true;
+    const hint = typeof parsed.hint === "string" ? parsed.hint : null;
+
+    if (!hintUsed && hint === null) {
+      return emptyHintState;
+    }
+
+    if (
+      hintSnapshotCache &&
+      hintSnapshotCache.state.hintUsed === hintUsed &&
+      hintSnapshotCache.state.hint === hint
+    ) {
+      hintSnapshotCache = { raw, state: hintSnapshotCache.state };
+      return hintSnapshotCache.state;
+    }
+
+    const state: GameHintState = { hintUsed, hint };
+    hintSnapshotCache = { raw, state };
+    return state;
+  } catch {
+    return emptyHintState;
+  }
+};
+
+export const getServerHintSnapshot = (): GameHintState => emptyHintState;
