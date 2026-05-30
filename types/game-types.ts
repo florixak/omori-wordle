@@ -21,5 +21,12 @@ export type GameState = {
   currentInput: string;
   status: GameStatus;
   startedAt: number | null;
+  hintUsed: boolean;
+  hint: string | null;
   historySignature?: string;
+};
+
+export type WordEntry = {
+  word: string;
+  hint: string;
 };

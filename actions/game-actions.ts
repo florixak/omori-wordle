@@ -20,7 +20,7 @@ import {
   computeTimeSeconds,
   validateCompletedGame,
 } from "@/lib/submit-game";
-import { and, eq } from "drizzle-orm";
+import { and, eq, sql } from "drizzle-orm";
 import { headers } from "next/headers";
 
 export type SubmitGamePayload = {
@@ -133,12 +133,40 @@ export async function processGuess(
   return processGuessSubmission(
     guess,
     previousGuesses,
-    getDailyWord(),
+    getDailyWord().word,
     MAX_ATTEMPTS,
     isValidGuess,
     puzzleDate,
     previousSignature,
   );
+}
+
+export async function getHint(): Promise<{ hint: string }> {
+  const { hint } = getDailyWord();
+  const session = await auth.api.getSession({ headers: await headers() });
+
+  if (!session) {
+    return { hint };
+  }
+
+  const today = getDailyDate();
+
+  await db
+    .insert(userStats)
+    .values({
+      userId: session.user.id,
+      hintsUsed: 1,
+      lastHintDate: today,
+    })
+    .onConflictDoUpdate({
+      target: userStats.userId,
+      set: {
+        hintsUsed: sql`CASE WHEN ${userStats.lastHintDate} IS DISTINCT FROM ${today} THEN ${userStats.hintsUsed} + 1 ELSE ${userStats.hintsUsed} END`,
+        lastHintDate: today,
+      },
+    });
+
+  return { hint };
 }
 
 export async function submitGame(
@@ -154,8 +182,7 @@ export async function submitGame(
   if (payload.date !== today) {
     return { ok: false, error: "Invalid game state" };
   }
-
-  const answer = getDailyWord();
+  const { word: answer } = getDailyWord();
   const wordLength = getDailyWordLength();
 
   const validation = validateCompletedGame(

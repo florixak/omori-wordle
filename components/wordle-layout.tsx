@@ -1,5 +1,6 @@
 "use client";
 
+import { useRegisterRequestHint } from "@/components/game-actions-provider";
 import useGameState from "@/hooks/use-game-state";
 import WordleGrid from "./wordle-grid";
 import WordleKeyboard from "./wordle-keyboard";
@@ -18,11 +19,15 @@ const WordleLayout = ({ date, wordLength }: WordleLayoutProps) => {
     addLetter,
     removeLetter,
     submitGuess,
+    requestHint,
     isSubmitting,
   } = useGameState({
     date,
     wordLength,
   });
+
+  useRegisterRequestHint(requestHint);
+
   return (
     <div className="flex w-full max-w-lg flex-col items-center justify-center gap-4 sm:gap-6">
       <div className="flex flex-col items-center gap-1 text-center">

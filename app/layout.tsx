@@ -1,4 +1,5 @@
 import Header from "@/components/header";
+import { GameActionsProvider } from "@/components/game-actions-provider";
 import { cn } from "@/lib/utils";
 import type { Metadata } from "next";
 import "./globals.css";
@@ -25,11 +26,13 @@ export default function RootLayout({
   return (
     <html lang="en" className={cn("h-full", "antialiased", pixelFont.variable)}>
       <body>
-        <Header />
-        {children}
-        <Suspense fallback={<div>Loading...</div>}>
-          <Footer />
-        </Suspense>
+        <GameActionsProvider>
+          <Header />
+          {children}
+          <Suspense fallback={<div>Loading...</div>}>
+            <Footer />
+          </Suspense>
+        </GameActionsProvider>
       </body>
     </html>
   );

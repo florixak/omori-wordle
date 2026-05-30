@@ -1,7 +1,12 @@
 "use client";
 
 import { KEYBOARD_LAYOUT } from "@/constants";
-import { GameStatus, TileEvaluation } from "@/types/game-types";
+import { cn } from "@/lib/utils";
+import {
+  GameStatus,
+  TileDisplayState,
+  TileEvaluation,
+} from "@/types/game-types";
 import WordleButton from "./wordle-button";
 
 type WordleKeyboardProps = {
@@ -11,6 +16,19 @@ type WordleKeyboardProps = {
   submitGuess: () => Promise<void>;
   status: GameStatus;
   isSubmitting: boolean;
+};
+
+const getKeyClasses = (display: TileDisplayState) => {
+  switch (display) {
+    case "correct":
+      return "bg-[var(--omori-correct)] text-black";
+    case "present":
+      return "bg-[var(--omori-present)] text-black";
+    case "absent":
+      return "bg-[var(--omori-absent)] text-white";
+    default:
+      return undefined;
+  }
 };
 
 const WordleKeyboard = ({
@@ -65,8 +83,11 @@ const WordleKeyboard = ({
                   <WordleButton
                     key={letter}
                     onClick={() => handleAddLetter(letter)}
-                    disabled={isLocked || keyboardState[letter] === "absent"}
-                    className="letter-button"
+                    disabled={isLocked}
+                    className={cn(
+                      "letter-button",
+                      getKeyClasses(keyboardState[letter]),
+                    )}
                   >
                     {letter}
                   </WordleButton>
@@ -84,8 +105,11 @@ const WordleKeyboard = ({
                 <WordleButton
                   key={letter}
                   onClick={() => handleAddLetter(letter)}
-                  disabled={isLocked || keyboardState[letter] === "absent"}
-                  className="letter-button"
+                  disabled={isLocked}
+                  className={cn(
+                    "letter-button",
+                    getKeyClasses(keyboardState[letter]),
+                  )}
                 >
                   {letter}
                 </WordleButton>

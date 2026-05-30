@@ -1,4 +1,5 @@
 import {
+  OmoriDialog,
   OmoriDialogContent,
   OmoriDialogDescription,
   OmoriDialogFooter,
@@ -6,7 +7,6 @@ import {
   OmoriDialogTitle,
 } from "./omori/omori-dialog";
 import WordleButton from "./wordle-button";
-import { Dialog } from "./ui/dialog";
 
 type OmoriLoginDialogProps = {
   open: boolean;
@@ -26,7 +26,7 @@ const OmoriLoginDialog = ({
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <OmoriDialog open={open} onOpenChange={onOpenChange}>
       <OmoriDialogContent>
         <OmoriDialogHeader>
           <OmoriDialogTitle>Sign in</OmoriDialogTitle>
@@ -45,7 +45,7 @@ const OmoriLoginDialog = ({
           </WordleButton>
         </OmoriDialogFooter>
       </OmoriDialogContent>
-    </Dialog>
+    </OmoriDialog>
   );
 };
 

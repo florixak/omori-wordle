@@ -1,5 +1,5 @@
 {
-  "id": "cec1d270-ff1f-4c54-badb-c2671761db39",
+  "id": "4349dd07-9120-49e8-b2bc-ba2b2f8b14df",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -609,6 +609,19 @@
           "type": "text",
           "primaryKey": false,
           "notNull": false
+        },
+        "last_hint_date": {
+          "name": "last_hint_date",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "hints_used": {
+          "name": "hints_used",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
         }
       },
       "indexes": {},
@@ -633,7 +646,11 @@
       "checkConstraints": {
         "user_stats_last_played_date_format_check": {
           "name": "user_stats_last_played_date_format_check",
-          "value": "\"user_stats\".\"last_played_date\" ~ '^[0-9]{4}-[0-9]{2}-[0-9]{2}$'"
+          "value": "(\"user_stats\".\"last_played_date\" IS NULL OR \"user_stats\".\"last_played_date\" ~ '^[0-9]{4}-[0-9]{2}-[0-9]{2}$')"
+        },
+        "user_stats_last_hint_date_format_check": {
+          "name": "user_stats_last_hint_date_format_check",
+          "value": "(\"user_stats\".\"last_hint_date\" IS NULL OR \"user_stats\".\"last_hint_date\" ~ '^[0-9]{4}-[0-9]{2}-[0-9]{2}$')"
         }
       },
       "isRLSEnabled": false

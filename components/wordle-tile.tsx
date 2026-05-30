@@ -10,29 +10,29 @@ interface WordleTileProps {
   delay?: number;
 }
 
-const WordleTile = ({ letter, display, delay = 0 }: WordleTileProps) => {
-  const getBgColor = () => {
-    switch (display) {
-      case "correct":
-        return "bg-[var(--omori-correct)] text-black";
-      case "present":
-        return "bg-[var(--omori-present)] text-black";
-      case "absent":
-        return "bg-[var(--omori-absent)] text-white";
-      case "active":
-        return "bg-white border-2 border-[var(--omori-border)]";
-      default:
-        return "bg-white border border-gray-300";
-    }
-  };
+const getTileClasses = (display: TileDisplayState): string => {
+  switch (display) {
+    case "correct":
+      return "bg-[var(--omori-correct)] text-black";
+    case "present":
+      return "bg-[var(--omori-present)] text-black";
+    case "absent":
+      return "bg-[var(--omori-absent)] text-white";
+    case "active":
+      return "bg-white border-2 border-[var(--omori-border)]";
+    default:
+      return "bg-white border border-gray-300";
+  }
+};
 
+const WordleTile = ({ letter, display, delay = 0 }: WordleTileProps) => {
   return (
     <div
       className={cn(
         omoriBorderLg,
         omoriFont,
         "relative flex h-[var(--tile-size,3.5rem)] w-[var(--tile-size,3.5rem)] items-center justify-center transition-all duration-200",
-        getBgColor(),
+        getTileClasses(display),
       )}
       style={{
         imageRendering: "pixelated",
