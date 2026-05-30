@@ -8,4 +8,11 @@ const KEYBOARD_LAYOUT = [
   ["Z", "X", "C", "V", "B", "N", "M"],
 ];
 
-export { MAX_ATTEMPTS, KEYBOARD_LAYOUT, GAME_STORAGE_KEY };
+const GUESS_DISTRIBUTION_KEYS = ["1", "2", "3", "4", "5", "6", "0"] as const;
+
+export {
+  MAX_ATTEMPTS,
+  KEYBOARD_LAYOUT,
+  GAME_STORAGE_KEY,
+  GUESS_DISTRIBUTION_KEYS,
+};
