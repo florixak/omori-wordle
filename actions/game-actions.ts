@@ -20,7 +20,7 @@ import {
   computeTimeSeconds,
   validateCompletedGame,
 } from "@/lib/submit-game";
-import { and, eq } from "drizzle-orm";
+import { and, eq, sql } from "drizzle-orm";
 import { headers } from "next/headers";
 
 export type SubmitGamePayload = {
@@ -159,23 +159,13 @@ export async function getHint(): Promise<{ hint: string }> {
     .limit(1);
 
   if (!existingGame) {
-    const [statsRow] = await db
-      .select({ hintsUsed: userStats.hintsUsed })
-      .from(userStats)
-      .where(eq(userStats.userId, session.user.id))
-      .limit(1);
-
-    if (statsRow) {
-      await db
-        .update(userStats)
-        .set({ hintsUsed: statsRow.hintsUsed + 1 })
-        .where(eq(userStats.userId, session.user.id));
-    } else {
-      await db.insert(userStats).values({
-        userId: session.user.id,
-        hintsUsed: 1,
+    await db
+      .insert(userStats)
+      .values({ userId: session.user.id, hintsUsed: 1 })
+      .onConflictDoUpdate({
+        target: userStats.userId,
+        set: { hintsUsed: sql`${userStats.hintsUsed} + 1` },
       });
-    }
   }
 
   return { hint };
