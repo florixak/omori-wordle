@@ -168,6 +168,7 @@ export const userStats = pgTable(
       .notNull(),
     // lastPlayedDate used to determine streak resets.
     lastPlayedDate: text("last_played_date"),
+    hintsUsed: integer("hints_used").default(0).notNull(),
   },
   (t) => [
     check(

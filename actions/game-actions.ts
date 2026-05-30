@@ -133,12 +133,52 @@ export async function processGuess(
   return processGuessSubmission(
     guess,
     previousGuesses,
-    getDailyWord(),
+    getDailyWord().word,
     MAX_ATTEMPTS,
     isValidGuess,
     puzzleDate,
     previousSignature,
   );
+}
+
+export async function getHint(): Promise<{ hint: string }> {
+  const { hint } = getDailyWord();
+  const session = await auth.api.getSession({ headers: await headers() });
+
+  if (!session) {
+    return { hint };
+  }
+
+  const today = getDailyDate();
+  const [existingGame] = await db
+    .select({ id: gameResult.id })
+    .from(gameResult)
+    .where(
+      and(eq(gameResult.userId, session.user.id), eq(gameResult.date, today)),
+    )
+    .limit(1);
+
+  if (!existingGame) {
+    const [statsRow] = await db
+      .select({ hintsUsed: userStats.hintsUsed })
+      .from(userStats)
+      .where(eq(userStats.userId, session.user.id))
+      .limit(1);
+
+    if (statsRow) {
+      await db
+        .update(userStats)
+        .set({ hintsUsed: statsRow.hintsUsed + 1 })
+        .where(eq(userStats.userId, session.user.id));
+    } else {
+      await db.insert(userStats).values({
+        userId: session.user.id,
+        hintsUsed: 1,
+      });
+    }
+  }
+
+  return { hint };
 }
 
 export async function submitGame(
@@ -154,8 +194,7 @@ export async function submitGame(
   if (payload.date !== today) {
     return { ok: false, error: "Invalid game state" };
   }
-
-  const answer = getDailyWord();
+  const { word: answer } = getDailyWord();
   const wordLength = getDailyWordLength();
 
   const validation = validateCompletedGame(

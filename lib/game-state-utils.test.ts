@@ -41,6 +41,7 @@ describe("game-state utils", () => {
       currentInput: "",
       status: "playing",
       startedAt: null,
+      hintUsed: false,
     });
   });
 
@@ -76,6 +77,7 @@ describe("game-state utils", () => {
       currentInput: "",
       status: "playing",
       startedAt: null,
+      hintUsed: false,
     });
   });
 

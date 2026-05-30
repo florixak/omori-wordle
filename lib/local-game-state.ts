@@ -114,6 +114,7 @@ export const createInitialState: (
     currentInput: "",
     status: "playing",
     startedAt: null,
+    hintUsed: false,
   };
 };
 

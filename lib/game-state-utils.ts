@@ -132,6 +132,7 @@ export const loadStoredGameState = (
       typeof value.currentInput === "string" ? value.currentInput : "",
     status,
     startedAt: typeof value.startedAt === "number" ? value.startedAt : null,
+    hintUsed: value.hintUsed === true,
     historySignature:
       typeof value.historySignature === "string"
         ? value.historySignature

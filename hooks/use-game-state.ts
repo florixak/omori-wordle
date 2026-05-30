@@ -1,6 +1,6 @@
 "use client";
 
-import { processGuess, submitGame } from "@/actions/game-actions";
+import { getHint, processGuess, submitGame } from "@/actions/game-actions";
 import { getGuessWords } from "@/lib/game-state-utils";
 import { getKeyboardStateFromGuesses } from "@/lib/game-logic";
 import { buildGridRows } from "@/lib/grid-view";
@@ -29,6 +29,7 @@ type UseGameStateReturn = {
   addLetter: (letter: string) => void;
   removeLetter: () => void;
   submitGuess: () => Promise<void>;
+  requestHint: () => Promise<string | null>;
   error: string | null;
   isSubmitting: boolean;
 };
@@ -178,6 +179,28 @@ const useGameState = ({
     }
   };
 
+  const requestHint = async (): Promise<string | null> => {
+    const snapshot = stateRef.current;
+
+    if (snapshot.hintUsed) {
+      return null;
+    }
+
+    try {
+      const { hint } = await getHint();
+
+      updateGameState((prev) => ({
+        ...prev,
+        hintUsed: true,
+      }));
+
+      return hint;
+    } catch {
+      setError("Unable to load hint right now. Please try again.");
+      return null;
+    }
+  };
+
   useHotkey("Enter", () => {
     void submitGuess();
   });
@@ -197,6 +220,7 @@ const useGameState = ({
     addLetter,
     removeLetter,
     submitGuess,
+    requestHint,
     error,
     isSubmitting,
   };
