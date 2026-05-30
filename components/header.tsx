@@ -1,7 +1,7 @@
 "use client";
 
 import { authClient } from "@/lib/auth-client";
-import { BarChart, LogOut, User } from "lucide-react";
+import { BarChart, Lightbulb, LogOut, User } from "lucide-react";
 import { useState } from "react";
 import OmoriLoginDialog from "./login-dialog";
 import WordleButton from "./wordle-button";
@@ -22,9 +22,14 @@ const Header = () => {
 
   return (
     <header className="absolute top-0 left-0 right-0 flex justify-between items-center p-4 gap-2 md:gap-4">
-      <WordleButton className="py-0">
-        <BarChart size={24} />
-      </WordleButton>
+      <div className="flex items-center gap-2">
+        <WordleButton className="py-0">
+          <BarChart size={24} />
+        </WordleButton>
+        <WordleButton className="py-0">
+          <Lightbulb size={24} />
+        </WordleButton>
+      </div>
       <div className="flex items-center gap-2">
         {session ? (
           <span className="font-pixel text-xs sm:text-sm">
