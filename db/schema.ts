@@ -172,7 +172,7 @@ export const userStats = pgTable(
   (t) => [
     check(
       "user_stats_last_played_date_format_check",
-      sql`${t.lastPlayedDate} ~ '^[0-9]{4}-[0-9]{2}-[0-9]{2}$'`,
+      sql`(${t.lastPlayedDate} IS NULL OR ${t.lastPlayedDate} ~ '^[0-9]{4}-[0-9]{2}-[0-9]{2}$')`,
     ),
   ],
 );

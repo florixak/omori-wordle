@@ -1,6 +1,6 @@
 {
-  "id": "a2357fe7-589a-4ab8-a056-5691a7e95766",
-  "prevId": "0495418f-5623-4fc1-9238-a46a281cff07",
+  "id": "b1ba9105-c8d8-4a91-b539-684c4406d002",
+  "prevId": "cec1d270-ff1f-4c54-badb-c2671761db39",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -633,7 +633,7 @@
       "checkConstraints": {
         "user_stats_last_played_date_format_check": {
           "name": "user_stats_last_played_date_format_check",
-          "value": "\"user_stats\".\"last_played_date\" ~ '^[0-9]{4}-[0-9]{2}-[0-9]{2}$'"
+          "value": "(\"user_stats\".\"last_played_date\" IS NULL OR \"user_stats\".\"last_played_date\" ~ '^[0-9]{4}-[0-9]{2}-[0-9]{2}$')"
         }
       },
       "isRLSEnabled": false

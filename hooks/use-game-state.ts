@@ -1,6 +1,6 @@
 "use client";
 
-import { processGuess } from "@/actions/game-actions";
+import { processGuess, submitGame } from "@/actions/game-actions";
 import { getGuessWords } from "@/lib/game-state-utils";
 import { getKeyboardStateFromGuesses } from "@/lib/game-logic";
 import { buildGridRows } from "@/lib/grid-view";
@@ -15,6 +15,7 @@ import { useHotkey } from "@tanstack/react-hotkeys";
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { useLocalStorage } from "@/hooks/use-local-storage";
 import { GAME_STORAGE_KEY, MAX_ATTEMPTS } from "@/constants";
+import { authClient } from "@/lib/auth-client";
 
 type UseGameProps = {
   date: string;
@@ -36,6 +37,7 @@ const useGameState = ({
   date,
   wordLength,
 }: UseGameProps): UseGameStateReturn => {
+  const { data: session } = authClient.useSession();
   const storage = useLocalStorage<GameState>(GAME_STORAGE_KEY);
 
   const state = useSyncExternalStore(
@@ -135,6 +137,9 @@ const useGameState = ({
       }
 
       const now = Date.now();
+      const startedAt = snapshot.startedAt ?? now;
+      const allGuesses = [...previousGuesses, response.guess];
+
       updateGameState((prev) => ({
         ...prev,
         submittedGuesses: [
@@ -149,6 +154,22 @@ const useGameState = ({
         status: response.status,
         historySignature: response.signature,
       }));
+
+      if (
+        session &&
+        (response.status === "won" || response.status === "lost")
+      ) {
+        const saveResult = await submitGame({
+          date: snapshot.date,
+          guesses: allGuesses,
+          startedAt,
+          historySignature: response.signature,
+        });
+
+        if (!saveResult.ok) {
+          setError(saveResult.error);
+        }
+      }
     } catch {
       setError("Unable to submit guess right now. Please try again.");
     } finally {

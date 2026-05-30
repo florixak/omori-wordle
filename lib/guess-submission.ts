@@ -19,11 +19,22 @@ const isHistorySigned = (
   guesses: string[],
   signature?: string,
 ): boolean => {
-  // If no signature provided, only accept empty histories.
   if (!signature) return guesses.length === 0;
   const expected = signHistory(date, guesses);
   if (expected.length !== signature.length) return false;
   return timingSafeEqual(Buffer.from(expected), Buffer.from(signature));
+};
+
+export const verifyGuessHistory = (
+  date: string,
+  guesses: string[],
+  signature?: string,
+): boolean => {
+  if (!isHistorySigningEnabled()) {
+    return true;
+  }
+
+  return isHistorySigned(date, guesses, signature);
 };
 
 export type ProcessGuessResult =

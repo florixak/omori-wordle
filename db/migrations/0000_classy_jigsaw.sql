@@ -34,7 +34,7 @@ CREATE TABLE "game_result" (
 	"guesses" json NOT NULL,
 	"time_seconds" integer,
 	"completed_at" timestamp DEFAULT now(),
-	CONSTRAINT "game_result_date_format_check" CHECK ("game_result"."date" ~ '^d{4}-d{2}-d{2}$'),
+	CONSTRAINT "game_result_date_format_check" CHECK ("game_result"."date" ~ '^[0-9]{4}-[0-9]{2}-[0-9]{2}$'),
 	CONSTRAINT "game_result_word_uppercase_check" CHECK ("game_result"."word" = upper("game_result"."word")),
 	CONSTRAINT "game_result_word_length_matches_check" CHECK ("game_result"."word_length" = char_length("game_result"."word"))
 );
@@ -70,7 +70,7 @@ CREATE TABLE "user_stats" (
 	"max_streak" integer DEFAULT 0 NOT NULL,
 	"guess_distribution" json DEFAULT '{}'::json NOT NULL,
 	"last_played_date" text,
-	CONSTRAINT "user_stats_last_played_date_format_check" CHECK ("user_stats"."last_played_date" ~ '^d{4}-d{2}-d{2}$')
+	CONSTRAINT "user_stats_last_played_date_format_check" CHECK ("user_stats"."last_played_date" ~ '^[0-9]{4}-[0-9]{2}-[0-9]{2}$')
 );
 --> statement-breakpoint
 CREATE TABLE "verification" (

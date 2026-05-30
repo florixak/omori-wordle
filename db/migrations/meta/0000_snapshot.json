@@ -1,5 +1,5 @@
 {
-  "id": "0495418f-5623-4fc1-9238-a46a281cff07",
+  "id": "cec1d270-ff1f-4c54-badb-c2671761db39",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -380,7 +380,7 @@
       "checkConstraints": {
         "game_result_date_format_check": {
           "name": "game_result_date_format_check",
-          "value": "\"game_result\".\"date\" ~ '^d{4}-d{2}-d{2}$'"
+          "value": "\"game_result\".\"date\" ~ '^[0-9]{4}-[0-9]{2}-[0-9]{2}$'"
         },
         "game_result_word_uppercase_check": {
           "name": "game_result_word_uppercase_check",
@@ -633,7 +633,7 @@
       "checkConstraints": {
         "user_stats_last_played_date_format_check": {
           "name": "user_stats_last_played_date_format_check",
-          "value": "\"user_stats\".\"last_played_date\" ~ '^d{4}-d{2}-d{2}$'"
+          "value": "\"user_stats\".\"last_played_date\" ~ '^[0-9]{4}-[0-9]{2}-[0-9]{2}$'"
         }
       },
       "isRLSEnabled": false
