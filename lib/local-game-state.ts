@@ -138,8 +138,11 @@ const emptyHintState: GameHintState = {
   hint: null,
 };
 
-let hintSnapshotCache: { raw: string | null; state: GameHintState } | null =
-  null;
+let hintSnapshotCache: {
+  raw: string | null;
+  today: string;
+  state: GameHintState;
+} | null = null;
 
 export const readStoredHintState = (): GameHintState => {
   if (typeof window === "undefined") {
@@ -147,19 +150,26 @@ export const readStoredHintState = (): GameHintState => {
   }
 
   try {
+    const today = getTodayString();
     const raw = window.localStorage.getItem(GAME_STORAGE_KEY);
 
-    if (hintSnapshotCache && hintSnapshotCache.raw === raw) {
+    if (
+      hintSnapshotCache &&
+      hintSnapshotCache.raw === raw &&
+      hintSnapshotCache.today === today
+    ) {
       return hintSnapshotCache.state;
     }
 
     if (!raw) {
+      hintSnapshotCache = { raw: null, today, state: emptyHintState };
       return emptyHintState;
     }
 
     const parsed = JSON.parse(raw) as Partial<GameState>;
 
-    if (parsed.date !== getTodayString()) {
+    if (parsed.date !== today) {
+      hintSnapshotCache = { raw, today, state: emptyHintState };
       return emptyHintState;
     }
 
@@ -175,12 +185,12 @@ export const readStoredHintState = (): GameHintState => {
       hintSnapshotCache.state.hintUsed === hintUsed &&
       hintSnapshotCache.state.hint === hint
     ) {
-      hintSnapshotCache = { raw, state: hintSnapshotCache.state };
+      hintSnapshotCache = { raw, today, state: hintSnapshotCache.state };
       return hintSnapshotCache.state;
     }
 
     const state: GameHintState = { hintUsed, hint };
-    hintSnapshotCache = { raw, state };
+    hintSnapshotCache = { raw, today, state };
     return state;
   } catch {
     return emptyHintState;
