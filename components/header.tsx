@@ -1,6 +1,7 @@
 "use client";
 
 import { useGameActions } from "@/components/game-actions-provider";
+import { useGameHintState } from "@/hooks/use-game-hint-state";
 import HintDialog from "@/components/hint-dialog";
 import { authClient } from "@/lib/auth-client";
 import { BarChart, Lightbulb, LogOut, User } from "lucide-react";
@@ -11,6 +12,7 @@ import WordleButton from "./wordle-button";
 const Header = () => {
   const { data: session, isPending } = authClient.useSession();
   const gameActions = useGameActions();
+  const { hintUsed, hint } = useGameHintState();
   const [showLoginDialog, setShowLoginDialog] = useState(false);
   const [showHintDialog, setShowHintDialog] = useState(false);
   const [isHintLoading, setIsHintLoading] = useState(false);
@@ -33,14 +35,14 @@ const Header = () => {
     setIsHintLoading(true);
     try {
       await gameActions.requestHint();
+    } catch {
+      // optionally surface a user-facing error state here
     } finally {
       setIsHintLoading(false);
     }
   };
 
-  const hintAvailable = gameActions !== null;
-  const hintUsed = gameActions?.hintUsed ?? false;
-  const hint = gameActions?.hint ?? null;
+  const hintAvailable = gameActions?.isAvailable ?? false;
 
   return (
     <header className="absolute top-0 left-0 right-0 flex justify-between items-center p-4 gap-2 md:gap-4">
