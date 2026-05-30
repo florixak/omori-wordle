@@ -1,7 +1,5 @@
 "use client";
 
-import { useGameActions } from "@/components/game-actions-provider";
-import { useGameHintState } from "@/hooks/use-game-hint-state";
 import HintDialog from "@/components/hint-dialog";
 import { authClient } from "@/lib/auth-client";
 import { BarChart, Lightbulb, LogOut, User } from "lucide-react";
@@ -11,11 +9,8 @@ import WordleButton from "./wordle-button";
 
 const Header = () => {
   const { data: session, isPending } = authClient.useSession();
-  const gameActions = useGameActions();
-  const { hintUsed, hint } = useGameHintState();
   const [showLoginDialog, setShowLoginDialog] = useState(false);
   const [showHintDialog, setShowHintDialog] = useState(false);
-  const [isHintLoading, setIsHintLoading] = useState(false);
 
   const handleLogout = async () => {
     await authClient.signOut();
@@ -27,23 +22,6 @@ const Header = () => {
     });
   };
 
-  const handleRevealHint = async () => {
-    if (!gameActions) {
-      return;
-    }
-
-    setIsHintLoading(true);
-    try {
-      await gameActions.requestHint();
-    } catch {
-      // optionally surface a user-facing error state here
-    } finally {
-      setIsHintLoading(false);
-    }
-  };
-
-  const hintAvailable = gameActions?.isAvailable ?? false;
-
   return (
     <header className="absolute top-0 left-0 right-0 flex justify-between items-center p-4 gap-2 md:gap-4">
       <div className="flex items-center gap-2">
@@ -52,7 +30,6 @@ const Header = () => {
         </WordleButton>
         <WordleButton
           className="py-0"
-          disabled={!hintAvailable}
           aria-label="Hint"
           onClick={() => setShowHintDialog(true)}
         >
@@ -84,14 +61,7 @@ const Header = () => {
         onLogin={handleLogin}
         isLoading={isPending}
       />
-      <HintDialog
-        open={showHintDialog}
-        onOpenChange={setShowHintDialog}
-        hint={hint}
-        hintUsed={hintUsed}
-        onRevealHint={handleRevealHint}
-        isLoading={isHintLoading}
-      />
+      <HintDialog open={showHintDialog} onOpenChange={setShowHintDialog} />
     </header>
   );
 };

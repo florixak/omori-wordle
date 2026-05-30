@@ -1,5 +1,8 @@
 "use client";
 
+import { useGameHintState } from "@/hooks/use-game-hint-state";
+import { useState } from "react";
+import { useGameActions } from "./game-actions-provider";
 import {
   OmoriDialog,
   OmoriDialogContent,
@@ -13,24 +16,27 @@ import WordleButton from "./wordle-button";
 type HintDialogProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  hint: string | null;
-  hintUsed: boolean;
-  onRevealHint: () => Promise<void>;
-  isLoading?: boolean;
 };
 
-const HintDialog = ({
-  open,
-  onOpenChange,
-  hint,
-  hintUsed,
-  onRevealHint,
-  isLoading = false,
-}: HintDialogProps) => {
+const HintDialog = ({ open, onOpenChange }: HintDialogProps) => {
+  const gameActions = useGameActions();
+  const { hintUsed, hint } = useGameHintState();
+  const [isHintLoading, setIsHintLoading] = useState(false);
   const isRevealed = hintUsed && hint !== null;
 
-  const handleRevealHint = () => {
-    void onRevealHint();
+  const handleRevealHint = async () => {
+    if (!gameActions) {
+      return;
+    }
+
+    setIsHintLoading(true);
+    try {
+      await gameActions.requestHint();
+    } catch {
+      // optionally surface a user-facing error state here
+    } finally {
+      setIsHintLoading(false);
+    }
   };
 
   return (
@@ -39,9 +45,7 @@ const HintDialog = ({
         <OmoriDialogHeader>
           <OmoriDialogTitle>Hint</OmoriDialogTitle>
           <OmoriDialogDescription>
-            {isRevealed
-              ? hint
-              : "Need a nudge? You get one hint per puzzle."}
+            {isRevealed ? hint : "Need a nudge? You get one hint per puzzle."}
           </OmoriDialogDescription>
         </OmoriDialogHeader>
         <OmoriDialogFooter>
@@ -49,9 +53,9 @@ const HintDialog = ({
             <WordleButton
               className="w-full gap-2"
               onClick={handleRevealHint}
-              disabled={isLoading}
+              disabled={isHintLoading}
             >
-              {isLoading ? "Loading…" : "Reveal hint"}
+              {isHintLoading ? "Loading…" : "Reveal hint"}
             </WordleButton>
           ) : (
             <WordleButton
