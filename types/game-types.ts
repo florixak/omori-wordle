@@ -22,6 +22,7 @@ export type GameState = {
   status: GameStatus;
   startedAt: number | null;
   hintUsed: boolean;
+  hint: string | null;
   historySignature?: string;
 };
 
