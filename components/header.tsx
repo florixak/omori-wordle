@@ -6,11 +6,13 @@ import { BarChart, Lightbulb, LogOut, User } from "lucide-react";
 import { useState } from "react";
 import OmoriLoginDialog from "./login-dialog";
 import WordleButton from "./wordle-button";
+import StatsDialog from "./stats-dialog";
 
 const Header = () => {
   const { data: session, isPending } = authClient.useSession();
   const [showLoginDialog, setShowLoginDialog] = useState(false);
   const [showHintDialog, setShowHintDialog] = useState(false);
+  const [showStatsDialog, setShowStatsDialog] = useState(false);
 
   const handleLogout = async () => {
     await authClient.signOut();
@@ -25,7 +27,11 @@ const Header = () => {
   return (
     <header className="absolute top-0 left-0 right-0 flex justify-between items-center p-4 gap-2 md:gap-4">
       <div className="flex items-center gap-2">
-        <WordleButton className="py-0">
+        <WordleButton
+          className="py-0"
+          aria-label="Stats"
+          onClick={() => setShowStatsDialog(true)}
+        >
           <BarChart size={24} />
         </WordleButton>
         <WordleButton
@@ -43,17 +49,25 @@ const Header = () => {
           </span>
         ) : null}
         {session ? (
-          <WordleButton className="py-0" onClick={handleLogout}>
-            <LogOut size={24} />
-          </WordleButton>
-        ) : (
           <WordleButton
             className="py-0"
-            onClick={() => setShowLoginDialog(true)}
+            aria-label="Logout"
+            onClick={handleLogout}
           >
-            <User size={24} />
+            <LogOut size={24} />
           </WordleButton>
-        )}
+        ) : null}
+        <WordleButton
+          className="py-0"
+          aria-label={session ? "User profile" : "Login"}
+          onClick={
+            session
+              ? () => setShowStatsDialog(true)
+              : () => setShowLoginDialog(true)
+          }
+        >
+          <User size={24} />
+        </WordleButton>
       </div>
       <OmoriLoginDialog
         open={showLoginDialog}
@@ -62,6 +76,7 @@ const Header = () => {
         isLoading={isPending}
       />
       <HintDialog open={showHintDialog} onOpenChange={setShowHintDialog} />
+      <StatsDialog open={showStatsDialog} onOpenChange={setShowStatsDialog} />
     </header>
   );
 };
