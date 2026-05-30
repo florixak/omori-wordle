@@ -20,7 +20,7 @@ type GameActionsContextValue = {
 
 type GameActionsRegistryContextValue = {
   registerRequestHint: (fn: RequestHintFn) => void;
-  unregisterRequestHint: () => void;
+  unregisterRequestHint: (fn: RequestHintFn) => void;
 };
 
 const GameActionsContext = createContext<GameActionsContextValue | null>(null);
@@ -36,7 +36,10 @@ export const GameActionsProvider = ({ children }: { children: ReactNode }) => {
     setIsAvailable(true);
   }, []);
 
-  const unregisterRequestHint = useCallback(() => {
+  const unregisterRequestHint = useCallback((fn: RequestHintFn) => {
+    if (requestHintRef.current !== fn) {
+      return;
+    }
     requestHintRef.current = null;
     setIsAvailable(false);
   }, []);
@@ -96,7 +99,7 @@ export const useRegisterRequestHint = (requestHint: RequestHintFn): void => {
     registry.registerRequestHint(invokeLatestRequestHint);
 
     return () => {
-      registry.unregisterRequestHint();
+      registry.unregisterRequestHint(invokeLatestRequestHint);
     };
   }, [registry]);
 };
