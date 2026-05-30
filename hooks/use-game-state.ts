@@ -1,8 +1,11 @@
 "use client";
 
 import { getHint, processGuess, submitGame } from "@/actions/game-actions";
-import { getGuessWords } from "@/lib/game-state-utils";
+import { GAME_STORAGE_KEY, MAX_ATTEMPTS } from "@/constants";
+import { useLocalStorage } from "@/hooks/use-local-storage";
+import { authClient } from "@/lib/auth-client";
 import { getKeyboardStateFromGuesses } from "@/lib/game-logic";
+import { getGuessWords } from "@/lib/game-state-utils";
 import { buildGridRows } from "@/lib/grid-view";
 import {
   getServerGameSnapshot,
@@ -13,9 +16,6 @@ import {
 import { GameState, GridTile, TileEvaluation } from "@/types/game-types";
 import { useHotkey } from "@tanstack/react-hotkeys";
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
-import { useLocalStorage } from "@/hooks/use-local-storage";
-import { GAME_STORAGE_KEY, MAX_ATTEMPTS } from "@/constants";
-import { authClient } from "@/lib/auth-client";
 
 type UseGameProps = {
   date: string;
@@ -182,8 +182,8 @@ const useGameState = ({
   const requestHint = async (): Promise<string | null> => {
     const snapshot = stateRef.current;
 
-    if (snapshot.hintUsed) {
-      return null;
+    if (snapshot.hintUsed && snapshot.hint) {
+      return snapshot.hint;
     }
 
     try {
@@ -192,6 +192,7 @@ const useGameState = ({
       updateGameState((prev) => ({
         ...prev,
         hintUsed: true,
+        hint,
       }));
 
       return hint;
