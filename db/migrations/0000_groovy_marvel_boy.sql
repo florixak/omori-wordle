@@ -70,7 +70,10 @@ CREATE TABLE "user_stats" (
 	"max_streak" integer DEFAULT 0 NOT NULL,
 	"guess_distribution" json DEFAULT '{}'::json NOT NULL,
 	"last_played_date" text,
-	CONSTRAINT "user_stats_last_played_date_format_check" CHECK ("user_stats"."last_played_date" ~ '^[0-9]{4}-[0-9]{2}-[0-9]{2}$')
+	"last_hint_date" text,
+	"hints_used" integer DEFAULT 0 NOT NULL,
+	CONSTRAINT "user_stats_last_played_date_format_check" CHECK (("user_stats"."last_played_date" IS NULL OR "user_stats"."last_played_date" ~ '^[0-9]{4}-[0-9]{2}-[0-9]{2}$')),
+	CONSTRAINT "user_stats_last_hint_date_format_check" CHECK (("user_stats"."last_hint_date" IS NULL OR "user_stats"."last_hint_date" ~ '^[0-9]{4}-[0-9]{2}-[0-9]{2}$'))
 );
 --> statement-breakpoint
 CREATE TABLE "verification" (

@@ -150,23 +150,21 @@ export async function getHint(): Promise<{ hint: string }> {
   }
 
   const today = getDailyDate();
-  const [existingGame] = await db
-    .select({ id: gameResult.id })
-    .from(gameResult)
-    .where(
-      and(eq(gameResult.userId, session.user.id), eq(gameResult.date, today)),
-    )
-    .limit(1);
 
-  if (!existingGame) {
-    await db
-      .insert(userStats)
-      .values({ userId: session.user.id, hintsUsed: 1 })
-      .onConflictDoUpdate({
-        target: userStats.userId,
-        set: { hintsUsed: sql`${userStats.hintsUsed} + 1` },
-      });
-  }
+  await db
+    .insert(userStats)
+    .values({
+      userId: session.user.id,
+      hintsUsed: 1,
+      lastHintDate: today,
+    })
+    .onConflictDoUpdate({
+      target: userStats.userId,
+      set: {
+        hintsUsed: sql`CASE WHEN ${userStats.lastHintDate} IS DISTINCT FROM ${today} THEN ${userStats.hintsUsed} + 1 ELSE ${userStats.hintsUsed} END`,
+        lastHintDate: today,
+      },
+    });
 
   return { hint };
 }
