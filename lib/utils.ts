@@ -1,4 +1,5 @@
 import { GUESS_DISTRIBUTION_KEYS } from "@/constants";
+import { UserStats } from "@/db/schema";
 import { GuessDistributionRow } from "@/types/game-types";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
@@ -32,3 +33,15 @@ export const computeWinRate = (
 
   return Math.round((gamesWon / gamesPlayed) * 100);
 };
+
+export const createEmptyStats = (userId: string): UserStats => ({
+  userId,
+  gamesPlayed: 0,
+  gamesWon: 0,
+  currentStreak: 0,
+  maxStreak: 0,
+  guessDistribution: {},
+  lastPlayedDate: null,
+  hintsUsed: 0,
+  lastHintDate: null,
+});
