@@ -195,14 +195,6 @@
     font-weight: var(--font-weight-normal);
     line-height: 1.5;
   }
-
-  .action-button {
-    @apply min-w-0 flex-[1.4] px-0.5 sm:flex-[1.5] sm:px-1 disabled:cursor-not-allowed disabled:opacity-50;
-  }
-
-  .letter-button {
-    @apply min-w-0 flex-1 disabled:cursor-not-allowed disabled:opacity-50;
-  }
 }
 
 @layer utilities {
@@ -219,6 +211,10 @@
   }
 
   .omori-panel {
-    @apply border-2 border-black shadow-[2px_2px_0px_var(--omori-shadow)] rounded-none bg-[var(--omori-empty)];
+    @apply rounded-none bg-[var(--omori-empty)];
+  }
+
+  .omori-button-disabled {
+    @apply disabled:cursor-not-allowed disabled:opacity-100;
   }
 }

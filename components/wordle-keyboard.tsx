@@ -75,7 +75,7 @@ const WordleKeyboard = ({
                 <WordleButton
                   onClick={handleSubmitGuess}
                   disabled={isLocked}
-                  className="action-button"
+                  className="min-w-0 px-0.5 sm:px-1"
                 >
                   ENTER
                 </WordleButton>
@@ -85,7 +85,7 @@ const WordleKeyboard = ({
                     onClick={() => handleAddLetter(letter)}
                     disabled={isLocked}
                     className={cn(
-                      "letter-button",
+                      "min-w-0 flex-1",
                       getKeyClasses(keyboardState[letter]),
                     )}
                   >
@@ -95,7 +95,7 @@ const WordleKeyboard = ({
                 <WordleButton
                   onClick={handleRemoveLetter}
                   disabled={isLocked}
-                  className="action-button"
+                  className="min-w-0 px-0.5 flex-1 sm:px-1"
                 >
                   ⌫
                 </WordleButton>
@@ -107,7 +107,7 @@ const WordleKeyboard = ({
                   onClick={() => handleAddLetter(letter)}
                   disabled={isLocked}
                   className={cn(
-                    "letter-button",
+                    "min-w-0 flex-1",
                     getKeyClasses(keyboardState[letter]),
                   )}
                 >

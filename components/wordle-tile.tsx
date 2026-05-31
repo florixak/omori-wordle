@@ -1,6 +1,5 @@
 "use client";
 
-import { omoriBorderLg, omoriFont } from "@/lib/omori-styles";
 import { cn } from "@/lib/utils";
 import { TileDisplayState } from "@/types/game-types";
 
@@ -29,8 +28,7 @@ const WordleTile = ({ letter, display, delay = 0 }: WordleTileProps) => {
   return (
     <div
       className={cn(
-        omoriBorderLg,
-        omoriFont,
+        "omori-border-lg font-pixel",
         "relative flex h-[var(--tile-size,3.5rem)] w-[var(--tile-size,3.5rem)] items-center justify-center transition-all duration-200",
         getTileClasses(display),
       )}
