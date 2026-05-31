@@ -3,12 +3,6 @@
 import { X } from "lucide-react";
 import * as React from "react";
 
-import {
-  omoriBorder,
-  omoriFont,
-  omoriPanel,
-  omoriPress,
-} from "@/lib/omori-styles";
 import { cn } from "@/lib/utils";
 import { Button } from "../ui/button";
 import {
@@ -30,9 +24,7 @@ function OmoriDialogContent({
   return (
     <DialogContent
       className={cn(
-        omoriBorder,
-        omoriPanel,
-        omoriFont,
+        "omori-border omori-panel font-pixel",
         "gap-4 p-5 ring-0",
         className,
       )}
@@ -47,9 +39,7 @@ function OmoriDialogContent({
             <Button
               variant="outline"
               className={cn(
-                omoriBorder,
-                omoriPress,
-                omoriFont,
+                "omori-border omori-press font-pixel",
                 "absolute top-3 right-3 size-8 p-0",
               )}
               aria-label="Close"

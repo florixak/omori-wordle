@@ -1,11 +1,5 @@
 "use client";
 
-import {
-  omoriBorder,
-  omoriButtonDisabled,
-  omoriFont,
-  omoriPress,
-} from "@/lib/omori-styles";
 import { cn } from "@/lib/utils";
 import React from "react";
 import { Button } from "./ui/button";
@@ -20,10 +14,7 @@ const WordleButton = ({ children, className, ...props }: WordleButtonProps) => {
       {...props}
       variant="outline"
       className={cn(
-        omoriBorder,
-        omoriPress,
-        omoriFont,
-        omoriButtonDisabled,
+        "omori-border omori-press font-pixel omori-button-disabled",
         "rounded h-10 text-[0.625rem] leading-none sm:text-base",
         className,
       )}

@@ -1,4 +1,3 @@
-import { omoriBorder } from "@/lib/omori-styles";
 import { cn } from "@/lib/utils";
 import { GuessDistributionRow } from "@/types/game-types";
 
@@ -19,8 +18,7 @@ const GuessDistributionChart = ({ rows }: GuessDistributionChartProps) => (
           </span>
           <div
             className={cn(
-              omoriBorder,
-              "h-5 min-w-0 flex-1 bg-[var(--omori-empty)] p-px",
+              "omori-border h-5 min-w-0 flex-1 bg-[var(--omori-empty)] p-px",
             )}
           >
             {count > 0 ? (
