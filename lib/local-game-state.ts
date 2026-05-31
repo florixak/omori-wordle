@@ -131,11 +131,28 @@ export const getTodayString: () => string = () => {
   return new Date().toISOString().slice(0, 10);
 };
 
-export type GameHintState = Pick<GameState, "hintUsed" | "hint">;
+export type GameHintState = Pick<GameState, "hintUsed" | "hint"> & {
+  submittedGuessCount: number;
+};
 
 const emptyHintState: GameHintState = {
   hintUsed: false,
   hint: null,
+  submittedGuessCount: 0,
+};
+
+const parseHintState = (parsed: Partial<GameState> | null): GameHintState => {
+  if (!parsed) {
+    return emptyHintState;
+  }
+
+  return {
+    hintUsed: parsed.hintUsed === true,
+    hint: typeof parsed.hint === "string" ? parsed.hint : null,
+    submittedGuessCount: Array.isArray(parsed.submittedGuesses)
+      ? parsed.submittedGuesses.length
+      : 0,
+  };
 };
 
 let hintSnapshotCache: {
@@ -173,25 +190,21 @@ export const readStoredHintState = (): GameHintState => {
       return emptyHintState;
     }
 
-    const hintUsed = parsed.hintUsed === true;
-    const hint = typeof parsed.hint === "string" ? parsed.hint : null;
-
-    if (!hintUsed && hint === null) {
-      return emptyHintState;
-    }
+    const nextState = parseHintState(parsed);
 
     if (
       hintSnapshotCache &&
-      hintSnapshotCache.state.hintUsed === hintUsed &&
-      hintSnapshotCache.state.hint === hint
+      hintSnapshotCache.raw === raw &&
+      hintSnapshotCache.state.hintUsed === nextState.hintUsed &&
+      hintSnapshotCache.state.hint === nextState.hint &&
+      hintSnapshotCache.state.submittedGuessCount ===
+        nextState.submittedGuessCount
     ) {
-      hintSnapshotCache = { raw, today, state: hintSnapshotCache.state };
       return hintSnapshotCache.state;
     }
 
-    const state: GameHintState = { hintUsed, hint };
-    hintSnapshotCache = { raw, today, state };
-    return state;
+    hintSnapshotCache = { raw, today, state: nextState };
+    return nextState;
   } catch {
     return emptyHintState;
   }

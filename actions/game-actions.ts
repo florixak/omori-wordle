@@ -1,7 +1,7 @@
 "use server";
 
 import { auth } from "@/auth";
-import { MAX_ATTEMPTS } from "@/constants";
+import { MAX_ATTEMPTS, MIN_ATTEMPTS_FOR_HINT } from "@/constants";
 import { db } from "@/db/drizzle";
 import { gameResult, userStats } from "@/db/schema";
 import {
@@ -15,6 +15,7 @@ import {
   processGuessSubmission,
   verifyGuessHistory,
 } from "@/lib/guess-submission";
+import { getGameStatus } from "@/lib/game-logic";
 import {
   computeStatsAfterGame,
   computeTimeSeconds,
@@ -141,32 +142,69 @@ export async function processGuess(
   );
 }
 
-export async function getHint(): Promise<{ hint: string }> {
-  const { hint } = getDailyWord();
-  const session = await auth.api.getSession({ headers: await headers() });
+export type GetHintPayload = {
+  date: string;
+  guesses: string[];
+  historySignature?: string;
+};
 
-  if (!session) {
-    return { hint };
-  }
+export type GetHintResult =
+  | { ok: true; hint: string }
+  | { ok: false; error: string };
 
+export async function getHint(payload: GetHintPayload): Promise<GetHintResult> {
   const today = getDailyDate();
 
-  await db
-    .insert(userStats)
-    .values({
-      userId: session.user.id,
-      hintsUsed: 1,
-      lastHintDate: today,
-    })
-    .onConflictDoUpdate({
-      target: userStats.userId,
-      set: {
-        hintsUsed: sql`CASE WHEN ${userStats.lastHintDate} IS DISTINCT FROM ${today} THEN ${userStats.hintsUsed} + 1 ELSE ${userStats.hintsUsed} END`,
-        lastHintDate: today,
-      },
-    });
+  if (payload.date !== today) {
+    return { ok: false, error: "Invalid game state" };
+  }
 
-  return { hint };
+  const guesses = payload.guesses.map((guess) => guess.toUpperCase());
+
+  if (guesses.length < MIN_ATTEMPTS_FOR_HINT) {
+    return {
+      ok: false,
+      error: `Make at least ${MIN_ATTEMPTS_FOR_HINT} guesses before using a hint.`,
+    };
+  }
+
+  for (const guess of guesses) {
+    if (!isValidGuess(guess)) {
+      return { ok: false, error: "Invalid game state" };
+    }
+  }
+
+  if (!verifyGuessHistory(payload.date, guesses, payload.historySignature)) {
+    return { ok: false, error: "Invalid game state" };
+  }
+
+  const { word: answer, hint } = getDailyWord();
+  const status = getGameStatus(guesses, answer, MAX_ATTEMPTS);
+
+  if (status !== "playing") {
+    return { ok: false, error: "Game already finished" };
+  }
+
+  const session = await auth.api.getSession({ headers: await headers() });
+
+  if (session) {
+    await db
+      .insert(userStats)
+      .values({
+        userId: session.user.id,
+        hintsUsed: 1,
+        lastHintDate: today,
+      })
+      .onConflictDoUpdate({
+        target: userStats.userId,
+        set: {
+          hintsUsed: sql`CASE WHEN ${userStats.lastHintDate} IS DISTINCT FROM ${today} THEN ${userStats.hintsUsed} + 1 ELSE ${userStats.hintsUsed} END`,
+          lastHintDate: today,
+        },
+      });
+  }
+
+  return { ok: true, hint };
 }
 
 export async function submitGame(
