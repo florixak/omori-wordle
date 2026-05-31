@@ -6,7 +6,7 @@ const Footer = async () => {
   const date = new Date();
   const year = date.getFullYear();
   return (
-    <footer className="flex flex-col items-center justify-center gap-2 p-4">
+    <footer className="flex flex-col items-center justify-center gap-2 p-4 bg-(--omori-empty)">
       <p className="font-pixel text-xs">
         © {year} Omori Wordle · Fan-made project · Not affiliated with OMOCAT
         LLC

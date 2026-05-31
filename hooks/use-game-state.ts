@@ -1,7 +1,7 @@
 "use client";
 
 import { getHint, processGuess, submitGame } from "@/actions/game-actions";
-import { GAME_STORAGE_KEY, MAX_ATTEMPTS } from "@/constants";
+import { GAME_STORAGE_KEY, MAX_ATTEMPTS, MIN_ATTEMPTS_FOR_HINT } from "@/constants";
 import { useLocalStorage } from "@/hooks/use-local-storage";
 import { authClient } from "@/lib/auth-client";
 import { getKeyboardStateFromGuesses } from "@/lib/game-logic";
@@ -186,16 +186,34 @@ const useGameState = ({
       return snapshot.hint;
     }
 
+    const guesses = getGuessWords(snapshot.submittedGuesses);
+
+    if (guesses.length < MIN_ATTEMPTS_FOR_HINT) {
+      setError(
+        `Make at least ${MIN_ATTEMPTS_FOR_HINT} guesses before using a hint.`,
+      );
+      return null;
+    }
+
     try {
-      const { hint } = await getHint();
+      const response = await getHint({
+        date: snapshot.date,
+        guesses,
+        historySignature: snapshot.historySignature,
+      });
+
+      if (!response.ok) {
+        setError(response.error);
+        return null;
+      }
 
       updateGameState((prev) => ({
         ...prev,
         hintUsed: true,
-        hint,
+        hint: response.hint,
       }));
 
-      return hint;
+      return response.hint;
     } catch {
       setError("Unable to load hint right now. Please try again.");
       return null;
