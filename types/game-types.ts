@@ -30,3 +30,11 @@ export type WordEntry = {
   word: string;
   hint: string;
 };
+
+export type GuessDistributionRow = {
+  key: string;
+  label: string;
+  count: number;
+  barWidth: string;
+  isLoss: boolean;
+};

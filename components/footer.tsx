@@ -8,11 +8,11 @@ const Footer = async () => {
   return (
     <footer className="flex flex-col items-center justify-center gap-2 p-4">
       <p className="font-pixel text-xs">
-        &copy; {year} Omori Wordle. All rights reserved. This is a fan-made game
-        and is not affiliated with the official Omori game.
+        © {year} Omori Wordle · Fan-made project · Not affiliated with OMOCAT
+        LLC
       </p>
       <p className="font-pixel text-xs">
-        Created with ❤️ for OMORI by{" "}
+        Created with ❤️ for OMORI community by{" "}
         <Link
           href="https://github.com/florixak"
           target="_blank"

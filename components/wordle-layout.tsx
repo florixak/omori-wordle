@@ -4,13 +4,21 @@ import { useRegisterRequestHint } from "@/components/game-actions-provider";
 import useGameState from "@/hooks/use-game-state";
 import WordleGrid from "./wordle-grid";
 import WordleKeyboard from "./wordle-keyboard";
+import WordleTitle from "./wordle-title";
 
 type WordleLayoutProps = {
   date: string;
   wordLength: number;
+  streak: number;
+  isLoggedIn: boolean;
 };
 
-const WordleLayout = ({ date, wordLength }: WordleLayoutProps) => {
+const WordleLayout = ({
+  date,
+  wordLength,
+  streak,
+  isLoggedIn,
+}: WordleLayoutProps) => {
   const {
     state,
     gridRows,
@@ -30,12 +38,7 @@ const WordleLayout = ({ date, wordLength }: WordleLayoutProps) => {
 
   return (
     <div className="flex w-full max-w-lg flex-col items-center justify-center gap-4 sm:gap-6">
-      <div className="flex flex-col items-center gap-1 text-center">
-        <h1 className="font-pixel text-2xl sm:text-3xl md:text-4xl">
-          Omori Wordle
-        </h1>
-        <p className="font-pixel text-xs sm:text-sm">Days in HEADSPACE: 0</p>
-      </div>
+      <WordleTitle streak={streak} isLoggedIn={isLoggedIn} />
       <WordleGrid gridRows={gridRows} error={error} wordLength={wordLength} />
       <WordleKeyboard
         keyboardState={keyboardState}
