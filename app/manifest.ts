@@ -1,0 +1,23 @@
+import { siteConfig } from "@/lib/site-config";
+import type { MetadataRoute } from "next";
+
+export default function manifest(): MetadataRoute.Manifest {
+  return {
+    name: siteConfig.name,
+    short_name: siteConfig.name,
+    description: siteConfig.description,
+    start_url: "/",
+    display: "standalone",
+    background_color: "#f8f4f0",
+    theme_color: "#2a2a2a",
+    lang: "en-US",
+    categories: ["games", "entertainment"],
+    icons: [
+      {
+        src: "/avatars/sunny.png",
+        sizes: "any",
+        type: "image/png",
+      },
+    ],
+  };
+}
