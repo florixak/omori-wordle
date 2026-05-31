@@ -166,22 +166,12 @@ const StatsDialog = ({ open, onOpenChange }: StatsDialogProps) => {
               <p className="text-[0.625rem] text-destructive sm:text-xs">
                 {error}
               </p>
-              <WordleButton
+              {/*<WordleButton
                 className="w-full"
-                onClick={() => {
-                  void getStats()
-                    .then(setStats)
-                    .catch((fetchError) => {
-                      setError(
-                        fetchError instanceof Error
-                          ? fetchError.message
-                          : "Failed to load stats",
-                      );
-                    });
-                }}
+                onClick={() => void fetchStats()}
               >
                 Try again
-              </WordleButton>
+              </WordleButton>*/}
             </div>
           ) : null}
 
