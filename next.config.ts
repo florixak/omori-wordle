@@ -4,7 +4,7 @@ const nextConfig: NextConfig = {
   typedRoutes: true,
   cacheComponents: true,
   images: {
-    domains: ["cdn.discordapp.com"],
+    remotePatterns: [{ protocol: "https", hostname: "cdn.discordapp.com" }],
   },
 };
 
