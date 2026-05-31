@@ -215,6 +215,6 @@
   }
 
   .omori-button-disabled {
-    @apply disabled:cursor-not-allowed disabled:opacity-100 disabled:bg-[var(--omori-absent)] disabled:text-white;
+    @apply disabled:cursor-not-allowed disabled:opacity-100;
   }
 }
