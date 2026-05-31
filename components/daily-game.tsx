@@ -1,5 +1,8 @@
+import { getStreak } from "@/actions/stats-actions";
+import { auth } from "@/auth";
 import { getDailyDate, getDailyWordLength } from "@/lib/daily-word";
 import { connection } from "next/server";
+import { headers } from "next/headers";
 import WordleLayout from "./wordle-layout";
 
 const DailyGame = async () => {
@@ -7,8 +10,18 @@ const DailyGame = async () => {
 
   const wordLength = getDailyWordLength();
   const date = getDailyDate();
+  const session = await auth.api.getSession({ headers: await headers() });
+  const isLoggedIn = Boolean(session);
+  const streak = isLoggedIn ? await getStreak() : 0;
 
-  return <WordleLayout date={date} wordLength={wordLength} />;
+  return (
+    <WordleLayout
+      date={date}
+      wordLength={wordLength}
+      streak={streak}
+      isLoggedIn={isLoggedIn}
+    />
+  );
 };
 
 export default DailyGame;

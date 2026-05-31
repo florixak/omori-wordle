@@ -32,7 +32,7 @@ export const getStreak = async (): Promise<number> => {
   const session = await auth.api.getSession({ headers: await headers() });
 
   if (!session) {
-    throw new Error("Unauthorized");
+    return 0;
   }
 
   const stats = await db
