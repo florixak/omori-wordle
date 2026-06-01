@@ -8,8 +8,8 @@ import {
   OmoriDialogFooter,
   OmoriDialogHeader,
   OmoriDialogTitle,
-} from "../omori/omori-dialog";
-import WordleButton from "../wordle-button";
+} from "@/components/omori/omori-dialog";
+import WordleButton from "@/components/wordle-button";
 
 type ResultDialogProps = {
   open: boolean;
