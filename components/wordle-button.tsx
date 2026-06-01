@@ -15,7 +15,9 @@ const WordleButton = ({ children, className, ...props }: WordleButtonProps) => {
       variant="outline"
       className={cn(
         "omori-border omori-press font-pixel omori-button-disabled",
-        "rounded h-10 text-[0.625rem] leading-none sm:text-base",
+        "rounded h-10 bg-background text-foreground",
+        "text-[0.625rem] leading-none sm:text-base",
+        "hover:bg-muted hover:text-foreground",
         className,
       )}
     >
