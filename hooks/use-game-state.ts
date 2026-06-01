@@ -6,7 +6,11 @@ import {
   processGuess,
   submitGame,
 } from "@/actions/game-actions";
-import { GAME_STORAGE_KEY, MAX_ATTEMPTS, MIN_ATTEMPTS_FOR_HINT } from "@/constants";
+import {
+  GAME_STORAGE_KEY,
+  MAX_ATTEMPTS,
+  MIN_ATTEMPTS_FOR_HINT,
+} from "@/constants";
 import { useLocalStorage } from "@/hooks/use-local-storage";
 import { authClient } from "@/lib/auth-client";
 import { getKeyboardStateFromGuesses } from "@/lib/game-logic";
@@ -82,17 +86,21 @@ const useGameState = ({
       date: state.date,
       guesses,
       historySignature: state.historySignature,
-    }).then((result) => {
-      if (!result.ok) {
-        return;
-      }
+    })
+      .then((result) => {
+        if (!result.ok) {
+          return;
+        }
 
-      updateGameState((prev) => ({
-        ...prev,
-        revealedWord: result.revealedWord,
-        answerHint: result.answerHint,
-      }));
-    });
+        updateGameState((prev) => ({
+          ...prev,
+          revealedWord: result.revealedWord,
+          answerHint: result.answerHint,
+        }));
+      })
+      .catch(() => {
+        // Reveal data is non-critical; ignore transient fetch failures.
+      });
   }, [
     state.status,
     state.revealedWord,
