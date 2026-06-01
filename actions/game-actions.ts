@@ -96,12 +96,19 @@ const persistCompletedGame = async (
   }
 };
 
+export type ProcessGuessActionResult =
+  | (Extract<ProcessGuessResult, { ok: true }> & {
+      revealedWord?: string;
+      answerHint?: string;
+    })
+  | Extract<ProcessGuessResult, { ok: false }>;
+
 export async function processGuess(
   guess: string,
   previousGuesses: string[],
   date?: string,
   previousSignature?: string,
-): Promise<ProcessGuessResult> {
+): Promise<ProcessGuessActionResult> {
   const today = getDailyDate();
 
   if (date && date !== today) {
@@ -131,7 +138,7 @@ export async function processGuess(
     }
   }
 
-  return processGuessSubmission(
+  const result = processGuessSubmission(
     guess,
     previousGuesses,
     getDailyWord().word,
@@ -140,6 +147,21 @@ export async function processGuess(
     puzzleDate,
     previousSignature,
   );
+
+  if (!result.ok) {
+    return result;
+  }
+
+  if (result.status === "won" || result.status === "lost") {
+    const { word, hint } = getDailyWord();
+    return {
+      ...result,
+      revealedWord: word,
+      answerHint: hint,
+    };
+  }
+
+  return result;
 }
 
 export type GetHintPayload = {
@@ -205,6 +227,45 @@ export async function getHint(payload: GetHintPayload): Promise<GetHintResult> {
   }
 
   return { ok: true, hint };
+}
+
+export type GetCompletedGameRevealResult =
+  | { ok: true; revealedWord: string; answerHint: string }
+  | { ok: false; error: string };
+
+export async function getCompletedGameReveal(
+  payload: GetHintPayload,
+): Promise<GetCompletedGameRevealResult> {
+  const today = getDailyDate();
+
+  if (payload.date !== today) {
+    return { ok: false, error: "Invalid game state" };
+  }
+
+  const guesses = payload.guesses.map((guess) => guess.toUpperCase());
+
+  if (guesses.length === 0) {
+    return { ok: false, error: "Invalid game state" };
+  }
+
+  for (const guess of guesses) {
+    if (!isValidGuess(guess)) {
+      return { ok: false, error: "Invalid game state" };
+    }
+  }
+
+  if (!verifyGuessHistory(payload.date, guesses, payload.historySignature)) {
+    return { ok: false, error: "Invalid game state" };
+  }
+
+  const { word: answer, hint } = getDailyWord();
+  const status = getGameStatus(guesses, answer, MAX_ATTEMPTS);
+
+  if (status === "playing") {
+    return { ok: false, error: "Game not finished" };
+  }
+
+  return { ok: true, revealedWord: answer, answerHint: hint };
 }
 
 export async function submitGame(
