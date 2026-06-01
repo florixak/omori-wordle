@@ -23,6 +23,8 @@ export type GameState = {
   startedAt: number | null;
   hintUsed: boolean;
   hint: string | null;
+  revealedWord: string | null;
+  answerHint: string | null;
   historySignature?: string;
 };
 

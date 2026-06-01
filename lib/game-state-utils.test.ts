@@ -43,6 +43,8 @@ describe("game-state utils", () => {
       startedAt: null,
       hintUsed: false,
       hint: null,
+      revealedWord: null,
+      answerHint: null,
     });
   });
 
@@ -80,6 +82,8 @@ describe("game-state utils", () => {
       startedAt: null,
       hintUsed: false,
       hint: null,
+      revealedWord: null,
+      answerHint: null,
     });
   });
 
