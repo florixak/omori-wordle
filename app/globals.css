@@ -142,7 +142,21 @@
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground transition-colors duration-500 ease-in-out;
+  }
+
+  body[data-game-lost="true"] {
+    background-color: var(--primary);
+    color: var(--primary-foreground);
+  }
+
+  body[data-game-lost="true"] footer {
+    background-color: transparent;
+    color: inherit;
+  }
+
+  body[data-game-lost="true"] .text-muted-foreground {
+    color: color-mix(in oklch, var(--primary-foreground) 60%, transparent);
   }
 
   /**

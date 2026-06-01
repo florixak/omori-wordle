@@ -3,6 +3,7 @@
 import { useRegisterRequestHint } from "@/components/game-actions-provider";
 import ResultDialog from "@/components/dialog/result-dialog";
 import useGameState from "@/hooks/use-game-state";
+import { useGameLostTheme } from "@/hooks/use-game-lost-theme";
 import { useResultDialog } from "@/hooks/use-result-dialog";
 import { getGuessWords } from "@/lib/game-state-utils";
 import WordleGrid from "./wordle-grid";
@@ -44,6 +45,9 @@ const WordleLayout = ({
 
   const guesses = getGuessWords(state.submittedGuesses);
   const isWon = state.status === "won";
+  const isLost = state.status === "lost";
+
+  useGameLostTheme(isLost);
 
   return (
     <div className="flex w-full max-w-lg flex-col items-center justify-center gap-4 sm:gap-6">
