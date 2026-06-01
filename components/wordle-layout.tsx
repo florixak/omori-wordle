@@ -1,7 +1,10 @@
 "use client";
 
 import { useRegisterRequestHint } from "@/components/game-actions-provider";
+import ResultDialog from "@/components/dialog/result-dialog";
 import useGameState from "@/hooks/use-game-state";
+import { useResultDialog } from "@/hooks/use-result-dialog";
+import { getGuessWords } from "@/lib/game-state-utils";
 import WordleGrid from "./wordle-grid";
 import WordleKeyboard from "./wordle-keyboard";
 import WordleTitle from "./wordle-title";
@@ -34,7 +37,13 @@ const WordleLayout = ({
     wordLength,
   });
 
+  const { open: showResultDialog, setOpen: setShowResultDialog } =
+    useResultDialog(state);
+
   useRegisterRequestHint(requestHint);
+
+  const guesses = getGuessWords(state.submittedGuesses);
+  const isWon = state.status === "won";
 
   return (
     <div className="flex w-full max-w-lg flex-col items-center justify-center gap-4 sm:gap-6">
@@ -48,6 +57,16 @@ const WordleLayout = ({
         status={state.status}
         isSubmitting={isSubmitting}
       />
+      {state.revealedWord && state.answerHint ? (
+        <ResultDialog
+          open={showResultDialog}
+          onOpenChange={setShowResultDialog}
+          word={state.revealedWord}
+          hint={state.answerHint}
+          guesses={isWon ? guesses.length : 0}
+          isWon={isWon}
+        />
+      ) : null}
     </div>
   );
 };
