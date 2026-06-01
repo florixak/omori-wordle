@@ -184,7 +184,11 @@ const StatsDialog = ({ open, onOpenChange }: StatsDialogProps) => {
               ) : null}
               <SummaryGrid
                 stats={stats}
-                userAvatar={session.user.image ?? "/avatars/sunny.png"}
+                userAvatar={
+                  session.user.image && session.user.image.trim().length > 0
+                    ? session.user.image
+                    : "/avatars/sunny.png"
+                }
                 userName={session.user.name}
               />
               <div className="border-t-2 border-black pt-4">
