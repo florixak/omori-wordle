@@ -11,11 +11,11 @@ import {
   OmoriDialogFooter,
   OmoriDialogHeader,
   OmoriDialogTitle,
-} from "./omori/omori-dialog";
-import WordleButton from "./wordle-button";
+} from "@/components/omori/omori-dialog";
+import WordleButton from "@/components/wordle-button";
 import { computeWinRate, formatGuessDistribution } from "@/lib/utils";
-import GuessDistributionChart from "./guess-distribution-chart";
-import StatCell from "./stat-cell";
+import GuessDistributionChart from "@/components/guess-distribution-chart";
+import StatCell from "@/components/stat-cell";
 import Image from "next/image";
 
 type StatsDialogProps = {

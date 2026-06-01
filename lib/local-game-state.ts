@@ -117,6 +117,8 @@ export const createInitialState: (
     startedAt: null,
     hintUsed: false,
     hint: null,
+    revealedWord: null,
+    answerHint: null,
   };
 };
 

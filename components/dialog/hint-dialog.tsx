@@ -3,7 +3,7 @@
 import { MIN_ATTEMPTS_FOR_HINT } from "@/constants";
 import { useGameHintState } from "@/hooks/use-game-hint-state";
 import { useState } from "react";
-import { useGameActions } from "./game-actions-provider";
+import { useGameActions } from "@/components/game-actions-provider";
 import {
   OmoriDialog,
   OmoriDialogContent,
@@ -11,8 +11,8 @@ import {
   OmoriDialogFooter,
   OmoriDialogHeader,
   OmoriDialogTitle,
-} from "./omori/omori-dialog";
-import WordleButton from "./wordle-button";
+} from "@/components/omori/omori-dialog";
+import WordleButton from "@/components/wordle-button";
 
 type HintDialogProps = {
   open: boolean;

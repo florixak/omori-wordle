@@ -1,7 +1,16 @@
 "use client";
 
-import { getHint, processGuess, submitGame } from "@/actions/game-actions";
-import { GAME_STORAGE_KEY, MAX_ATTEMPTS, MIN_ATTEMPTS_FOR_HINT } from "@/constants";
+import {
+  getCompletedGameReveal,
+  getHint,
+  processGuess,
+  submitGame,
+} from "@/actions/game-actions";
+import {
+  GAME_STORAGE_KEY,
+  MAX_ATTEMPTS,
+  MIN_ATTEMPTS_FOR_HINT,
+} from "@/constants";
 import { useLocalStorage } from "@/hooks/use-local-storage";
 import { authClient } from "@/lib/auth-client";
 import { getKeyboardStateFromGuesses } from "@/lib/game-logic";
@@ -61,6 +70,45 @@ const useGameState = ({
     storage.setItem(next);
     notifyGameStorageChange();
   };
+
+  useEffect(() => {
+    if (state.status !== "won" && state.status !== "lost") {
+      return;
+    }
+
+    if (state.revealedWord && state.answerHint) {
+      return;
+    }
+
+    const guesses = getGuessWords(state.submittedGuesses);
+
+    void getCompletedGameReveal({
+      date: state.date,
+      guesses,
+      historySignature: state.historySignature,
+    })
+      .then((result) => {
+        if (!result.ok) {
+          return;
+        }
+
+        updateGameState((prev) => ({
+          ...prev,
+          revealedWord: result.revealedWord,
+          answerHint: result.answerHint,
+        }));
+      })
+      .catch(() => {
+        // Reveal data is non-critical; ignore transient fetch failures.
+      });
+  }, [
+    state.status,
+    state.revealedWord,
+    state.answerHint,
+    state.date,
+    state.submittedGuesses,
+    state.historySignature,
+  ]);
 
   const addLetter = (letter: string) => {
     setError(null);
@@ -154,6 +202,12 @@ const useGameState = ({
         startedAt: prev.startedAt ?? now,
         status: response.status,
         historySignature: response.signature,
+        ...(response.status === "won" || response.status === "lost"
+          ? {
+              revealedWord: response.revealedWord ?? null,
+              answerHint: response.answerHint ?? null,
+            }
+          : {}),
       }));
 
       if (

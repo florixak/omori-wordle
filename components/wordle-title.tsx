@@ -10,13 +10,23 @@ const WordleTitle = ({ streak, isLoggedIn }: WordleTitleProps) => {
         Omori Wordle
       </h1>
       {isLoggedIn ? (
-        <p className="font-pixel text-xs sm:text-sm">
-          Days in HEADSPACE: {streak}
-        </p>
+        <div className="flex flex-col items-center text-center">
+          <p className="font-pixel text-xs text-muted-foreground sm:text-sm">
+            Welcome back to HEADSPACE.
+          </p>
+          <p className="font-pixel text-xs sm:text-sm">
+            Days in HEADSPACE: {streak}
+          </p>
+        </div>
       ) : (
-        <p className="font-pixel text-xs text-muted-foreground sm:text-sm">
-          Login to see your streak
-        </p>
+        <div className="flex flex-col items-center text-center">
+          <p className="font-pixel text-xs text-muted-foreground sm:text-sm">
+            Welcome to HEADSPACE.
+          </p>
+          <p className="font-pixel text-xs text-muted-foreground sm:text-sm">
+            Login to track your journey.
+          </p>
+        </div>
       )}
     </div>
   );

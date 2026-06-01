@@ -1,5 +1,6 @@
 const MAX_ATTEMPTS = 6;
 const MIN_ATTEMPTS_FOR_HINT = 3;
+const RESULT_DIALOG_DELAY_MS = 500;
 
 const GAME_STORAGE_KEY = "omori-wordle-game";
 
@@ -14,6 +15,7 @@ const GUESS_DISTRIBUTION_KEYS = ["1", "2", "3", "4", "5", "6", "0"] as const;
 export {
   MAX_ATTEMPTS,
   MIN_ATTEMPTS_FOR_HINT,
+  RESULT_DIALOG_DELAY_MS,
   KEYBOARD_LAYOUT,
   GAME_STORAGE_KEY,
   GUESS_DISTRIBUTION_KEYS,

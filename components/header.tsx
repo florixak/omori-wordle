@@ -1,12 +1,12 @@
 "use client";
 
-import HintDialog from "@/components/hint-dialog";
+import HintDialog from "@/components/dialog/hint-dialog";
 import { authClient } from "@/lib/auth-client";
 import { BarChart, Lightbulb, LogOut, User } from "lucide-react";
 import { useState } from "react";
-import OmoriLoginDialog from "./login-dialog";
+import OmoriLoginDialog from "./dialog/login-dialog";
 import WordleButton from "./wordle-button";
-import StatsDialog from "./stats-dialog";
+import StatsDialog from "./dialog/stats-dialog";
 
 const Header = () => {
   const { data: session, isPending } = authClient.useSession();
