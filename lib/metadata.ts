@@ -64,11 +64,22 @@ export const createPageMetadata = ({
     canonical: path,
   },
   openGraph: {
-    title,
+    type: "website",
+    locale: siteConfig.locale,
+    siteName: siteConfig.name,
+    title: `${title} | ${siteConfig.name}`,
     description,
     url: `${siteConfig.url}${path}`,
+    images: [
+      {
+        url: `${siteConfig.url}/opengraph-image.png`,
+        width: 1200,
+        height: 630,
+      },
+    ],
   },
   twitter: {
+    card: "summary_large_image",
     title,
     description,
   },
