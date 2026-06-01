@@ -5,8 +5,8 @@ import {
   OmoriDialogFooter,
   OmoriDialogHeader,
   OmoriDialogTitle,
-} from "./omori/omori-dialog";
-import WordleButton from "./wordle-button";
+} from "../omori/omori-dialog";
+import WordleButton from "../wordle-button";
 
 type OmoriLoginDialogProps = {
   open: boolean;
