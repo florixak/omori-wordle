@@ -35,8 +35,8 @@ const SummaryGrid = ({ stats, userAvatar, userName }: SummaryGridProps) => (
       <Image
         src={userAvatar}
         alt="User avatar"
-        width={32}
-        height={32}
+        width={48}
+        height={48}
         className="rounded-full"
       />
       <span className="font-pixel text-xs sm:text-sm">{userName}</span>
@@ -184,7 +184,11 @@ const StatsDialog = ({ open, onOpenChange }: StatsDialogProps) => {
               ) : null}
               <SummaryGrid
                 stats={stats}
-                userAvatar={session.user.image ?? ""}
+                userAvatar={
+                  session.user.image && session.user.image.trim().length > 0
+                    ? session.user.image
+                    : "/avatars/sunny.png"
+                }
                 userName={session.user.name}
               />
               <div className="border-t-2 border-black pt-4">
