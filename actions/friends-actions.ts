@@ -2,9 +2,7 @@
 
 import { auth } from "@/auth";
 import { db } from "@/db/drizzle";
-import { friendship, gameResult, user } from "@/db/schema";
-import { getDailyDate } from "@/lib/daily-word";
-import { rankLeaderboard, toUserPreview } from "@/lib/friend-utils";
+import { friendship, user } from "@/db/schema";
 import type {
   FriendActionResult,
   FriendListEntry,
@@ -12,6 +10,7 @@ import type {
   FriendsOverview,
   PendingFriendRequest,
 } from "@/types/friends-types";
+import { toUserPreview } from "@/lib/friend-utils";
 import { and, eq, inArray, ne, or, sql } from "drizzle-orm";
 import { headers } from "next/headers";
 
@@ -28,7 +27,6 @@ const requireSession = async () => {
 export const getFriendsOverview = async (): Promise<FriendsOverview> => {
   const session = await requireSession();
   const userId = session.user.id;
-  const today = getDailyDate();
 
   const [outgoingPendingRows, incomingPendingRows, acceptedFriendRows] =
     await Promise.all([
@@ -64,7 +62,6 @@ export const getFriendsOverview = async (): Promise<FriendsOverview> => {
   const friendIds = acceptedFriendRows.map((row) => row.addresseeId);
   const relatedUserIds = [
     ...new Set([
-      userId,
       ...friendIds,
       ...outgoingPendingRows.map((row) => row.addresseeId),
       ...incomingPendingRows.map((row) => row.requesterId),
@@ -104,31 +101,9 @@ export const getFriendsOverview = async (): Promise<FriendsOverview> => {
     user: getPreview(row.addresseeId),
   }));
 
-  const leaderboardUserIds = [userId, ...friendIds];
-  const todayResults =
-    leaderboardUserIds.length > 0
-      ? await db
-          .select({
-            userId: gameResult.userId,
-            attempts: gameResult.attempts,
-            won: gameResult.won,
-          })
-          .from(gameResult)
-          .where(
-            and(
-              eq(gameResult.date, today),
-              inArray(gameResult.userId, leaderboardUserIds),
-            ),
-          )
-      : [];
-
-  const leaderboard = rankLeaderboard(todayResults, getPreview);
-
   return {
-    date: today,
     pendingRequests,
     friends,
-    leaderboard,
   };
 };
 

@@ -1,15 +1,8 @@
 "use client";
 
-import {
-  cancelOutgoingRequest,
-  removeFriend,
-  respondToFriendRequest,
-} from "@/actions/friends-actions";
-import AddFriendSection from "@/components/friends/add-friend-section";
-import FriendsListSection from "@/components/friends/friends-list-section";
-import PendingRequestsSection from "@/components/friends/pending-requests-section";
+import LeaderboardSection from "@/components/friends/leaderboard-section";
 import WordleButton from "@/components/wordle-button";
-import useFriends from "@/hooks/use-friends";
+import useLeaderboard from "@/hooks/use-leaderboard";
 import { cn } from "@/lib/utils";
 import {
   OmoriDialog,
@@ -20,16 +13,10 @@ import {
   OmoriDialogTitle,
 } from "../omori/omori-dialog";
 
-type FriendsDialogProps = {
+type LeaderboardDialogProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
 };
-
-export const SectionTitle = ({ children }: { children: React.ReactNode }) => (
-  <h3 className="font-pixel text-[0.625rem] uppercase tracking-wide sm:text-xs">
-    {children}
-  </h3>
-);
 
 const SkeletonBlock = ({ className }: { className?: string }) => (
   <div
@@ -40,29 +27,25 @@ const SkeletonBlock = ({ className }: { className?: string }) => (
   />
 );
 
-const FriendsDialog = ({ open, onOpenChange }: FriendsDialogProps) => {
+const LeaderboardDialog = ({ open, onOpenChange }: LeaderboardDialogProps) => {
   const {
     session,
     isSessionPending,
     handleOpenChange,
     handleLogin,
-    runAction,
     isLoading,
     error,
-    overview,
-    isActionBusy,
-    actionMessage,
-    reloadOverview,
-    handleSendRequest,
-  } = useFriends({ open, onOpenChange });
+    leaderboard,
+    reloadLeaderboard,
+  } = useLeaderboard({ open, onOpenChange });
 
   return (
     <OmoriDialog open={open} onOpenChange={handleOpenChange}>
       <OmoriDialogContent className="max-h-[85dvh] max-w-sm overflow-y-auto">
         <OmoriDialogHeader>
-          <OmoriDialogTitle>Friends</OmoriDialogTitle>
+          <OmoriDialogTitle>Leaderboard</OmoriDialogTitle>
           <OmoriDialogDescription>
-            Add friends and manage requests.
+            See how you and your friends did on today&apos;s puzzle.
           </OmoriDialogDescription>
         </OmoriDialogHeader>
 
@@ -76,7 +59,8 @@ const FriendsDialog = ({ open, onOpenChange }: FriendsDialogProps) => {
           {!isSessionPending && !session ? (
             <div className="flex flex-col items-center gap-3 py-2 text-center">
               <p className="text-[0.625rem] leading-relaxed sm:text-xs">
-                Sign in with Discord to add friends and manage requests.
+                Sign in with Discord to view the friends-only daily
+                leaderboard.
               </p>
               <WordleButton className="w-full" onClick={handleLogin}>
                 Continue with Discord
@@ -86,9 +70,8 @@ const FriendsDialog = ({ open, onOpenChange }: FriendsDialogProps) => {
 
           {session && isLoading ? (
             <div className="flex flex-col gap-4">
-              <SkeletonBlock className="h-16" />
+              <SkeletonBlock className="h-6" />
               <SkeletonBlock className="h-24" />
-              <SkeletonBlock className="h-20" />
             </div>
           ) : null}
 
@@ -99,46 +82,18 @@ const FriendsDialog = ({ open, onOpenChange }: FriendsDialogProps) => {
               </p>
               <WordleButton
                 className="w-full"
-                onClick={() => void reloadOverview()}
+                onClick={() => void reloadLeaderboard()}
               >
                 Try again
               </WordleButton>
             </div>
           ) : null}
 
-          {session && !isLoading && !error && overview ? (
-            <>
-              <PendingRequestsSection
-                requests={overview.pendingRequests}
-                isBusy={isActionBusy}
-                onRespond={(requestId, action) =>
-                  void runAction(() =>
-                    respondToFriendRequest(requestId, action),
-                  )
-                }
-                onCancel={(requestId) =>
-                  void runAction(() => cancelOutgoingRequest(requestId))
-                }
-              />
-
-              <FriendsListSection
-                friends={overview.friends}
-                isBusy={isActionBusy}
-                onRemove={(userId) =>
-                  void runAction(() => removeFriend(userId))
-                }
-              />
-              <AddFriendSection
-                isBusy={isActionBusy}
-                onSendRequest={handleSendRequest}
-              />
-            </>
-          ) : null}
-
-          {actionMessage ? (
-            <p className="text-center text-[0.625rem] text-muted-foreground sm:text-xs">
-              {actionMessage}
-            </p>
+          {session && !isLoading && !error && leaderboard ? (
+            <LeaderboardSection
+              entries={leaderboard.entries}
+              date={leaderboard.date}
+            />
           ) : null}
         </div>
 
@@ -155,4 +110,4 @@ const FriendsDialog = ({ open, onOpenChange }: FriendsDialogProps) => {
   );
 };
 
-export default FriendsDialog;
+export default LeaderboardDialog;

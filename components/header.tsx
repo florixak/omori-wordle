@@ -2,9 +2,10 @@
 
 import FriendsDialog from "@/components/dialog/friends-dialog";
 import HintDialog from "@/components/dialog/hint-dialog";
+import LeaderboardDialog from "@/components/dialog/leaderboard-dialog";
 import StatsDialog from "@/components/dialog/stats-dialog";
 import { authClient } from "@/lib/auth-client";
-import { BarChart, Lightbulb, LogOut, User, Users } from "lucide-react";
+import { BarChart, Lightbulb, LogOut, Trophy, User, Users } from "lucide-react";
 import { useState } from "react";
 import OmoriLoginDialog from "./dialog/login-dialog";
 import WordleButton from "./wordle-button";
@@ -15,6 +16,7 @@ const Header = () => {
   const [showHintDialog, setShowHintDialog] = useState(false);
   const [showStatsDialog, setShowStatsDialog] = useState(false);
   const [showFriendsDialog, setShowFriendsDialog] = useState(false);
+  const [showLeaderboardDialog, setShowLeaderboardDialog] = useState(false);
 
   const handleLogout = async () => {
     await authClient.signOut();
@@ -36,6 +38,15 @@ const Header = () => {
         >
           <BarChart size={24} />
         </WordleButton>
+        {session ? (
+          <WordleButton
+            className="py-0"
+            aria-label="Friends leaderboard"
+            onClick={() => setShowLeaderboardDialog(true)}
+          >
+            <Trophy size={24} />
+          </WordleButton>
+        ) : null}
         <WordleButton
           className="py-0"
           aria-label="Hint"
@@ -92,6 +103,10 @@ const Header = () => {
       <FriendsDialog
         open={showFriendsDialog}
         onOpenChange={setShowFriendsDialog}
+      />
+      <LeaderboardDialog
+        open={showLeaderboardDialog}
+        onOpenChange={setShowLeaderboardDialog}
       />
     </header>
   );

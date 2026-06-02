@@ -5,12 +5,7 @@ import {
   sendFriendRequest,
 } from "@/actions/friends-actions";
 import { authClient } from "@/lib/auth-client";
-import {
-  FriendListEntry,
-  FriendsLeaderboardEntry,
-  FriendsOverview,
-  PendingFriendRequest,
-} from "@/types/friends-types";
+import { FriendsOverview } from "@/types/friends-types";
 import { useEffect, useEffectEvent, useState } from "react";
 
 type UseFriendsProps = {
@@ -21,11 +16,6 @@ type UseFriendsProps = {
 const useFriends = ({ open, onOpenChange }: UseFriendsProps) => {
   const { data: session, isPending: isSessionPending } =
     authClient.useSession();
-  const [friends, setFriends] = useState<FriendListEntry[]>([]);
-  const [pendingRequests, setPendingRequests] = useState<
-    PendingFriendRequest[]
-  >([]);
-  const [leaderboard, setLeaderboard] = useState<FriendsLeaderboardEntry[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [actionMessage, setActionMessage] = useState<string | null>(null);
@@ -138,9 +128,6 @@ const useFriends = ({ open, onOpenChange }: UseFriendsProps) => {
     isLoading,
     error,
     overview,
-    friends,
-    pendingRequests,
-    leaderboard,
     isActionBusy,
     actionMessage,
     reloadOverview,
