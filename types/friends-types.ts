@@ -22,11 +22,14 @@ export type FriendsLeaderboardEntry = {
   rank: number;
 };
 
-export type FriendsOverview = {
+export type FriendsLeaderboard = {
   date: string;
+  entries: FriendsLeaderboardEntry[];
+};
+
+export type FriendsOverview = {
   pendingRequests: PendingFriendRequest[];
   friends: FriendListEntry[];
-  leaderboard: FriendsLeaderboardEntry[];
 };
 
 export type FriendActionResult = { ok: true } | { ok: false; error: string };

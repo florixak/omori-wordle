@@ -1,25 +1,24 @@
 "use client";
 
 import {
-  OmoriDialog,
-  OmoriDialogContent,
-  OmoriDialogHeader,
-  OmoriDialogTitle,
-  OmoriDialogDescription,
-  OmoriDialogFooter,
-} from "../omori/omori-dialog";
-import WordleButton from "@/components/wordle-button";
-import { cn } from "@/lib/utils";
-import useFriends from "@/hooks/use-friends";
-import PendingRequestsSection from "@/components/friends/pending-requests-section";
-import LeaderboardSection from "@/components/friends/leaderboard-section";
-import FriendsListSection from "@/components/friends/friends-list-section";
-import AddFriendSection from "@/components/friends/add-friend-section";
-import {
-  respondToFriendRequest,
   cancelOutgoingRequest,
   removeFriend,
+  respondToFriendRequest,
 } from "@/actions/friends-actions";
+import AddFriendSection from "@/components/friends/add-friend-section";
+import FriendsListSection from "@/components/friends/friends-list-section";
+import PendingRequestsSection from "@/components/friends/pending-requests-section";
+import WordleButton from "@/components/wordle-button";
+import useFriends from "@/hooks/use-friends";
+import { cn } from "@/lib/utils";
+import {
+  OmoriDialog,
+  OmoriDialogContent,
+  OmoriDialogDescription,
+  OmoriDialogFooter,
+  OmoriDialogHeader,
+  OmoriDialogTitle,
+} from "../omori/omori-dialog";
 
 type FriendsDialogProps = {
   open: boolean;
@@ -63,7 +62,7 @@ const FriendsDialog = ({ open, onOpenChange }: FriendsDialogProps) => {
         <OmoriDialogHeader>
           <OmoriDialogTitle>Friends</OmoriDialogTitle>
           <OmoriDialogDescription>
-            Compare today&apos;s puzzle with people you trust.
+            Add friends and manage requests.
           </OmoriDialogDescription>
         </OmoriDialogHeader>
 
@@ -77,8 +76,7 @@ const FriendsDialog = ({ open, onOpenChange }: FriendsDialogProps) => {
           {!isSessionPending && !session ? (
             <div className="flex flex-col items-center gap-3 py-2 text-center">
               <p className="text-[0.625rem] leading-relaxed sm:text-xs">
-                Sign in with Discord to add friends and view the daily
-                leaderboard.
+                Sign in with Discord to add friends and manage requests.
               </p>
               <WordleButton className="w-full" onClick={handleLogin}>
                 Continue with Discord
@@ -122,10 +120,7 @@ const FriendsDialog = ({ open, onOpenChange }: FriendsDialogProps) => {
                   void runAction(() => cancelOutgoingRequest(requestId))
                 }
               />
-              <LeaderboardSection
-                entries={overview.leaderboard}
-                date={overview.date}
-              />
+
               <FriendsListSection
                 friends={overview.friends}
                 isBusy={isActionBusy}
