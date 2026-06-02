@@ -1,25 +1,25 @@
 "use client";
 
 import {
-  cancelOutgoingRequest,
-  removeFriend,
-  respondToFriendRequest,
-} from "@/actions/friends-actions";
-import AddFriendSection from "@/components/friends/add-friend-section";
-import FriendsListSection from "@/components/friends/friends-list-section";
-import LeaderboardSection from "@/components/friends/leaderboard-section";
-import PendingRequestsSection from "@/components/friends/pending-requests-section";
-import {
   OmoriDialog,
   OmoriDialogContent,
-  OmoriDialogDescription,
-  OmoriDialogFooter,
   OmoriDialogHeader,
   OmoriDialogTitle,
-} from "@/components/omori/omori-dialog";
+  OmoriDialogDescription,
+  OmoriDialogFooter,
+} from "../omori/omori-dialog";
 import WordleButton from "@/components/wordle-button";
-import useFriends from "@/hooks/use-friends";
 import { cn } from "@/lib/utils";
+import useFriends from "@/hooks/use-friends";
+import PendingRequestsSection from "@/components/friends/pending-requests-section";
+import LeaderboardSection from "@/components/friends/leaderboard-section";
+import FriendsListSection from "@/components/friends/friends-list-section";
+import AddFriendSection from "@/components/friends/add-friend-section";
+import {
+  respondToFriendRequest,
+  cancelOutgoingRequest,
+  removeFriend,
+} from "@/actions/friends-actions";
 
 type FriendsDialogProps = {
   open: boolean;
