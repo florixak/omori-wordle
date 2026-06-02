@@ -18,7 +18,7 @@ const UserRow = ({ user, trailing }: UserRowProps) => {
     <>
       <Image
         src={getAvatarSrc(user.image)}
-        alt=""
+        alt={`${user.name}'s avatar`}
         width={32}
         height={32}
         className="size-8 shrink-0 rounded-full border border-black"
