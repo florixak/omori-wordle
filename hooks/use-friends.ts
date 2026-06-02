@@ -38,6 +38,9 @@ const useFriends = ({ open, onOpenChange }: UseFriendsProps) => {
     void queryClient.invalidateQueries({
       queryKey: QUERY_KEYS.FRIENDS_OVERVIEW,
     });
+    void queryClient.invalidateQueries({
+      queryKey: QUERY_KEYS.FRIENDS_LEADERBOARD,
+    });
   };
 
   const mutationOptions = {
@@ -60,8 +63,8 @@ const useFriends = ({ open, onOpenChange }: UseFriendsProps) => {
     ...mutationOptions,
   });
 
-  const { mutate: respondToRequest, isPending: isRespondPending } =
-    useMutation({
+  const { mutate: respondToRequest, isPending: isRespondPending } = useMutation(
+    {
       mutationFn: async ({
         requestId,
         action,
@@ -73,18 +76,17 @@ const useFriends = ({ open, onOpenChange }: UseFriendsProps) => {
         assertFriendActionResult(result);
       },
       ...mutationOptions,
-    });
-
-  const {
-    mutate: cancelOutgoingRequestAction,
-    isPending: isCancelPending,
-  } = useMutation({
-    mutationFn: async (requestId: number) => {
-      const result = await cancelOutgoingRequest(requestId);
-      assertFriendActionResult(result);
     },
-    ...mutationOptions,
-  });
+  );
+
+  const { mutate: cancelOutgoingRequestAction, isPending: isCancelPending } =
+    useMutation({
+      mutationFn: async (requestId: number) => {
+        const result = await cancelOutgoingRequest(requestId);
+        assertFriendActionResult(result);
+      },
+      ...mutationOptions,
+    });
 
   const { mutate: removeFriendAction, isPending: isRemovePending } =
     useMutation({
@@ -96,10 +98,7 @@ const useFriends = ({ open, onOpenChange }: UseFriendsProps) => {
     });
 
   const isMutating =
-    isSendPending ||
-    isRespondPending ||
-    isCancelPending ||
-    isRemovePending;
+    isSendPending || isRespondPending || isCancelPending || isRemovePending;
 
   const isBusy = isOverviewFetching || isMutating;
 
