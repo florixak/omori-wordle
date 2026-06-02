@@ -3,7 +3,7 @@
 import { MIN_ATTEMPTS_FOR_HINT } from "@/constants";
 import { useGameHintState } from "@/hooks/use-game-hint-state";
 import { useState } from "react";
-import { useGameActions } from "@/components/game-actions-provider";
+import { useGameActions } from "@/components/providers/game-actions-provider";
 import {
   OmoriDialog,
   OmoriDialogContent,
