@@ -17,6 +17,9 @@ import { computeWinRate, formatGuessDistribution } from "@/lib/utils";
 import GuessDistributionChart from "@/components/guess-distribution-chart";
 import StatCell from "@/components/stat-cell";
 import Image from "next/image";
+import { QUERY_KEYS } from "@/constants";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { createStatsQueryOptions } from "@/hooks/query-options";
 
 type StatsDialogProps = {
   open: boolean;
@@ -60,47 +63,13 @@ const SummaryGrid = ({ stats, userAvatar, userName }: SummaryGridProps) => (
 const StatsDialog = ({ open, onOpenChange }: StatsDialogProps) => {
   const { data: session, isPending: isSessionPending } =
     authClient.useSession();
-  const [stats, setStats] = useState<UserStats | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
-  const setLoadingEvent = useEffectEvent((loading: boolean) => {
-    setIsLoading(loading);
-  });
-
-  const setErrorEvent = useEffectEvent((nextError: string | null) => {
-    setError(nextError);
-  });
-
-  const setStatsEvent = useEffectEvent((nextStats: UserStats | null) => {
-    setStats(nextStats);
-  });
-
-  useEffect(() => {
-    if (!open || !session) {
-      return;
-    }
-
-    const fetchStats = async () => {
-      try {
-        setLoadingEvent(true);
-        setErrorEvent(null);
-        setStatsEvent(null);
-        const nextStats = await getStats();
-        setStatsEvent(nextStats);
-      } catch (fetchError) {
-        setErrorEvent(
-          fetchError instanceof Error
-            ? fetchError.message
-            : "Failed to load stats",
-        );
-      } finally {
-        setLoadingEvent(false);
-      }
-    };
-
-    void fetchStats();
-  }, [open, session]);
+  const {
+    data: stats,
+    isPending: isStatsPending,
+    error: statsError,
+    refetch: refetchStats,
+  } = useQuery(createStatsQueryOptions(session?.user.id, open));
 
   const handleLogin = async () => {
     await authClient.signIn.social({
@@ -109,7 +78,7 @@ const StatsDialog = ({ open, onOpenChange }: StatsDialogProps) => {
   };
 
   const rows = formatGuessDistribution(stats?.guessDistribution ?? {});
-  const isEmpty = stats !== null && stats.gamesPlayed === 0;
+  const isEmpty = stats !== null && stats?.gamesPlayed === 0;
 
   return (
     <OmoriDialog open={open} onOpenChange={onOpenChange}>
@@ -140,7 +109,7 @@ const StatsDialog = ({ open, onOpenChange }: StatsDialogProps) => {
             </div>
           ) : null}
 
-          {session && isLoading ? (
+          {session && isStatsPending ? (
             <div className="flex flex-col gap-4">
               <div className="grid grid-cols-4 gap-2">
                 {Array.from({ length: 4 }).map((_, index) => (
@@ -161,21 +130,21 @@ const StatsDialog = ({ open, onOpenChange }: StatsDialogProps) => {
             </div>
           ) : null}
 
-          {session && !isLoading && error ? (
+          {session && !isStatsPending && statsError ? (
             <div className="flex flex-col items-center gap-3 py-2 text-center">
               <p className="text-[0.625rem] text-destructive sm:text-xs">
-                {error}
+                {statsError.message}
               </p>
-              {/*<WordleButton
+              <WordleButton
                 className="w-full"
-                onClick={() => void fetchStats()}
+                onClick={() => void refetchStats()}
               >
                 Try again
-              </WordleButton>*/}
+              </WordleButton>
             </div>
           ) : null}
 
-          {session && !isLoading && !error && stats ? (
+          {session && !isStatsPending && !statsError && stats ? (
             <>
               {isEmpty ? (
                 <p className="text-center text-[0.625rem] leading-relaxed text-muted-foreground sm:text-xs">
