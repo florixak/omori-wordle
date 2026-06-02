@@ -1,18 +1,20 @@
 "use client";
 
+import FriendsDialog from "@/components/dialog/friends-dialog";
 import HintDialog from "@/components/dialog/hint-dialog";
+import StatsDialog from "@/components/dialog/stats-dialog";
 import { authClient } from "@/lib/auth-client";
-import { BarChart, Lightbulb, LogOut, User } from "lucide-react";
+import { BarChart, Lightbulb, LogOut, User, Users } from "lucide-react";
 import { useState } from "react";
 import OmoriLoginDialog from "./dialog/login-dialog";
 import WordleButton from "./wordle-button";
-import StatsDialog from "./dialog/stats-dialog";
 
 const Header = () => {
   const { data: session, isPending } = authClient.useSession();
   const [showLoginDialog, setShowLoginDialog] = useState(false);
   const [showHintDialog, setShowHintDialog] = useState(false);
   const [showStatsDialog, setShowStatsDialog] = useState(false);
+  const [showFriendsDialog, setShowFriendsDialog] = useState(false);
 
   const handleLogout = async () => {
     await authClient.signOut();
@@ -49,13 +51,23 @@ const Header = () => {
           </span>
         ) : null}
         {session ? (
-          <WordleButton
-            className="py-0"
-            aria-label="Logout"
-            onClick={handleLogout}
-          >
-            <LogOut size={24} />
-          </WordleButton>
+          <>
+            <WordleButton
+              className="py-0"
+              aria-label="Logout"
+              onClick={handleLogout}
+            >
+              <LogOut size={24} />
+            </WordleButton>
+
+            <WordleButton
+              className="py-0"
+              aria-label="Friends"
+              onClick={() => setShowFriendsDialog(true)}
+            >
+              <Users size={24} />
+            </WordleButton>
+          </>
         ) : null}
         <WordleButton
           className="py-0"
@@ -77,6 +89,10 @@ const Header = () => {
       />
       <HintDialog open={showHintDialog} onOpenChange={setShowHintDialog} />
       <StatsDialog open={showStatsDialog} onOpenChange={setShowStatsDialog} />
+      <FriendsDialog
+        open={showFriendsDialog}
+        onOpenChange={setShowFriendsDialog}
+      />
     </header>
   );
 };

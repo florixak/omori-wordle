@@ -12,6 +12,8 @@ const KEYBOARD_LAYOUT = [
 
 const GUESS_DISTRIBUTION_KEYS = ["1", "2", "3", "4", "5", "6", "0"] as const;
 
+const DEFAULT_AVATAR = "/avatars/sunny.png";
+
 export {
   MAX_ATTEMPTS,
   MIN_ATTEMPTS_FOR_HINT,
@@ -19,4 +21,5 @@ export {
   KEYBOARD_LAYOUT,
   GAME_STORAGE_KEY,
   GUESS_DISTRIBUTION_KEYS,
+  DEFAULT_AVATAR,
 };
