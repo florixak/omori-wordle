@@ -16,6 +16,7 @@ const DEFAULT_AVATAR = "/avatars/sunny.png";
 
 const QUERY_KEYS = {
   FRIENDS_OVERVIEW: ["friends", "overview"],
+  FRIENDS_LEADERBOARD: ["friends", "leaderboard"],
 };
 
 export {
