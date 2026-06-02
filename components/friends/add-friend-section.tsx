@@ -7,7 +7,7 @@ const AddFriendSection = ({
   onSendRequest,
   isBusy,
 }: {
-  onSendRequest: (username: string) => Promise<void>;
+  onSendRequest: (username: string) => void;
   isBusy: boolean;
 }) => {
   const [username, setUsername] = useState("");
@@ -16,7 +16,7 @@ const AddFriendSection = ({
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setSearchResult(null);
-    await onSendRequest(username);
+    onSendRequest(username);
   };
 
   const handleSearch = async () => {

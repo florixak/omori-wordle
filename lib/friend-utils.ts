@@ -2,6 +2,7 @@ import { DEFAULT_AVATAR } from "@/constants";
 import { type User } from "@/db/schema";
 import {
   FriendsLeaderboardEntry,
+  FriendActionResult,
   FriendUserPreview,
 } from "@/types/friends-types";
 
@@ -22,6 +23,12 @@ export const formatAttempts = (
 
 export const getAvatarSrc = (image: string | null): string =>
   image && image.trim().length > 0 ? image : DEFAULT_AVATAR;
+
+export const assertFriendActionResult = (result: FriendActionResult): void => {
+  if (!result.ok) {
+    throw new Error(result.error);
+  }
+};
 
 export const toUserPreview = (row: User): FriendUserPreview => ({
   id: row.id,

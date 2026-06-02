@@ -1,12 +1,17 @@
 "use client";
 
 import {
-  getFriendsOverview,
+  cancelOutgoingRequest,
+  removeFriend,
+  respondToFriendRequest,
   sendFriendRequest,
 } from "@/actions/friends-actions";
+import { createFriendsOverviewQueryOptions } from "@/hooks/query-options";
 import { authClient } from "@/lib/auth-client";
-import { FriendsOverview } from "@/types/friends-types";
-import { useEffect, useEffectEvent, useState } from "react";
+import { assertFriendActionResult } from "@/lib/friend-utils";
+import { QUERY_KEYS } from "@/constants";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useState } from "react";
 
 type UseFriendsProps = {
   open: boolean;
@@ -14,77 +19,93 @@ type UseFriendsProps = {
 };
 
 const useFriends = ({ open, onOpenChange }: UseFriendsProps) => {
+  const queryClient = useQueryClient();
   const { data: session, isPending: isSessionPending } =
     authClient.useSession();
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [actionMessage, setActionMessage] = useState<string | null>(null);
-  const [isActionBusy, setIsActionBusy] = useState(false);
-  const [overview, setOverview] = useState<FriendsOverview | null>(null);
 
-  const setLoadingEvent = useEffectEvent((loading: boolean) => {
-    setIsLoading(loading);
-  });
+  const userId = session?.user.id;
 
-  const setErrorEvent = useEffectEvent((nextError: string | null) => {
-    setError(nextError);
-  });
+  const {
+    data: overview,
+    isPending: isOverviewPending,
+    isFetching: isOverviewFetching,
+    error,
+    refetch,
+  } = useQuery(createFriendsOverviewQueryOptions(userId, open));
 
-  const setOverviewEvent = useEffectEvent(
-    (nextOverview: FriendsOverview | null) => {
-      setOverview(nextOverview);
-    },
-  );
-
-  const reloadOverview = async () => {
-    try {
-      setIsLoading(true);
-      setError(null);
-      setOverview(null);
-      const nextOverview = await getFriendsOverview();
-      setOverview(nextOverview);
-    } catch (fetchError) {
-      setError(
-        fetchError instanceof Error
-          ? fetchError.message
-          : "Failed to load friends",
-      );
-    } finally {
-      setIsLoading(false);
-    }
+  const invalidateOverview = () => {
+    void queryClient.invalidateQueries({
+      queryKey: QUERY_KEYS.FRIENDS_OVERVIEW,
+    });
   };
 
-  useEffect(() => {
-    if (!open || !session) {
-      return;
-    }
+  const mutationOptions = {
+    onMutate: () => {
+      setActionMessage(null);
+    },
+    onSuccess: () => {
+      invalidateOverview();
+    },
+    onError: (mutationError: Error) => {
+      setActionMessage(mutationError.message);
+    },
+  };
 
-    const fetchOverview = async () => {
-      try {
-        setLoadingEvent(true);
-        setErrorEvent(null);
-        setOverviewEvent(null);
-        const nextOverview = await getFriendsOverview();
-        setOverviewEvent(nextOverview);
-      } catch (fetchError) {
-        setErrorEvent(
-          fetchError instanceof Error
-            ? fetchError.message
-            : "Failed to load friends",
-        );
-      } finally {
-        setLoadingEvent(false);
-      }
-    };
+  const { mutate: sendRequest, isPending: isSendPending } = useMutation({
+    mutationFn: async (username: string) => {
+      const result = await sendFriendRequest(username);
+      assertFriendActionResult(result);
+    },
+    ...mutationOptions,
+  });
 
-    void fetchOverview();
-  }, [open, session]);
+  const { mutate: respondToRequest, isPending: isRespondPending } =
+    useMutation({
+      mutationFn: async ({
+        requestId,
+        action,
+      }: {
+        requestId: number;
+        action: "accept" | "decline";
+      }) => {
+        const result = await respondToFriendRequest(requestId, action);
+        assertFriendActionResult(result);
+      },
+      ...mutationOptions,
+    });
+
+  const {
+    mutate: cancelOutgoingRequestAction,
+    isPending: isCancelPending,
+  } = useMutation({
+    mutationFn: async (requestId: number) => {
+      const result = await cancelOutgoingRequest(requestId);
+      assertFriendActionResult(result);
+    },
+    ...mutationOptions,
+  });
+
+  const { mutate: removeFriendAction, isPending: isRemovePending } =
+    useMutation({
+      mutationFn: async (friendUserId: string) => {
+        const result = await removeFriend(friendUserId);
+        assertFriendActionResult(result);
+      },
+      ...mutationOptions,
+    });
+
+  const isMutating =
+    isSendPending ||
+    isRespondPending ||
+    isCancelPending ||
+    isRemovePending;
+
+  const isBusy = isOverviewFetching || isMutating;
 
   const handleOpenChange = (nextOpen: boolean) => {
     if (!nextOpen) {
       setActionMessage(null);
-      setError(null);
-      setOverview(null);
     }
 
     onOpenChange(nextOpen);
@@ -96,27 +117,23 @@ const useFriends = ({ open, onOpenChange }: UseFriendsProps) => {
     });
   };
 
-  const runAction = async (
-    action: () => Promise<{ ok: boolean; error?: string }>,
-  ) => {
-    setIsActionBusy(true);
-    setActionMessage(null);
-
-    try {
-      const result = await action();
-      if (!result.ok) {
-        setActionMessage(result.error ?? "Something went wrong.");
-        return;
-      }
-
-      await reloadOverview();
-    } finally {
-      setIsActionBusy(false);
-    }
+  const handleSendRequest = (username: string) => {
+    sendRequest(username);
   };
 
-  const handleSendRequest = async (username: string) => {
-    await runAction(() => sendFriendRequest(username));
+  const handleRespondToRequest = (
+    requestId: number,
+    action: "accept" | "decline",
+  ) => {
+    respondToRequest({ requestId, action });
+  };
+
+  const handleCancelOutgoingRequest = (requestId: number) => {
+    cancelOutgoingRequestAction(requestId);
+  };
+
+  const handleRemoveFriend = (friendUserId: string) => {
+    removeFriendAction(friendUserId);
   };
 
   return {
@@ -124,14 +141,16 @@ const useFriends = ({ open, onOpenChange }: UseFriendsProps) => {
     isSessionPending,
     handleOpenChange,
     handleLogin,
-    runAction,
-    isLoading,
+    isOverviewPending,
+    isBusy,
     error,
     overview,
-    isActionBusy,
     actionMessage,
-    reloadOverview,
     handleSendRequest,
+    handleRespondToRequest,
+    handleCancelOutgoingRequest,
+    handleRemoveFriend,
+    refetch,
   };
 };
 
