@@ -1,6 +1,6 @@
 "use client";
 
-import { useRegisterRequestHint } from "@/components/game-actions-provider";
+import { useRegisterRequestHint } from "@/components/providers/game-actions-provider";
 import ResultDialog from "@/components/dialog/result-dialog";
 import useGameState from "@/hooks/use-game-state";
 import { useGameLostTheme } from "@/hooks/use-game-lost-theme";
