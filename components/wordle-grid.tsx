@@ -13,6 +13,10 @@ type WordleGridProps = {
 const WordleGrid = ({ gridRows, error, wordLength }: WordleGridProps) => {
   const tileGapRem = 0.375;
 
+  const prefersReducedMotion = window.matchMedia(
+    "(prefers-reduced-motion: reduce)",
+  ).matches;
+
   return (
     <div
       className="flex w-full flex-col gap-3 sm:gap-4"
@@ -34,11 +38,11 @@ const WordleGrid = ({ gridRows, error, wordLength }: WordleGridProps) => {
                 display={tile.display}
                 style={{
                   animation:
-                    tile.display === "correct"
+                    tile.display === "correct" && !prefersReducedMotion
                       ? "right-answer-wave 0.45s ease-out forwards"
                       : undefined,
                   animationDelay:
-                    tile.display === "correct"
+                    tile.display === "correct" && !prefersReducedMotion
                       ? `${colIndex * 90}ms`
                       : undefined,
                 }}
