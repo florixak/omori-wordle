@@ -13,10 +13,10 @@ const AddFriendSection = ({
   const [username, setUsername] = useState("");
   const [searchResult, setSearchResult] = useState<string | null>(null);
 
-  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setSearchResult(null);
-    onSendRequest(username);
+    void onSendRequest(username);
   };
 
   const handleSearch = async () => {

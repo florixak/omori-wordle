@@ -95,7 +95,7 @@ const WordleKeyboard = ({
                 <WordleButton
                   onClick={handleRemoveLetter}
                   disabled={isLocked}
-                  className="min-w-0 px-0.5 flex-1 sm:px-1"
+                  className="min-w-7 sm:min-w-0 px-0.5 flex-1 sm:px-1"
                 >
                   ⌫
                 </WordleButton>
