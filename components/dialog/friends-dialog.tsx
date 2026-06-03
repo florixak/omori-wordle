@@ -1,10 +1,5 @@
 "use client";
 
-import {
-  cancelOutgoingRequest,
-  removeFriend,
-  respondToFriendRequest,
-} from "@/actions/friends-actions";
 import AddFriendSection from "@/components/friends/add-friend-section";
 import FriendsListSection from "@/components/friends/friends-list-section";
 import PendingRequestsSection from "@/components/friends/pending-requests-section";
@@ -46,14 +41,16 @@ const FriendsDialog = ({ open, onOpenChange }: FriendsDialogProps) => {
     isSessionPending,
     handleOpenChange,
     handleLogin,
-    runAction,
-    isLoading,
-    error,
-    overview,
-    isActionBusy,
-    actionMessage,
-    reloadOverview,
     handleSendRequest,
+    handleRespondToRequest,
+    handleCancelOutgoingRequest,
+    handleRemoveFriend,
+    overview,
+    isOverviewPending,
+    isBusy,
+    error,
+    actionMessage,
+    refetch,
   } = useFriends({ open, onOpenChange });
 
   return (
@@ -84,7 +81,7 @@ const FriendsDialog = ({ open, onOpenChange }: FriendsDialogProps) => {
             </div>
           ) : null}
 
-          {session && isLoading ? (
+          {session && isOverviewPending ? (
             <div className="flex flex-col gap-4">
               <SkeletonBlock className="h-16" />
               <SkeletonBlock className="h-24" />
@@ -92,45 +89,36 @@ const FriendsDialog = ({ open, onOpenChange }: FriendsDialogProps) => {
             </div>
           ) : null}
 
-          {session && !isLoading && error ? (
+          {session && !isOverviewPending && error ? (
             <div className="flex flex-col items-center gap-3 py-2 text-center">
               <p className="text-[0.625rem] text-destructive sm:text-xs">
-                {error}
+                {error.message}
               </p>
-              <WordleButton
-                className="w-full"
-                onClick={() => void reloadOverview()}
-              >
+              <WordleButton className="w-full" onClick={() => void refetch()}>
                 Try again
               </WordleButton>
             </div>
           ) : null}
 
-          {session && !isLoading && !error && overview ? (
+          {session && !isOverviewPending && !error && overview ? (
             <>
               <PendingRequestsSection
                 requests={overview.pendingRequests}
-                isBusy={isActionBusy}
+                isBusy={isBusy}
                 onRespond={(requestId, action) =>
-                  void runAction(() =>
-                    respondToFriendRequest(requestId, action),
-                  )
+                  handleRespondToRequest(requestId, action)
                 }
-                onCancel={(requestId) =>
-                  void runAction(() => cancelOutgoingRequest(requestId))
-                }
+                onCancel={(requestId) => handleCancelOutgoingRequest(requestId)}
               />
 
               <FriendsListSection
                 friends={overview.friends}
-                isBusy={isActionBusy}
-                onRemove={(userId) =>
-                  void runAction(() => removeFriend(userId))
-                }
+                isBusy={isBusy}
+                onRemove={(userId) => handleRemoveFriend(userId)}
               />
               <AddFriendSection
-                isBusy={isActionBusy}
-                onSendRequest={handleSendRequest}
+                isBusy={isBusy}
+                onSendRequest={(username) => handleSendRequest(username)}
               />
             </>
           ) : null}

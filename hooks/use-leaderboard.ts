@@ -1,9 +1,8 @@
 "use client";
 
-import { getFriendsLeaderboard } from "@/actions/leaderboard-actions";
 import { authClient } from "@/lib/auth-client";
-import type { FriendsLeaderboard } from "@/types/friends-types";
-import { useEffect, useEffectEvent, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { createFriendsLeaderboardQueryOptions } from "./query-options";
 
 type UseLeaderboardProps = {
   open: boolean;
@@ -13,76 +12,14 @@ type UseLeaderboardProps = {
 const useLeaderboard = ({ open, onOpenChange }: UseLeaderboardProps) => {
   const { data: session, isPending: isSessionPending } =
     authClient.useSession();
-  const [leaderboard, setLeaderboard] = useState<FriendsLeaderboard | null>(
-    null,
-  );
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  const setLoadingEvent = useEffectEvent((loading: boolean) => {
-    setIsLoading(loading);
-  });
-
-  const setErrorEvent = useEffectEvent((nextError: string | null) => {
-    setError(nextError);
-  });
-
-  const setLeaderboardEvent = useEffectEvent(
-    (nextLeaderboard: FriendsLeaderboard | null) => {
-      setLeaderboard(nextLeaderboard);
-    },
-  );
-
-  const reloadLeaderboard = async () => {
-    try {
-      setIsLoading(true);
-      setError(null);
-      setLeaderboard(null);
-      const nextLeaderboard = await getFriendsLeaderboard();
-      setLeaderboard(nextLeaderboard);
-    } catch (fetchError) {
-      setError(
-        fetchError instanceof Error
-          ? fetchError.message
-          : "Failed to load leaderboard",
-      );
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    if (!open || !session) {
-      return;
-    }
-
-    const fetchLeaderboard = async () => {
-      try {
-        setLoadingEvent(true);
-        setErrorEvent(null);
-        setLeaderboardEvent(null);
-        const nextLeaderboard = await getFriendsLeaderboard();
-        setLeaderboardEvent(nextLeaderboard);
-      } catch (fetchError) {
-        setErrorEvent(
-          fetchError instanceof Error
-            ? fetchError.message
-            : "Failed to load leaderboard",
-        );
-      } finally {
-        setLoadingEvent(false);
-      }
-    };
-
-    void fetchLeaderboard();
-  }, [open, session]);
+  const {
+    data: leaderboard,
+    isPending: isLeaderboardPending,
+    error,
+    refetch,
+  } = useQuery(createFriendsLeaderboardQueryOptions(session?.user.id, open));
 
   const handleOpenChange = (nextOpen: boolean) => {
-    if (!nextOpen) {
-      setError(null);
-      setLeaderboard(null);
-    }
-
     onOpenChange(nextOpen);
   };
 
@@ -97,10 +34,10 @@ const useLeaderboard = ({ open, onOpenChange }: UseLeaderboardProps) => {
     isSessionPending,
     handleOpenChange,
     handleLogin,
-    isLoading,
+    isLeaderboardPending,
     error,
     leaderboard,
-    reloadLeaderboard,
+    refetch,
   };
 };
 

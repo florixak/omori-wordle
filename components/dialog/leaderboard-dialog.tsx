@@ -33,10 +33,10 @@ const LeaderboardDialog = ({ open, onOpenChange }: LeaderboardDialogProps) => {
     isSessionPending,
     handleOpenChange,
     handleLogin,
-    isLoading,
+    isLeaderboardPending,
     error,
     leaderboard,
-    reloadLeaderboard,
+    refetch,
   } = useLeaderboard({ open, onOpenChange });
 
   return (
@@ -59,8 +59,7 @@ const LeaderboardDialog = ({ open, onOpenChange }: LeaderboardDialogProps) => {
           {!isSessionPending && !session ? (
             <div className="flex flex-col items-center gap-3 py-2 text-center">
               <p className="text-[0.625rem] leading-relaxed sm:text-xs">
-                Sign in with Discord to view the friends-only daily
-                leaderboard.
+                Sign in with Discord to view the friends-only daily leaderboard.
               </p>
               <WordleButton className="w-full" onClick={handleLogin}>
                 Continue with Discord
@@ -68,28 +67,25 @@ const LeaderboardDialog = ({ open, onOpenChange }: LeaderboardDialogProps) => {
             </div>
           ) : null}
 
-          {session && isLoading ? (
+          {session && isLeaderboardPending ? (
             <div className="flex flex-col gap-4">
               <SkeletonBlock className="h-6" />
               <SkeletonBlock className="h-24" />
             </div>
           ) : null}
 
-          {session && !isLoading && error ? (
+          {session && !isLeaderboardPending && error ? (
             <div className="flex flex-col items-center gap-3 py-2 text-center">
               <p className="text-[0.625rem] text-destructive sm:text-xs">
-                {error}
+                {error.message}
               </p>
-              <WordleButton
-                className="w-full"
-                onClick={() => void reloadLeaderboard()}
-              >
+              <WordleButton className="w-full" onClick={() => void refetch()}>
                 Try again
               </WordleButton>
             </div>
           ) : null}
 
-          {session && !isLoading && !error && leaderboard ? (
+          {session && !isLeaderboardPending && !error && leaderboard ? (
             <LeaderboardSection
               entries={leaderboard.entries}
               date={leaderboard.date}
