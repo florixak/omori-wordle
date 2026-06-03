@@ -32,6 +32,16 @@ const WordleGrid = ({ gridRows, error, wordLength }: WordleGridProps) => {
                 key={`${rowIndex}-${colIndex}`}
                 letter={tile.letter}
                 display={tile.display}
+                style={{
+                  animation:
+                    tile.display === "correct"
+                      ? "right-answer-wave 0.45s ease-out forwards"
+                      : undefined,
+                  animationDelay:
+                    tile.display === "correct"
+                      ? `${colIndex * 90}ms`
+                      : undefined,
+                }}
               />
             ))}
           </div>
