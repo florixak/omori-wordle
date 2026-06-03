@@ -212,6 +212,24 @@
 }
 
 @layer utilities {
+  @keyframes right-answer-wave {
+    0% {
+      transform: translateY(0) scale(1);
+    }
+
+    35% {
+      transform: translateY(-18%) scale(1.04);
+    }
+
+    70% {
+      transform: translateY(0) scale(1);
+    }
+
+    100% {
+      transform: translateY(0) scale(1);
+    }
+  }
+
   .omori-border {
     @apply border-2 border-black shadow-[2px_2px_0px_var(--omori-shadow)];
   }
