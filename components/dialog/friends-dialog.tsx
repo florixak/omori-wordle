@@ -94,8 +94,12 @@ const FriendsDialog = ({ open, onOpenChange }: FriendsDialogProps) => {
               <p className="text-[0.625rem] text-destructive sm:text-xs">
                 {error.message}
               </p>
-              <WordleButton className="w-full" onClick={() => void refetch()}>
-                Try again
+              <WordleButton
+                className="w-full"
+                onClick={() => void refetch()}
+                disabled={isBusy}
+              >
+                {isBusy ? "Retrying…" : "Try again"}
               </WordleButton>
             </div>
           ) : null}
