@@ -1,7 +1,8 @@
 "use client";
 
-import { CSSProperties } from "react";
+import useReducedMotion from "@/hooks/use-reduced-motion";
 import { GridTile } from "@/types/game-types";
+import { CSSProperties } from "react";
 import WordleTile from "./wordle-tile";
 
 type WordleGridProps = {
@@ -12,10 +13,7 @@ type WordleGridProps = {
 
 const WordleGrid = ({ gridRows, error, wordLength }: WordleGridProps) => {
   const tileGapRem = 0.375;
-
-  const prefersReducedMotion = window.matchMedia(
-    "(prefers-reduced-motion: reduce)",
-  ).matches;
+  const prefersReducedMotion = useReducedMotion();
 
   return (
     <div
