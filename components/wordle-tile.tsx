@@ -3,7 +3,7 @@
 import { cn } from "@/lib/utils";
 import { TileDisplayState } from "@/types/game-types";
 
-interface WordleTileProps {
+interface WordleTileProps extends React.HTMLAttributes<HTMLDivElement> {
   letter: string;
   display: TileDisplayState;
   delay?: number;
@@ -24,17 +24,24 @@ const getTileClasses = (display: TileDisplayState): string => {
   }
 };
 
-const WordleTile = ({ letter, display, delay = 0 }: WordleTileProps) => {
+const WordleTile = ({
+  letter,
+  display,
+  delay = 0,
+  ...props
+}: WordleTileProps) => {
   return (
     <div
+      {...props}
       className={cn(
         "omori-border-lg font-pixel",
-        "relative flex h-[var(--tile-size,3.5rem)] w-[var(--tile-size,3.5rem)] items-center justify-center transition-all duration-200",
+        "relative flex h-(--tile-size,3.5rem) w-(--tile-size,3.5rem) items-center justify-center transition-all duration-200 motion-safe:origin-[bottom_center] motion-safe:will-change-transform",
         getTileClasses(display),
       )}
       style={{
         imageRendering: "pixelated",
         transitionDelay: `${delay}ms`,
+        ...props.style,
       }}
     >
       <span
