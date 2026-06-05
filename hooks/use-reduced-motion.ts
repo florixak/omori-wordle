@@ -11,7 +11,7 @@ const subscribeToReducedMotion = (onStoreChange: () => void) => {
 const getReducedMotionSnapshot = () =>
   window.matchMedia(REDUCED_MOTION_QUERY).matches;
 
-const getReducedMotionServerSnapshot = () => false;
+const getReducedMotionServerSnapshot = () => true;
 
 const useReducedMotion = () => {
   const prefersReducedMotion = useSyncExternalStore(
