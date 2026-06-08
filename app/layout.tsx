@@ -1,5 +1,4 @@
 import Footer from "@/components/footer";
-import Header from "@/components/header";
 import Providers from "@/components/providers/providers";
 import { rootMetadata } from "@/lib/metadata";
 import { cn } from "@/lib/utils";
@@ -32,7 +31,6 @@ export default function RootLayout({
     <html lang="en" className={cn("h-full", "antialiased", pixelFont.variable)}>
       <body>
         <Providers>
-          <Header />
           {children}
           <Suspense fallback={<div>Loading...</div>}>
             <Footer />
