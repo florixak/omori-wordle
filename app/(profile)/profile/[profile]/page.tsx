@@ -1,13 +1,11 @@
 import { createPageMetadata } from "@/lib/metadata";
 import type { Metadata } from "next";
 
-type ProfilePageProps = {
-  params: Promise<{ profile: string }>;
-};
-
 export async function generateMetadata({
   params,
-}: ProfilePageProps): Promise<Metadata> {
+}: {
+  params: Promise<{ profile: string }>;
+}): Promise<Metadata> {
   const { profile } = await params;
   const username = decodeURIComponent(profile);
 
