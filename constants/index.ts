@@ -17,7 +17,13 @@ const DEFAULT_AVATAR = "/avatars/sunny.png";
 const QUERY_KEYS = {
   FRIENDS_OVERVIEW: ["friends", "overview"],
   FRIENDS_LEADERBOARD: ["friends", "leaderboard"],
-  STATS: (userId: string) => ["stats", userId],
+  STATS_KEY: ["stats"],
+  STATS: (userId: string) => [...QUERY_KEYS.STATS_KEY, userId],
+  FRIENDS_IS_FRIEND_KEY: ["friends", "isFriend"],
+  FRIENDS_IS_FRIEND: (userId: string) => [
+    ...QUERY_KEYS.FRIENDS_IS_FRIEND_KEY,
+    userId,
+  ],
 } as const;
 
 export {

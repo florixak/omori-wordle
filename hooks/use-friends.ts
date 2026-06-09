@@ -41,6 +41,12 @@ const useFriends = ({ open, onOpenChange }: UseFriendsProps) => {
     void queryClient.invalidateQueries({
       queryKey: QUERY_KEYS.FRIENDS_LEADERBOARD,
     });
+    void queryClient.invalidateQueries({
+      queryKey: QUERY_KEYS.FRIENDS_IS_FRIEND_KEY,
+    });
+    void queryClient.invalidateQueries({
+      queryKey: QUERY_KEYS.STATS_KEY,
+    });
   };
 
   const mutationOptions = {

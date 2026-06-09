@@ -58,12 +58,10 @@ const Header = () => {
       <div className="flex-1"></div>
       <div className="flex items-center gap-2 flex-wrap justify-end">
         {session ? (
-          <span className="font-pixel text-xs sm:text-sm">
-            {session.user.name}
-          </span>
-        ) : null}
-        {session ? (
           <>
+            <span className="font-pixel text-xs sm:text-sm">
+              {session.user.name}
+            </span>
             <WordleButton
               className="py-0"
               aria-label="Logout"
@@ -80,18 +78,15 @@ const Header = () => {
               <Users size={24} />
             </WordleButton>
           </>
-        ) : null}
-        <WordleButton
-          className="py-0"
-          aria-label={session ? "User profile" : "Login"}
-          onClick={
-            session
-              ? () => setShowStatsDialog(true)
-              : () => setShowLoginDialog(true)
-          }
-        >
-          <User size={24} />
-        </WordleButton>
+        ) : (
+          <WordleButton
+            className="py-0"
+            aria-label="Login"
+            onClick={() => setShowLoginDialog(true)}
+          >
+            <User size={24} />
+          </WordleButton>
+        )}
       </div>
       <OmoriLoginDialog
         open={showLoginDialog}

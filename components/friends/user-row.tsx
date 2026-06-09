@@ -1,8 +1,6 @@
 import { getAvatarSrc } from "@/lib/friend-utils";
 import { FriendListEntry } from "@/types/friends-types";
-import { Route } from "next";
 import Image from "next/image";
-import Link from "next/link";
 
 type UserRowProps = {
   user: FriendListEntry["user"];
@@ -10,18 +8,15 @@ type UserRowProps = {
 };
 
 const UserRow = ({ user, trailing }: UserRowProps) => {
-  const profileHref = user.username
-    ? (`/profile/${encodeURIComponent(user.username)}` as Route)
-    : null;
-
   const identity = (
-    <>
+    <div className="flex items-center gap-2 justify-start w-full">
       <Image
         src={getAvatarSrc(user.image)}
         alt={`${user.name}'s avatar`}
-        width={32}
-        height={32}
-        className="size-8 shrink-0 rounded-full border border-black"
+        width={48}
+        height={48}
+        className="size-12 shrink-0 rounded-full border border-black"
+        loading="lazy"
       />
       <div className="min-w-0 flex-1">
         <p className="truncate text-[0.625rem] sm:text-xs">{user.name}</p>
@@ -31,21 +26,12 @@ const UserRow = ({ user, trailing }: UserRowProps) => {
           </p>
         ) : null}
       </div>
-    </>
+    </div>
   );
 
   return (
     <div className="omori-border flex items-center gap-2 bg-(--omori-empty) p-2">
-      {profileHref ? (
-        <Link
-          href={profileHref}
-          className="flex min-w-0 flex-1 items-center gap-2 transition-colors hover:opacity-80"
-        >
-          {identity}
-        </Link>
-      ) : (
-        <div className="flex min-w-0 flex-1 items-center gap-2">{identity}</div>
-      )}
+      {identity}
       {trailing}
     </div>
   );

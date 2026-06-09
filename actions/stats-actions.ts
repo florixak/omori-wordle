@@ -2,30 +2,62 @@
 
 import { auth } from "@/auth";
 import { db } from "@/db/drizzle";
-import { friendship, UserStats, userStats } from "@/db/schema";
+import { user, UserStats, userStats } from "@/db/schema";
 import { createEmptyStats } from "@/lib/utils";
-import { and, eq } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { headers } from "next/headers";
+import { isFriend } from "./friends-actions";
 
-export const getStats = async (): Promise<UserStats> => {
+export type UserStatsView = {
+  stats: UserStats;
+  user: {
+    id: string;
+    name: string;
+    image: string | null;
+  };
+};
+
+export const getStats = async (
+  targetUserId: string,
+): Promise<UserStatsView> => {
   const session = await auth.api.getSession({ headers: await headers() });
 
   if (!session) {
     throw new Error("Unauthorized");
   }
 
-  const stats = await db
-    .select()
-    .from(userStats)
-    .where(eq(userStats.userId, session.user.id))
-    .limit(1);
-
-  if (stats.length === 0) {
-    return createEmptyStats(session.user.id);
+  if (targetUserId !== session.user.id) {
+    const isFriendResult = await isFriend(targetUserId);
+    if (!isFriendResult) {
+      throw new Error("User is not a friend");
+    }
   }
 
-  const [statsRow] = stats;
-  return statsRow;
+  const [userRows, statsRows] = await Promise.all([
+    db.select().from(user).where(eq(user.id, targetUserId)).limit(1),
+    db
+      .select()
+      .from(userStats)
+      .where(eq(userStats.userId, targetUserId))
+      .limit(1),
+  ]);
+
+  if (userRows.length === 0) {
+    throw new Error("User not found");
+  }
+
+  const [userRow] = userRows;
+  const stats =
+    statsRows.length === 0 ? createEmptyStats(targetUserId) : statsRows[0];
+
+  return {
+    stats,
+    user: {
+      id: userRow.id,
+      name: userRow.name,
+      image: userRow.image ?? null,
+    },
+  };
 };
 
 export const getStreak = async (): Promise<number> => {
@@ -51,40 +83,4 @@ export const getStreak = async (): Promise<number> => {
   }
 
   return statsRow.currentStreak;
-};
-
-export const getStatsForUser = async (userId: string): Promise<UserStats> => {
-  const session = await auth.api.getSession({ headers: await headers() });
-
-  if (!session) {
-    throw new Error("Unauthorized");
-  }
-
-  const isFriend = await db
-    .select()
-    .from(friendship)
-    .where(
-      and(
-        eq(friendship.requesterId, session.user.id),
-        eq(friendship.addresseeId, userId),
-        eq(friendship.status, "accepted"),
-      ),
-    );
-
-  if (isFriend.length === 0) {
-    throw new Error("Not a friend");
-  }
-
-  const stats = await db
-    .select()
-    .from(userStats)
-    .where(eq(userStats.userId, userId))
-    .limit(1);
-
-  if (stats.length === 0) {
-    throw new Error("Stats not found");
-  }
-
-  const [statsRow] = stats;
-  return statsRow;
 };

@@ -26,12 +26,13 @@ export const createFriendsLeaderboardQueryOptions = (
 };
 
 export const createStatsQueryOptions = (
-  userId: string | undefined,
+  targetUserId: string | undefined,
   open: boolean,
+  isAuthenticated: boolean,
 ) => {
   return {
-    queryKey: [...QUERY_KEYS.STATS(userId ?? "")] as const,
-    queryFn: () => getStats(),
-    enabled: Boolean(userId) && open,
+    queryKey: [...QUERY_KEYS.STATS(targetUserId ?? "")] as const,
+    queryFn: () => getStats(targetUserId ?? ""),
+    enabled: isAuthenticated && Boolean(targetUserId) && open,
   };
 };

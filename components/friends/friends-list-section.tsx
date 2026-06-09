@@ -2,14 +2,17 @@ import WordleButton from "@/components/wordle-button";
 import { FriendListEntry } from "@/types/friends-types";
 import { SectionTitle } from "@/components/dialog/friends-dialog";
 import UserRow from "./user-row";
+import { BarChart, X } from "lucide-react";
 
 const FriendsListSection = ({
   friends,
   onRemove,
+  onViewStats,
   isBusy,
 }: {
   friends: FriendListEntry[];
   onRemove: (userId: string) => void;
+  onViewStats: (userId: string) => void;
   isBusy: boolean;
 }) => (
   <section className="flex flex-col gap-2">
@@ -25,13 +28,26 @@ const FriendsListSection = ({
             key={user.id}
             user={user}
             trailing={
-              <WordleButton
-                className="px-2 text-[0.625rem] sm:text-xs"
-                disabled={isBusy}
-                onClick={() => onRemove(user.id)}
-              >
-                Remove
-              </WordleButton>
+              <>
+                <WordleButton
+                  className="px-2 text-[0.625rem] sm:text-xs"
+                  disabled={isBusy}
+                  onClick={() => onViewStats(user.id)}
+                  aria-label={`View stats for ${user.name}`}
+                  title={`View stats for ${user.name}`}
+                >
+                  <BarChart size={24} />
+                </WordleButton>
+                <WordleButton
+                  className="px-2 text-[0.625rem] sm:text-xs"
+                  disabled={isBusy}
+                  onClick={() => onRemove(user.id)}
+                  aria-label={`Remove ${user.name} from friends`}
+                  title={`Remove ${user.name} from friends`}
+                >
+                  <X size={24} />
+                </WordleButton>
+              </>
             }
           />
         ))}
