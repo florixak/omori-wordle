@@ -1,9 +1,6 @@
 "use client";
 
-import { getStats } from "@/actions/stats-actions";
-import type { UserStats } from "@/db/schema";
-import { authClient } from "@/lib/auth-client";
-import { useEffect, useEffectEvent, useState } from "react";
+import GuessDistributionChart from "@/components/guess-distribution-chart";
 import {
   OmoriDialog,
   OmoriDialogContent,
@@ -12,18 +9,20 @@ import {
   OmoriDialogHeader,
   OmoriDialogTitle,
 } from "@/components/omori/omori-dialog";
-import WordleButton from "@/components/wordle-button";
-import { computeWinRate, formatGuessDistribution } from "@/lib/utils";
-import GuessDistributionChart from "@/components/guess-distribution-chart";
 import StatCell from "@/components/stat-cell";
-import Image from "next/image";
-import { QUERY_KEYS } from "@/constants";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import WordleButton from "@/components/wordle-button";
+import type { UserStats } from "@/db/schema";
 import { createStatsQueryOptions } from "@/hooks/query-options";
+import { authClient } from "@/lib/auth-client";
+import { getAvatarSrc } from "@/lib/friend-utils";
+import { computeWinRate, formatGuessDistribution } from "@/lib/utils";
+import { useQuery } from "@tanstack/react-query";
+import Image from "next/image";
 
 type StatsDialogProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  userId?: string;
 };
 
 type SummaryGridProps = {
@@ -40,7 +39,8 @@ const SummaryGrid = ({ stats, userAvatar, userName }: SummaryGridProps) => (
         alt="User avatar"
         width={48}
         height={48}
-        className="rounded-full"
+        loading="lazy"
+        className="shrink-0 rounded-full border border-black"
       />
       <span className="font-pixel text-xs sm:text-sm">{userName}</span>
     </div>
@@ -60,16 +60,19 @@ const SummaryGrid = ({ stats, userAvatar, userName }: SummaryGridProps) => (
   </div>
 );
 
-const StatsDialog = ({ open, onOpenChange }: StatsDialogProps) => {
+const StatsDialog = ({ open, onOpenChange, userId }: StatsDialogProps) => {
   const { data: session, isPending: isSessionPending } =
     authClient.useSession();
 
+  const targetUserId = userId ?? session?.user.id;
+  const isViewingSelf = Boolean(session && targetUserId === session.user.id);
+
   const {
-    data: stats,
+    data: statsView,
     isPending: isStatsPending,
     error: statsError,
     refetch: refetchStats,
-  } = useQuery(createStatsQueryOptions(session?.user.id, open));
+  } = useQuery(createStatsQueryOptions(targetUserId, open, Boolean(session)));
 
   const handleLogin = async () => {
     await authClient.signIn.social({
@@ -77,8 +80,10 @@ const StatsDialog = ({ open, onOpenChange }: StatsDialogProps) => {
     });
   };
 
-  const rows = formatGuessDistribution(stats?.guessDistribution ?? {});
-  const isEmpty = stats !== null && stats?.gamesPlayed === 0;
+  const rows = formatGuessDistribution(
+    statsView?.stats.guessDistribution ?? {},
+  );
+  const isEmpty = statsView !== undefined && statsView.stats.gamesPlayed === 0;
 
   return (
     <OmoriDialog open={open} onOpenChange={onOpenChange}>
@@ -86,7 +91,11 @@ const StatsDialog = ({ open, onOpenChange }: StatsDialogProps) => {
         <OmoriDialogHeader>
           <OmoriDialogTitle>Statistics</OmoriDialogTitle>
           <OmoriDialogDescription>
-            Your journey through HEADSPACE.
+            {isViewingSelf
+              ? "Your journey through HEADSPACE."
+              : statsView
+                ? `${statsView.user.name}'s journey through HEADSPACE.`
+                : "A friend's journey through HEADSPACE."}
           </OmoriDialogDescription>
         </OmoriDialogHeader>
 
@@ -144,21 +153,19 @@ const StatsDialog = ({ open, onOpenChange }: StatsDialogProps) => {
             </div>
           ) : null}
 
-          {session && !isStatsPending && !statsError && stats ? (
+          {session && !isStatsPending && !statsError && statsView ? (
             <>
               {isEmpty ? (
                 <p className="text-center text-[0.625rem] leading-relaxed text-muted-foreground sm:text-xs">
-                  Play your first puzzle to start building stats.
+                  {isViewingSelf
+                    ? "Play your first puzzle to start building stats."
+                    : "No games played yet."}
                 </p>
               ) : null}
               <SummaryGrid
-                stats={stats}
-                userAvatar={
-                  session.user.image && session.user.image.trim().length > 0
-                    ? session.user.image
-                    : "/avatars/sunny.png"
-                }
-                userName={session.user.name}
+                stats={statsView.stats}
+                userAvatar={getAvatarSrc(statsView.user.image)}
+                userName={statsView.user.name}
               />
               <div className="border-t-2 border-black pt-4">
                 <GuessDistributionChart rows={rows} />
