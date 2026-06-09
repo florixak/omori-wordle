@@ -18,6 +18,7 @@ const QUERY_KEYS = {
   FRIENDS_OVERVIEW: ["friends", "overview"],
   FRIENDS_LEADERBOARD: ["friends", "leaderboard"],
   STATS: (userId: string) => ["stats", userId],
+  FRIENDS_IS_FRIEND: (userId: string) => ["friends", "isFriend", userId],
 } as const;
 
 export {

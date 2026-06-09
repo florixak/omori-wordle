@@ -330,3 +330,61 @@ export const removeFriend = async (
 
   return { ok: true };
 };
+
+export const isFriend = async (userId: string): Promise<boolean> => {
+  const session = await requireSession();
+
+  if (!session) {
+    throw new Error("Unauthorized");
+  }
+
+  const isFriend = await db
+    .select()
+    .from(friendship)
+    .where(
+      and(
+        or(
+          and(
+            eq(friendship.requesterId, session.user.id),
+            eq(friendship.addresseeId, userId),
+          ),
+          and(
+            eq(friendship.requesterId, userId),
+            eq(friendship.addresseeId, session.user.id),
+          ),
+        ),
+        eq(friendship.status, "accepted"),
+      ),
+    )
+    .limit(1);
+
+  return isFriend.length > 0;
+};
+
+export const getFriendProfileByUsername = async (
+  username: string,
+): Promise<FriendUserPreview> => {
+  const session = await requireSession();
+
+  if (!session) {
+    throw new Error("Unauthorized");
+  }
+
+  const userRows = await db
+    .select()
+    .from(user)
+    .where(eq(user.name, username))
+    .limit(1);
+
+  if (userRows.length === 0) {
+    throw new Error("User not found");
+  }
+  const [userRow] = userRows;
+  const isFriendResult = await isFriend(userRow.id);
+
+  if (!isFriendResult) {
+    throw new Error("User is not a friend");
+  }
+
+  return toUserPreview(userRow);
+};
