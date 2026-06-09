@@ -33,6 +33,8 @@ const FriendsListSection = ({
                   className="px-2 text-[0.625rem] sm:text-xs"
                   disabled={isBusy}
                   onClick={() => onViewStats(user.id)}
+                  aria-label={`View stats for ${user.name}`}
+                  title={`View stats for ${user.name}`}
                 >
                   <BarChart size={24} />
                 </WordleButton>
@@ -40,6 +42,8 @@ const FriendsListSection = ({
                   className="px-2 text-[0.625rem] sm:text-xs"
                   disabled={isBusy}
                   onClick={() => onRemove(user.id)}
+                  aria-label={`Remove ${user.name} from friends`}
+                  title={`Remove ${user.name} from friends`}
                 >
                   <X size={24} />
                 </WordleButton>
