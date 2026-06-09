@@ -59,7 +59,15 @@ const FriendsDialog = ({ open, onOpenChange }: FriendsDialogProps) => {
 
   return (
     <>
-      <OmoriDialog open={open} onOpenChange={handleOpenChange}>
+      <OmoriDialog
+        open={open}
+        onOpenChange={(nextOpen) => {
+          if (!nextOpen) {
+            setStatsUserId(null);
+          }
+          handleOpenChange(nextOpen);
+        }}
+      >
         <OmoriDialogContent className="max-h-[85dvh] max-w-sm overflow-y-auto">
           <OmoriDialogHeader>
             <OmoriDialogTitle>Friends</OmoriDialogTitle>
@@ -153,7 +161,7 @@ const FriendsDialog = ({ open, onOpenChange }: FriendsDialogProps) => {
         </OmoriDialogContent>
       </OmoriDialog>
       <StatsDialog
-        open={statsUserId !== null}
+        open={open && statsUserId !== null}
         onOpenChange={(isOpen) => {
           if (!isOpen) {
             setStatsUserId(null);
