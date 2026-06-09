@@ -7,7 +7,7 @@ import StatsDialog from "@/components/dialog/stats-dialog";
 import { authClient } from "@/lib/auth-client";
 import { BarChart, Lightbulb, Trophy } from "lucide-react";
 import { useState } from "react";
-import WordleButton from "./wordle-button";
+import WordleButton from "@/components/wordle-button";
 
 const Header = () => {
   const { data: session } = authClient.useSession();
