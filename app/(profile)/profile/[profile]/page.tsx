@@ -1,5 +1,6 @@
 import { createPageMetadata } from "@/lib/metadata";
 import type { Metadata } from "next";
+import { redirect } from "next/navigation";
 
 export async function generateMetadata({
   params,
@@ -7,7 +8,12 @@ export async function generateMetadata({
   params: Promise<{ profile: string }>;
 }): Promise<Metadata> {
   const { profile } = await params;
-  const username = decodeURIComponent(profile);
+  let username = profile;
+  try {
+    username = decodeURIComponent(profile);
+  } catch {
+    redirect("/");
+  }
 
   return createPageMetadata({
     title: `${username}'s Profile`,
