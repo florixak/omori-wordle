@@ -42,10 +42,10 @@ const useFriends = ({ open, onOpenChange }: UseFriendsProps) => {
       queryKey: QUERY_KEYS.FRIENDS_LEADERBOARD,
     });
     void queryClient.invalidateQueries({
-      queryKey: [...QUERY_KEYS.FRIENDS_IS_FRIEND(userId ?? "")],
+      queryKey: QUERY_KEYS.FRIENDS_IS_FRIEND_KEY,
     });
     void queryClient.invalidateQueries({
-      queryKey: [...QUERY_KEYS.STATS(userId ?? "")],
+      queryKey: QUERY_KEYS.STATS_KEY,
     });
   };
 

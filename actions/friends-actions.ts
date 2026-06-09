@@ -370,10 +370,16 @@ export const getFriendProfileByUsername = async (
     throw new Error("Unauthorized");
   }
 
+  const normalized = username.trim().toLowerCase();
+
+  if (!normalized) {
+    throw new Error("User not found");
+  }
+
   const userRows = await db
     .select()
     .from(user)
-    .where(eq(user.name, username))
+    .where(sql`lower(${user.name}) = ${normalized}`)
     .limit(1);
 
   if (userRows.length === 0) {
