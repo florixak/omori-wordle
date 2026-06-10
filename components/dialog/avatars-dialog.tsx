@@ -34,7 +34,11 @@ const AvatarsDialog = ({ open, onOpenChange }: AvatarsDialogProps) => {
 
   const handleSubmit = () => {
     if (selected) {
-      void updateAvatarMutation(selected);
+      void updateAvatarMutation(selected, {
+        onSuccess: () => {
+          onOpenChange(false);
+        },
+      });
     }
   };
 
