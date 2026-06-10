@@ -2,7 +2,7 @@
 
 import { db } from "@/db/drizzle";
 import { user } from "@/db/schema";
-import { getAvatar } from "@/lib/friend-utils";
+import { getAvatarById } from "@/lib/friend-utils";
 import { eq } from "drizzle-orm";
 import { requireSession } from "@/actions/friends-actions";
 
@@ -19,7 +19,7 @@ export const updateAvatar = async (avatarId: string): Promise<string> => {
     throw new Error("User not found");
   }
 
-  const avatar = getAvatar(avatarId);
+  const avatar = getAvatarById(avatarId);
 
   if (!avatar) {
     throw new Error("Avatar not found");

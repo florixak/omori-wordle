@@ -2,7 +2,7 @@
 
 import { updateAvatar } from "@/actions/profile-actions";
 import { authClient } from "@/lib/auth-client";
-import { getAvatar } from "@/lib/friend-utils";
+import { getAvatarByImage } from "@/lib/friend-utils";
 import { useMutation } from "@tanstack/react-query";
 
 const useProfile = () => {
@@ -18,7 +18,7 @@ const useProfile = () => {
     });
 
   const selectedAvatarId =
-    getAvatar(session?.user.image ?? null)?.id ?? undefined;
+    getAvatarByImage(session?.user.image ?? null)?.id ?? undefined;
 
   return {
     updateAvatarMutation,

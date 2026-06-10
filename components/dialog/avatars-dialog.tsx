@@ -24,26 +24,30 @@ type AvatarsDialogProps = {
 const AvatarsDialog = ({ open, onOpenChange }: AvatarsDialogProps) => {
   const { updateAvatarMutation, isUpdatingAvatar, selectedAvatarId } =
     useProfile();
-  const [selected, setSelected] = useState<string | undefined>(
-    selectedAvatarId,
-  );
+  const [pendingSelection, setPendingSelection] = useState<string | undefined>();
+  const activeSelection = pendingSelection ?? selectedAvatarId;
 
-  const handleUpdateAvatar = (avatarId: string) => {
-    setSelected(avatarId);
+  const handleOpenChange = (nextOpen: boolean) => {
+    if (!nextOpen) {
+      setPendingSelection(undefined);
+    }
+    onOpenChange(nextOpen);
   };
 
   const handleSubmit = () => {
-    if (selected) {
-      void updateAvatarMutation(selected, {
-        onSuccess: () => {
-          onOpenChange(false);
-        },
-      });
+    if (!activeSelection || activeSelection === selectedAvatarId) {
+      return;
     }
+
+    void updateAvatarMutation(activeSelection, {
+      onSuccess: () => {
+        handleOpenChange(false);
+      },
+    });
   };
 
   return (
-    <OmoriDialog open={open} onOpenChange={onOpenChange}>
+    <OmoriDialog open={open} onOpenChange={handleOpenChange}>
       <OmoriDialogContent>
         <OmoriDialogHeader>
           <OmoriDialogTitle>Avatars</OmoriDialogTitle>
@@ -55,7 +59,7 @@ const AvatarsDialog = ({ open, onOpenChange }: AvatarsDialogProps) => {
           {AVATARS.map((avatar) => (
             <button
               key={avatar.id}
-              onClick={() => handleUpdateAvatar(avatar.id)}
+              onClick={() => setPendingSelection(avatar.id)}
               className="p-0 cursor-pointer relative"
             >
               <Image
@@ -68,7 +72,7 @@ const AvatarsDialog = ({ open, onOpenChange }: AvatarsDialogProps) => {
                 )}
                 loading="lazy"
               />
-              {selected === avatar.id && (
+              {activeSelection === avatar.id && (
                 <span className="absolute top-2 right-2 w-4 h-4 text-foreground font-pixel rounded-full bg-black"></span>
               )}
             </button>
@@ -77,7 +81,11 @@ const AvatarsDialog = ({ open, onOpenChange }: AvatarsDialogProps) => {
         <OmoriDialogFooter>
           <WordleButton
             onClick={handleSubmit}
-            disabled={isUpdatingAvatar || !selected}
+            disabled={
+              isUpdatingAvatar ||
+              !activeSelection ||
+              activeSelection === selectedAvatarId
+            }
           >
             {isUpdatingAvatar ? "Updating..." : "Update Avatar"}
           </WordleButton>

@@ -24,13 +24,20 @@ export const formatAttempts = (
 export const getAvatarSrc = (image: string | null): string =>
   image && image.trim().length > 0 ? image : DEFAULT_AVATAR;
 
-export const getAvatar = (id: string | null): Avatar | undefined => {
+export const getAvatarById = (id: string | null): Avatar | undefined => {
   if (!id) {
     return undefined;
   }
 
-  const avatar = AVATARS.find((avatar) => avatar.id === id);
-  return avatar || undefined;
+  return AVATARS.find((avatar) => avatar.id === id);
+};
+
+export const getAvatarByImage = (image: string | null): Avatar | undefined => {
+  if (!image) {
+    return undefined;
+  }
+
+  return AVATARS.find((avatar) => avatar.image === image);
 };
 
 export const assertFriendActionResult = (result: FriendActionResult): void => {
