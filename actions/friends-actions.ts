@@ -14,7 +14,7 @@ import { toUserPreview } from "@/lib/friend-utils";
 import { and, eq, inArray, ne, or, sql } from "drizzle-orm";
 import { headers } from "next/headers";
 
-const requireSession = async () => {
+export const requireSession = async () => {
   const session = await auth.api.getSession({ headers: await headers() });
 
   if (!session) {
