@@ -24,7 +24,9 @@ type AvatarsDialogProps = {
 const AvatarsDialog = ({ open, onOpenChange }: AvatarsDialogProps) => {
   const { updateAvatarMutation, isUpdatingAvatar, selectedAvatarId } =
     useProfile();
-  const [pendingSelection, setPendingSelection] = useState<string | undefined>();
+  const [pendingSelection, setPendingSelection] = useState<
+    string | undefined
+  >();
   const activeSelection = pendingSelection ?? selectedAvatarId;
 
   const handleOpenChange = (nextOpen: boolean) => {
@@ -51,10 +53,10 @@ const AvatarsDialog = ({ open, onOpenChange }: AvatarsDialogProps) => {
       <OmoriDialogContent>
         <OmoriDialogHeader>
           <OmoriDialogTitle>Avatars</OmoriDialogTitle>
+          <OmoriDialogDescription>
+            Select an avatar to update your profile.
+          </OmoriDialogDescription>
         </OmoriDialogHeader>
-        <OmoriDialogDescription>
-          Select an avatar to update your profile.
-        </OmoriDialogDescription>
         <div className="grid grid-cols-2 gap-4">
           {AVATARS.map((avatar) => (
             <button
