@@ -30,7 +30,6 @@ const FriendsListSection = ({
             trailing={
               <>
                 <WordleButton
-                  className="px-2 text-[0.625rem] sm:text-xs"
                   disabled={isBusy}
                   onClick={() => onViewStats(user.id)}
                   aria-label={`View stats for ${user.name}`}
@@ -39,7 +38,6 @@ const FriendsListSection = ({
                   <BarChart size={24} />
                 </WordleButton>
                 <WordleButton
-                  className="px-2 text-[0.625rem] sm:text-xs"
                   disabled={isBusy}
                   onClick={() => onRemove(user.id)}
                   aria-label={`Remove ${user.name} from friends`}

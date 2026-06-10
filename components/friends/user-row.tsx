@@ -15,7 +15,7 @@ const UserRow = ({ user, trailing }: UserRowProps) => {
         alt={`${user.name}'s avatar`}
         width={48}
         height={48}
-        className="size-12 shrink-0 rounded-full border border-black"
+        className="size-12 shrink-0 rounded border border-black"
         loading="lazy"
       />
       <div className="min-w-0 flex-1">

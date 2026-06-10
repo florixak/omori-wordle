@@ -2,6 +2,7 @@ import { PendingFriendRequest } from "@/types/friends-types";
 import { SectionTitle } from "@/components/dialog/friends-dialog";
 import UserRow from "./user-row";
 import WordleButton from "@/components/wordle-button";
+import { Check, X } from "lucide-react";
 
 const PendingRequestsSection = ({
   requests,
@@ -23,42 +24,41 @@ const PendingRequestsSection = ({
       <SectionTitle>Pending requests</SectionTitle>
       <div className="flex flex-col gap-2">
         {requests.map((request) => (
-          <div
+          <UserRow
             key={request.id}
-            className="flex flex-col gap-2 sm:flex-row sm:items-center"
-          >
-            <div className="min-w-0 flex-1">
-              <UserRow user={request.user} />
-            </div>
-            <div className="flex gap-2">
-              {request.direction === "incoming" ? (
+            user={request.user}
+            trailing={
+              request.direction === "incoming" ? (
                 <>
                   <WordleButton
-                    className="flex-1 px-2 text-[0.625rem] sm:text-xs"
                     disabled={isBusy}
                     onClick={() => onRespond(request.id, "accept")}
+                    aria-label={`Accept request from ${request.user.name}`}
+                    title={`Accept request from ${request.user.name}`}
                   >
-                    Accept
+                    <Check size={24} />
                   </WordleButton>
                   <WordleButton
-                    className="flex-1 px-2 text-[0.625rem] sm:text-xs"
                     disabled={isBusy}
                     onClick={() => onRespond(request.id, "decline")}
+                    aria-label={`Decline request from ${request.user.name}`}
+                    title={`Decline request from ${request.user.name}`}
                   >
-                    Decline
+                    <X size={24} />
                   </WordleButton>
                 </>
               ) : (
                 <WordleButton
-                  className="w-full px-2 text-[0.625rem] sm:text-xs"
                   disabled={isBusy}
                   onClick={() => onCancel(request.id)}
+                  aria-label={`Cancel request to ${request.user.name}`}
+                  title={`Cancel request to ${request.user.name}`}
                 >
-                  Cancel
+                  <X size={24} />
                 </WordleButton>
-              )}
-            </div>
-          </div>
+              )
+            }
+          />
         ))}
       </div>
     </section>
