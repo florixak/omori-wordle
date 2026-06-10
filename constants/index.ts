@@ -26,6 +26,35 @@ const QUERY_KEYS = {
   ],
 } as const;
 
+type Avatar = {
+  id: string;
+  name: string;
+  image: string;
+};
+
+const AVATARS: Avatar[] = [
+  {
+    id: "1",
+    name: "Sunny",
+    image: "/avatars/sunny.png",
+  },
+  {
+    id: "2",
+    name: "Aubrey",
+    image: "/avatars/aubrey.png",
+  },
+  {
+    id: "3",
+    name: "Kel",
+    image: "/avatars/kel.png",
+  },
+  {
+    id: "4",
+    name: "Basil",
+    image: "/avatars/basil.png",
+  },
+] as const;
+
 export {
   MAX_ATTEMPTS,
   MIN_ATTEMPTS_FOR_HINT,
@@ -35,4 +64,6 @@ export {
   GUESS_DISTRIBUTION_KEYS,
   DEFAULT_AVATAR,
   QUERY_KEYS,
+  AVATARS,
+  type Avatar,
 };
