@@ -25,16 +25,12 @@ export const updateAvatar = async (avatarId: string): Promise<string> => {
     throw new Error("Avatar not found");
   }
 
-  const result = await db
+  await db
     .update(user)
     .set({
       image: avatar.image,
     })
     .where(eq(user.id, session.user.id));
-
-  if (result.rowCount === 0) {
-    throw new Error("Failed to update avatar");
-  }
 
   return avatarId;
 };
