@@ -1,4 +1,4 @@
-import { DEFAULT_AVATAR } from "@/constants";
+import { Avatar, AVATARS, DEFAULT_AVATAR } from "@/constants";
 import { type User } from "@/db/schema";
 import {
   FriendsLeaderboardEntry,
@@ -23,6 +23,15 @@ export const formatAttempts = (
 
 export const getAvatarSrc = (image: string | null): string =>
   image && image.trim().length > 0 ? image : DEFAULT_AVATAR;
+
+export const getAvatar = (id: string | null): Avatar | undefined => {
+  if (!id) {
+    return undefined;
+  }
+
+  const avatar = AVATARS.find((avatar) => avatar.id === id);
+  return avatar || undefined;
+};
 
 export const assertFriendActionResult = (result: FriendActionResult): void => {
   if (!result.ok) {
