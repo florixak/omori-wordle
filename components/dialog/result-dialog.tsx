@@ -10,6 +10,7 @@ import {
   OmoriDialogTitle,
 } from "@/components/omori/omori-dialog";
 import WordleButton from "@/components/wordle-button";
+import { cn } from "@/lib/utils";
 
 type ResultDialogProps = {
   open: boolean;
@@ -49,7 +50,7 @@ const ResultDialog = ({
         </div>
         <OmoriDialogFooter>
           <WordleButton
-            className="w-full bg-primary text-primary-foreground hover:bg-primary/80 hover:text-primary-foreground/80"
+            className={cn("w-full gap-2", "omori-button-default")}
             onClick={() => onOpenChange(false)}
           >
             Share result

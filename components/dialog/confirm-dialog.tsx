@@ -8,6 +8,7 @@ import {
   OmoriDialogTitle,
 } from "../omori/omori-dialog";
 import WordleButton from "../wordle-button";
+import { cn } from "@/lib/utils";
 
 type ConfirmDialogProps = {
   open: boolean;
@@ -45,7 +46,7 @@ const ConfirmDialog = ({
             Cancel
           </WordleButton>
           <WordleButton
-            className="w-full gap-2"
+            className={cn("w-full gap-2", "omori-button-default")}
             onClick={onConfirm}
             tabIndex={0}
             disabled={isLoading}
