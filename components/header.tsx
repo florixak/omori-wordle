@@ -24,8 +24,14 @@ const Header = () => {
   const [showAvatarsDialog, setShowAvatarsDialog] = useState(false);
 
   const handleLogout = async () => {
-    await authClient.signOut();
-    omoriToast.success("Logged out");
+    try {
+      await authClient.signOut();
+      omoriToast.success("Logged out");
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : "Failed to log out";
+      omoriToast.error(message);
+    }
   };
 
   const handleLogin = async () => {
