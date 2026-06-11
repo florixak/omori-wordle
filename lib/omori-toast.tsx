@@ -19,4 +19,5 @@ export const omoriToast = {
   success: (message: string) => showOmoriToast(message, "success"),
   error: (message: string) => showOmoriToast(message, "error"),
   info: (message: string) => showOmoriToast(message, "info"),
+  loading: (message: string) => showOmoriToast(message, "loading"),
 };

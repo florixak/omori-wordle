@@ -3,12 +3,13 @@
 import { cn } from "@/lib/utils";
 import type { Toast as HotToast } from "react-hot-toast";
 
-export type OmoriToastVariant = "success" | "error" | "info";
+export type OmoriToastVariant = "success" | "error" | "info" | "loading";
 
 const variantStyles: Record<OmoriToastVariant, string> = {
   success: "bg-[var(--omori-present)] text-[var(--omori-border)]",
   error: "bg-destructive text-destructive-foreground",
   info: "bg-[var(--omori-empty)] text-foreground",
+  loading: "bg-primary text-primary-foreground",
 };
 
 interface OmoriToastProps {
