@@ -115,7 +115,7 @@ const useFriends = ({ open, onOpenChange }: UseFriendsProps) => {
       ),
     });
 
-  const { mutate: removeFriendAction, isPending: isRemovePending } =
+  const { mutateAsync: removeFriendAction, isPending: isRemovePending } =
     useMutation({
       mutationFn: async (friendUserId: string) => {
         const result = await removeFriend(friendUserId);
@@ -150,8 +150,8 @@ const useFriends = ({ open, onOpenChange }: UseFriendsProps) => {
     cancelOutgoingRequestAction(requestId);
   };
 
-  const handleRemoveFriend = (friendUserId: string) => {
-    removeFriendAction(friendUserId);
+  const handleRemoveFriend = async (friendUserId: string) => {
+    await removeFriendAction(friendUserId);
   };
 
   return {

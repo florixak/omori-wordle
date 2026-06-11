@@ -249,4 +249,12 @@
   .omori-button-disabled {
     @apply disabled:cursor-not-allowed disabled:opacity-100;
   }
+
+  .omori-button-default {
+    @apply bg-primary text-primary-foreground hover:bg-primary/80 hover:text-primary-foreground/80;
+  }
+
+  .omori-button-outline {
+    @apply border-border bg-background hover:bg-muted hover:text-foreground aria-expanded:bg-muted aria-expanded:text-foreground dark:border-input dark:bg-input/30 dark:hover:bg-input/50;
+  }
 }

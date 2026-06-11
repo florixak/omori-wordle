@@ -42,13 +42,13 @@ const HintDialog = ({ open, onOpenChange }: HintDialogProps) => {
     }
   };
 
+  const guessLabel = guessesRemaining === 1 ? "guess" : "guesses";
   const getDescription = () => {
     if (isRevealed) {
       return hint;
     }
 
     if (!canRequestHint) {
-      const guessLabel = guessesRemaining === 1 ? "guess" : "guesses";
       return `Make ${guessesRemaining} more ${guessLabel} before you can unlock a hint.`;
     }
 
@@ -69,7 +69,11 @@ const HintDialog = ({ open, onOpenChange }: HintDialogProps) => {
               onClick={handleRevealHint}
               disabled={isHintLoading || !canRequestHint || !gameActions}
             >
-              {isHintLoading ? "Loading…" : "Reveal hint"}
+              {isHintLoading
+                ? "Loading…"
+                : !canRequestHint
+                  ? `${guessesRemaining} ${guessLabel} left`
+                  : "Reveal hint"}
             </WordleButton>
           ) : (
             <WordleButton
