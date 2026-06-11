@@ -12,6 +12,7 @@ import { useState } from "react";
 import AvatarsDialog from "./dialog/avatars-dialog";
 import OmoriLoginDialog from "./dialog/login-dialog";
 import WordleButton from "./wordle-button";
+import { resolveErrorMessage } from "@/lib/errors";
 import { omoriToast } from "@/lib/omori-toast";
 
 const Header = () => {
@@ -28,9 +29,7 @@ const Header = () => {
       await authClient.signOut();
       omoriToast.success("Logged out");
     } catch (error) {
-      const message =
-        error instanceof Error ? error.message : "Failed to log out";
-      omoriToast.error(message);
+      omoriToast.error(resolveErrorMessage(error));
     }
   };
 

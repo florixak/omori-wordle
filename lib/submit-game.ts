@@ -1,4 +1,5 @@
 import { UserStats } from "@/db/schema";
+import { ErrorCode } from "@/lib/errors";
 import { getGameStatus } from "@/lib/game-logic";
 
 export type ValidateCompletedGameResult =
@@ -8,7 +9,7 @@ export type ValidateCompletedGameResult =
       attempts: number;
       guesses: string[];
     }
-  | { ok: false; error: string };
+  | { ok: false; error: ErrorCode };
 
 export type SubmitGameStatsUpdate = {
   gamesPlayed: number;
@@ -33,24 +34,24 @@ export const validateCompletedGame = (
   isGuessValid: (word: string) => boolean,
 ): ValidateCompletedGameResult => {
   if (guesses.length === 0) {
-    return { ok: false, error: "Invalid game state" };
+    return { ok: false, error: ErrorCode.INVALID_GAME_STATE };
   }
 
   const normalizedGuesses = guesses.map((guess) => guess.toUpperCase());
 
   for (const guess of normalizedGuesses) {
     if (guess.length !== wordLength) {
-      return { ok: false, error: "Invalid game state" };
+      return { ok: false, error: ErrorCode.INVALID_GAME_STATE };
     }
 
     if (!isGuessValid(guess)) {
-      return { ok: false, error: "Invalid game state" };
+      return { ok: false, error: ErrorCode.INVALID_GAME_STATE };
     }
   }
 
   const status = getGameStatus(normalizedGuesses, answer, maxAttempts);
   if (status === "playing") {
-    return { ok: false, error: "Invalid game state" };
+    return { ok: false, error: ErrorCode.INVALID_GAME_STATE };
   }
 
   const won = status === "won";

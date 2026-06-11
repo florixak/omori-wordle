@@ -32,4 +32,6 @@ export type FriendsOverview = {
   friends: FriendListEntry[];
 };
 
-export type FriendActionResult = { ok: true } | { ok: false; error: string };
+import type { ErrorResult } from "@/lib/errors";
+
+export type FriendActionResult = { ok: true } | ErrorResult;

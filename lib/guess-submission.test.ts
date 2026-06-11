@@ -1,6 +1,7 @@
 import { createHmac } from "crypto";
 import { beforeAll, describe, expect, it } from "vitest";
 
+import { ErrorCode } from "@/lib/errors";
 import { processGuessSubmission } from "@/lib/guess-submission";
 
 const TEST_DATE = "2026-05-26";
@@ -52,7 +53,7 @@ describe("processGuessSubmission", () => {
       ),
     ).toEqual({
       ok: false,
-      error: "Not in word list",
+      error: ErrorCode.NOT_IN_WORD_LIST,
     });
   });
 
@@ -69,7 +70,7 @@ describe("processGuessSubmission", () => {
       ),
     ).toEqual({
       ok: false,
-      error: "Game already finished",
+      error: ErrorCode.GAME_ALREADY_COMPLETED,
     });
   });
 
@@ -95,7 +96,7 @@ describe("processGuessSubmission", () => {
       ),
     ).toEqual({
       ok: false,
-      error: "No attempts remaining",
+      error: ErrorCode.NO_ATTEMPTS_REMAINING,
     });
   });
 
@@ -112,7 +113,7 @@ describe("processGuessSubmission", () => {
       ),
     ).toEqual({
       ok: false,
-      error: "Invalid game state",
+      error: ErrorCode.INVALID_GAME_STATE,
     });
   });
 
@@ -127,7 +128,7 @@ describe("processGuessSubmission", () => {
       ),
     ).toEqual({
       ok: false,
-      error: "Invalid game state",
+      error: ErrorCode.INVALID_GAME_STATE,
     });
   });
 

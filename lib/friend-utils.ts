@@ -5,6 +5,7 @@ import {
   FriendActionResult,
   FriendUserPreview,
 } from "@/types/friends-types";
+import { AppError } from "@/lib/errors";
 
 export const formatAttempts = (
   attempts: number | null,
@@ -42,7 +43,7 @@ export const getAvatarByImage = (image: string | null): Avatar | undefined => {
 
 export const assertFriendActionResult = (result: FriendActionResult): void => {
   if (!result.ok) {
-    throw new Error(result.error);
+    throw new AppError(result.error, result.params);
   }
 };
 

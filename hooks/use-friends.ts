@@ -10,6 +10,7 @@ import { QUERY_KEYS } from "@/constants";
 import { createFriendsOverviewQueryOptions } from "@/hooks/query-options";
 import { authClient } from "@/lib/auth-client";
 import { assertFriendActionResult } from "@/lib/friend-utils";
+import { resolveErrorMessage } from "@/lib/errors";
 import { omoriToast } from "@/lib/omori-toast";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
@@ -65,7 +66,7 @@ const useFriends = ({ open, onOpenChange }: UseFriendsProps) => {
       },
       onError: (mutationError: Error) => {
         if (loadingToastId) toast.dismiss(loadingToastId);
-        omoriToast.error(mutationError.message);
+        omoriToast.error(resolveErrorMessage(mutationError));
       },
     };
   };
@@ -97,7 +98,7 @@ const useFriends = ({ open, onOpenChange }: UseFriendsProps) => {
         );
       },
       onError: (mutationError: Error) => {
-        omoriToast.error(mutationError.message);
+        omoriToast.error(resolveErrorMessage(mutationError));
       },
     },
   );

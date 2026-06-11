@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 
+import { ErrorCode } from "@/lib/errors";
 import {
   computeStatsAfterGame,
   computeTimeSeconds,
@@ -60,7 +61,7 @@ describe("validateCompletedGame", () => {
       ),
     ).toEqual({
       ok: false,
-      error: "Invalid game state",
+      error: ErrorCode.INVALID_GAME_STATE,
     });
   });
 });
@@ -88,6 +89,8 @@ describe("computeStatsAfterGame", () => {
           maxStreak: 4,
           guessDistribution: { "3": 2, "0": 1 },
           lastPlayedDate: "2026-05-28",
+          lastHintDate: null,
+          hintsUsed: 0,
         },
         "2026-05-29",
         true,
@@ -99,6 +102,7 @@ describe("computeStatsAfterGame", () => {
       currentStreak: 3,
       maxStreak: 4,
       guessDistribution: { "2": 1, "3": 2, "0": 1 },
+      lastPlayedDate: "2026-05-29",
     });
   });
 });

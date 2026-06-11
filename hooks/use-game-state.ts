@@ -13,6 +13,7 @@ import {
 } from "@/constants";
 import { useLocalStorage } from "@/hooks/use-local-storage";
 import { authClient } from "@/lib/auth-client";
+import { ErrorCode, getErrorMessage } from "@/lib/errors";
 import { omoriToast } from "@/lib/omori-toast";
 import { getKeyboardStateFromGuesses } from "@/lib/game-logic";
 import { getGuessWords } from "@/lib/game-state-utils";
@@ -141,7 +142,7 @@ const useGameState = ({
 
     if (snapshot.status !== "playing") return;
     if (snapshot.currentInput.length !== snapshot.wordLength) {
-      omoriToast.error("Not enough letters");
+      omoriToast.error(getErrorMessage(ErrorCode.NOT_ENOUGH_LETTERS));
       return;
     }
 
@@ -161,23 +162,23 @@ const useGameState = ({
       );
 
       if (!response.ok) {
-        if (
-          response.error === "Progress out of sync — local progress cleared."
-        ) {
+        if (response.error === ErrorCode.PROGRESS_OUT_OF_SYNC) {
           storage.removeItem();
           notifyGameStorageChange();
-          omoriToast.error(response.error);
+          omoriToast.error(getErrorMessage(response.error));
           return;
         }
 
-        if (response.error === "Invalid game state") {
+        if (response.error === ErrorCode.INVALID_GAME_STATE) {
           storage.removeItem();
           notifyGameStorageChange();
-          omoriToast.error("Invalid game state — local progress cleared.");
+          omoriToast.error(
+            getErrorMessage(ErrorCode.INVALID_GAME_STATE_CLEARED),
+          );
           return;
         }
 
-        omoriToast.error(response.error);
+        omoriToast.error(getErrorMessage(response.error));
         return;
       }
 
@@ -218,11 +219,11 @@ const useGameState = ({
         });
 
         if (!saveResult.ok) {
-          omoriToast.error(saveResult.error);
+          omoriToast.error(getErrorMessage(saveResult.error));
         }
       }
     } catch {
-      omoriToast.error("Unable to submit guess right now. Please try again.");
+      omoriToast.error(getErrorMessage(ErrorCode.SUBMIT_GUESS_FAILED));
     } finally {
       isSubmittingRef.current = false;
       setIsSubmitting(false);
@@ -239,9 +240,7 @@ const useGameState = ({
     const guesses = getGuessWords(snapshot.submittedGuesses);
 
     if (guesses.length < MIN_ATTEMPTS_FOR_HINT) {
-      omoriToast.info(
-        `Make at least ${MIN_ATTEMPTS_FOR_HINT} guesses before using a hint.`,
-      );
+      omoriToast.info(getErrorMessage(ErrorCode.HINT_MIN_GUESSES_REQUIRED));
       return null;
     }
 
@@ -253,7 +252,7 @@ const useGameState = ({
       });
 
       if (!response.ok) {
-        omoriToast.error(response.error);
+        omoriToast.error(getErrorMessage(response.error));
         return null;
       }
 
@@ -265,7 +264,7 @@ const useGameState = ({
 
       return response.hint;
     } catch {
-      omoriToast.error("Unable to load hint right now. Please try again.");
+      omoriToast.error(getErrorMessage(ErrorCode.LOAD_HINT_FAILED));
       return null;
     }
   };

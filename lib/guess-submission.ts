@@ -1,3 +1,4 @@
+import { ErrorCode } from "@/lib/errors";
 import { evaluateGuess, getGameStatus } from "@/lib/game-logic";
 import { GameStatus, TileEvaluation } from "@/types/game-types";
 import { createHmac, timingSafeEqual } from "crypto";
@@ -45,7 +46,7 @@ export type ProcessGuessResult =
       guess: string;
       signature?: string;
     }
-  | { ok: false; error: string };
+  | { ok: false; error: ErrorCode };
 
 export const processGuessSubmission = (
   guess: string,
@@ -58,10 +59,10 @@ export const processGuessSubmission = (
 ): ProcessGuessResult => {
   if (previousGuesses.length > 0 && isHistorySigningEnabled()) {
     if (!date || !previousSignature) {
-      return { ok: false, error: "Invalid game state" };
+      return { ok: false, error: ErrorCode.INVALID_GAME_STATE };
     }
     if (!isHistorySigned(date, previousGuesses, previousSignature)) {
-      return { ok: false, error: "Invalid game state" };
+      return { ok: false, error: ErrorCode.INVALID_GAME_STATE };
     }
   }
 
@@ -71,22 +72,22 @@ export const processGuessSubmission = (
   );
 
   if (normalizedPrevious.length >= maxAttempts) {
-    return { ok: false, error: "No attempts remaining" };
+    return { ok: false, error: ErrorCode.NO_ATTEMPTS_REMAINING };
   }
 
   const priorStatus = getGameStatus(normalizedPrevious, answer, maxAttempts);
   if (priorStatus !== "playing") {
-    return { ok: false, error: "Game already finished" };
+    return { ok: false, error: ErrorCode.GAME_ALREADY_COMPLETED };
   }
 
   for (const priorGuess of normalizedPrevious) {
     if (!isGuessValid(priorGuess)) {
-      return { ok: false, error: "Invalid game state" };
+      return { ok: false, error: ErrorCode.INVALID_GAME_STATE };
     }
   }
 
   if (!isGuessValid(upper)) {
-    return { ok: false, error: "Not in word list" };
+    return { ok: false, error: ErrorCode.NOT_IN_WORD_LIST };
   }
 
   const allGuesses = [...normalizedPrevious, upper];

@@ -6,6 +6,7 @@ import FriendsListSection from "@/components/friends/friends-list-section";
 import PendingRequestsSection from "@/components/friends/pending-requests-section";
 import WordleButton from "@/components/wordle-button";
 import useFriends from "@/hooks/use-friends";
+import { resolveErrorMessage } from "@/lib/errors";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
 import {
@@ -104,7 +105,7 @@ const FriendsDialog = ({ open, onOpenChange }: FriendsDialogProps) => {
             {session && !isOverviewPending && error ? (
               <div className="flex flex-col items-center gap-3 py-2 text-center">
                 <p className="text-[0.625rem] text-destructive sm:text-xs">
-                  {error.message}
+                  {resolveErrorMessage(error)}
                 </p>
                 <WordleButton
                   className="w-full"

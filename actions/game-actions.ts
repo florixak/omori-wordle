@@ -21,6 +21,7 @@ import {
   computeTimeSeconds,
   validateCompletedGame,
 } from "@/lib/submit-game";
+import { AppError, ErrorCode, type ErrorResult } from "@/lib/errors";
 import { and, eq, sql } from "drizzle-orm";
 import { headers } from "next/headers";
 
@@ -31,7 +32,7 @@ export type SubmitGamePayload = {
   historySignature?: string;
 };
 
-export type SubmitGameResult = { ok: true } | { ok: false; error: string };
+export type SubmitGameResult = { ok: true } | ErrorResult;
 
 type CompletedGameValidation = Extract<
   ReturnType<typeof validateCompletedGame>,
@@ -55,7 +56,7 @@ const persistCompletedGame = async (
     .limit(1);
 
   if (existing.length > 0) {
-    throw new Error("ALREADY_PLAYED");
+    throw new AppError(ErrorCode.ALREADY_PLAYED_TODAY);
   }
 
   await db.insert(gameResult).values({
@@ -114,7 +115,7 @@ export async function processGuess(
   if (date && date !== today) {
     return {
       ok: false,
-      error: "Progress out of sync — local progress cleared.",
+      error: ErrorCode.PROGRESS_OUT_OF_SYNC,
     };
   }
 
@@ -134,7 +135,7 @@ export async function processGuess(
       .limit(1);
 
     if (existing.length > 0) {
-      return { ok: false, error: "Already played today" };
+      return { ok: false, error: ErrorCode.ALREADY_PLAYED_TODAY };
     }
   }
 
@@ -170,15 +171,13 @@ export type GetHintPayload = {
   historySignature?: string;
 };
 
-export type GetHintResult =
-  | { ok: true; hint: string }
-  | { ok: false; error: string };
+export type GetHintResult = { ok: true; hint: string } | ErrorResult;
 
 export async function getHint(payload: GetHintPayload): Promise<GetHintResult> {
   const today = getDailyDate();
 
   if (payload.date !== today) {
-    return { ok: false, error: "Invalid game state" };
+    return { ok: false, error: ErrorCode.INVALID_GAME_STATE };
   }
 
   const guesses = payload.guesses.map((guess) => guess.toUpperCase());
@@ -186,25 +185,25 @@ export async function getHint(payload: GetHintPayload): Promise<GetHintResult> {
   if (guesses.length < MIN_ATTEMPTS_FOR_HINT) {
     return {
       ok: false,
-      error: `Make at least ${MIN_ATTEMPTS_FOR_HINT} guesses before using a hint.`,
+      error: ErrorCode.HINT_MIN_GUESSES_REQUIRED,
     };
   }
 
   for (const guess of guesses) {
     if (!isValidGuess(guess)) {
-      return { ok: false, error: "Invalid game state" };
+      return { ok: false, error: ErrorCode.INVALID_GAME_STATE };
     }
   }
 
   if (!verifyGuessHistory(payload.date, guesses, payload.historySignature)) {
-    return { ok: false, error: "Invalid game state" };
+    return { ok: false, error: ErrorCode.INVALID_GAME_STATE };
   }
 
   const { word: answer, hint } = getDailyWord();
   const status = getGameStatus(guesses, answer, MAX_ATTEMPTS);
 
   if (status !== "playing") {
-    return { ok: false, error: "Game already finished" };
+    return { ok: false, error: ErrorCode.GAME_ALREADY_COMPLETED };
   }
 
   const session = await auth.api.getSession({ headers: await headers() });
@@ -231,7 +230,7 @@ export async function getHint(payload: GetHintPayload): Promise<GetHintResult> {
 
 export type GetCompletedGameRevealResult =
   | { ok: true; revealedWord: string; answerHint: string }
-  | { ok: false; error: string };
+  | ErrorResult;
 
 export async function getCompletedGameReveal(
   payload: GetHintPayload,
@@ -239,30 +238,30 @@ export async function getCompletedGameReveal(
   const today = getDailyDate();
 
   if (payload.date !== today) {
-    return { ok: false, error: "Invalid game state" };
+    return { ok: false, error: ErrorCode.INVALID_GAME_STATE };
   }
 
   const guesses = payload.guesses.map((guess) => guess.toUpperCase());
 
   if (guesses.length === 0) {
-    return { ok: false, error: "Invalid game state" };
+    return { ok: false, error: ErrorCode.INVALID_GAME_STATE };
   }
 
   for (const guess of guesses) {
     if (!isValidGuess(guess)) {
-      return { ok: false, error: "Invalid game state" };
+      return { ok: false, error: ErrorCode.INVALID_GAME_STATE };
     }
   }
 
   if (!verifyGuessHistory(payload.date, guesses, payload.historySignature)) {
-    return { ok: false, error: "Invalid game state" };
+    return { ok: false, error: ErrorCode.INVALID_GAME_STATE };
   }
 
   const { word: answer, hint } = getDailyWord();
   const status = getGameStatus(guesses, answer, MAX_ATTEMPTS);
 
   if (status === "playing") {
-    return { ok: false, error: "Game not finished" };
+    return { ok: false, error: ErrorCode.GAME_NOT_FINISHED };
   }
 
   return { ok: true, revealedWord: answer, answerHint: hint };
@@ -274,12 +273,12 @@ export async function submitGame(
   const session = await auth.api.getSession({ headers: await headers() });
 
   if (!session) {
-    return { ok: false, error: "Unauthorized" };
+    return { ok: false, error: ErrorCode.UNAUTHORIZED };
   }
 
   const today = getDailyDate();
   if (payload.date !== today) {
-    return { ok: false, error: "Invalid game state" };
+    return { ok: false, error: ErrorCode.INVALID_GAME_STATE };
   }
   const { word: answer } = getDailyWord();
   const wordLength = getDailyWordLength();
@@ -303,7 +302,7 @@ export async function submitGame(
       payload.historySignature,
     )
   ) {
-    return { ok: false, error: "Invalid game state" };
+    return { ok: false, error: ErrorCode.INVALID_GAME_STATE };
   }
 
   const completedAtMs = Date.now();
@@ -319,14 +318,11 @@ export async function submitGame(
       completedAtMs,
     );
   } catch (error) {
-    if (error instanceof Error && error.message === "ALREADY_PLAYED") {
-      return { ok: false, error: "Already played today" };
+    if (error instanceof AppError) {
+      return { ok: false, error: error.code };
     }
 
-    return {
-      ok: false,
-      error: error instanceof Error ? error.message : "Unknown error",
-    };
+    return { ok: false, error: ErrorCode.UNKNOWN_ERROR };
   }
 
   return { ok: true };
