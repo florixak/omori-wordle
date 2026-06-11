@@ -174,7 +174,11 @@ const FriendsDialog = ({ open, onOpenChange }: FriendsDialogProps) => {
         }}
         title="Remove friend"
         description="Are you sure you want to remove this friend?"
-        onConfirm={() => handleRemoveFriend(confirmUserId ?? "")}
+        onConfirm={async () => {
+          if (!confirmUserId) return;
+          await handleRemoveFriend(confirmUserId);
+          setConfirmUserId(null);
+        }}
         onCancel={() => setConfirmUserId(null)}
         isLoading={isBusy && confirmUserId !== null}
       />
