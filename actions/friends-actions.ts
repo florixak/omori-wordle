@@ -339,10 +339,6 @@ export const removeFriend = async (
 export const isFriend = async (userId: string): Promise<boolean> => {
   const session = await requireSession();
 
-  if (!session) {
-    throw new AppError(ErrorCode.UNAUTHORIZED);
-  }
-
   const isFriend = await db
     .select()
     .from(friendship)
