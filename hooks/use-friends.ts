@@ -6,12 +6,12 @@ import {
   respondToFriendRequest,
   sendFriendRequest,
 } from "@/actions/friends-actions";
+import { QUERY_KEYS } from "@/constants";
 import { createFriendsOverviewQueryOptions } from "@/hooks/query-options";
 import { authClient } from "@/lib/auth-client";
 import { assertFriendActionResult } from "@/lib/friend-utils";
-import { QUERY_KEYS } from "@/constants";
+import { omoriToast } from "@/lib/omori-toast";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
 
 type UseFriendsProps = {
   open: boolean;
@@ -22,7 +22,6 @@ const useFriends = ({ open, onOpenChange }: UseFriendsProps) => {
   const queryClient = useQueryClient();
   const { data: session, isPending: isSessionPending } =
     authClient.useSession();
-  const [actionMessage, setActionMessage] = useState<string | null>(null);
 
   const userId = session?.user.id;
 
@@ -49,24 +48,22 @@ const useFriends = ({ open, onOpenChange }: UseFriendsProps) => {
     });
   };
 
-  const mutationOptions = {
-    onMutate: () => {
-      setActionMessage(null);
-    },
+  const createFriendMutationOptions = (successMessage: string) => ({
     onSuccess: () => {
       invalidateOverview();
+      omoriToast.success(successMessage);
     },
     onError: (mutationError: Error) => {
-      setActionMessage(mutationError.message);
+      omoriToast.error(mutationError.message);
     },
-  };
+  });
 
   const { mutate: sendRequest, isPending: isSendPending } = useMutation({
     mutationFn: async (username: string) => {
       const result = await sendFriendRequest(username);
       assertFriendActionResult(result);
     },
-    ...mutationOptions,
+    ...createFriendMutationOptions("Request sent"),
   });
 
   const { mutate: respondToRequest, isPending: isRespondPending } = useMutation(
@@ -81,7 +78,15 @@ const useFriends = ({ open, onOpenChange }: UseFriendsProps) => {
         const result = await respondToFriendRequest(requestId, action);
         assertFriendActionResult(result);
       },
-      ...mutationOptions,
+      onSuccess: (_, { action }) => {
+        invalidateOverview();
+        omoriToast.success(
+          action === "accept" ? "Friend added" : "Request declined",
+        );
+      },
+      onError: (mutationError: Error) => {
+        omoriToast.error(mutationError.message);
+      },
     },
   );
 
@@ -91,7 +96,7 @@ const useFriends = ({ open, onOpenChange }: UseFriendsProps) => {
         const result = await cancelOutgoingRequest(requestId);
         assertFriendActionResult(result);
       },
-      ...mutationOptions,
+      ...createFriendMutationOptions("Request cancelled"),
     });
 
   const { mutate: removeFriendAction, isPending: isRemovePending } =
@@ -100,21 +105,13 @@ const useFriends = ({ open, onOpenChange }: UseFriendsProps) => {
         const result = await removeFriend(friendUserId);
         assertFriendActionResult(result);
       },
-      ...mutationOptions,
+      ...createFriendMutationOptions("Friend removed"),
     });
 
   const isMutating =
     isSendPending || isRespondPending || isCancelPending || isRemovePending;
 
   const isBusy = isOverviewFetching || isMutating;
-
-  const handleOpenChange = (nextOpen: boolean) => {
-    if (!nextOpen) {
-      setActionMessage(null);
-    }
-
-    onOpenChange(nextOpen);
-  };
 
   const handleLogin = async () => {
     await authClient.signIn.social({
@@ -144,13 +141,12 @@ const useFriends = ({ open, onOpenChange }: UseFriendsProps) => {
   return {
     session,
     isSessionPending,
-    handleOpenChange,
+    handleOpenChange: onOpenChange,
     handleLogin,
     isOverviewPending,
     isBusy,
     error,
     overview,
-    actionMessage,
     handleSendRequest,
     handleRespondToRequest,
     handleCancelOutgoingRequest,
