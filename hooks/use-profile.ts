@@ -3,6 +3,7 @@
 import { updateAvatar } from "@/actions/profile-actions";
 import { authClient } from "@/lib/auth-client";
 import { getAvatarByImage } from "@/lib/friend-utils";
+import { omoriToast } from "@/lib/omori-toast";
 import { useMutation } from "@tanstack/react-query";
 
 const useProfile = () => {
@@ -13,7 +14,10 @@ const useProfile = () => {
       mutationFn: updateAvatar,
       onSuccess: () => {
         void refetchSession();
-        //toast.success("Avatar updated successfully");
+        omoriToast.success("Avatar updated");
+      },
+      onError: (error: Error) => {
+        omoriToast.error(error.message);
       },
     });
 
