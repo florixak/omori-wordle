@@ -26,7 +26,6 @@ const WordleLayout = ({
   const {
     state,
     gridRows,
-    error,
     keyboardState,
     addLetter,
     removeLetter,
@@ -52,7 +51,7 @@ const WordleLayout = ({
   return (
     <div className="flex w-full max-w-lg flex-col items-center justify-center gap-4 sm:gap-6">
       <WordleTitle streak={streak} isLoggedIn={isLoggedIn} />
-      <WordleGrid gridRows={gridRows} error={error} wordLength={wordLength} />
+      <WordleGrid gridRows={gridRows} wordLength={wordLength} />
       <WordleKeyboard
         keyboardState={keyboardState}
         addLetter={addLetter}

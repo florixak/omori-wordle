@@ -13,6 +13,7 @@ import {
 } from "@/constants";
 import { useLocalStorage } from "@/hooks/use-local-storage";
 import { authClient } from "@/lib/auth-client";
+import { omoriToast } from "@/lib/omori-toast";
 import { getKeyboardStateFromGuesses } from "@/lib/game-logic";
 import { getGuessWords } from "@/lib/game-state-utils";
 import { buildGridRows } from "@/lib/grid-view";
@@ -39,7 +40,6 @@ type UseGameStateReturn = {
   removeLetter: () => void;
   submitGuess: () => Promise<void>;
   requestHint: () => Promise<string | null>;
-  error: string | null;
   isSubmitting: boolean;
 };
 
@@ -56,7 +56,6 @@ const useGameState = ({
     () => getServerGameSnapshot(date, wordLength),
   );
 
-  const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const stateRef = useRef(state);
   const isSubmittingRef = useRef(false);
@@ -111,7 +110,6 @@ const useGameState = ({
   ]);
 
   const addLetter = (letter: string) => {
-    setError(null);
     updateGameState((prev) => {
       if (prev.status !== "playing") return prev;
       if (letter.length !== 1) return prev;
@@ -125,7 +123,6 @@ const useGameState = ({
   };
 
   const removeLetter = () => {
-    setError(null);
     updateGameState((prev) => {
       if (prev.status !== "playing") return prev;
       if (prev.currentInput.length === 0) return prev;
@@ -144,13 +141,12 @@ const useGameState = ({
 
     if (snapshot.status !== "playing") return;
     if (snapshot.currentInput.length !== snapshot.wordLength) {
-      setError("Not enough letters");
+      omoriToast.error("Not enough letters");
       return;
     }
 
     isSubmittingRef.current = true;
     setIsSubmitting(true);
-    setError(null);
 
     const submittedInput = snapshot.currentInput;
     const previousGuesses = getGuessWords(snapshot.submittedGuesses);
@@ -170,18 +166,18 @@ const useGameState = ({
         ) {
           storage.removeItem();
           notifyGameStorageChange();
-          setError(response.error);
+          omoriToast.error(response.error);
           return;
         }
 
         if (response.error === "Invalid game state") {
           storage.removeItem();
           notifyGameStorageChange();
-          setError("Invalid game state — local progress cleared.");
+          omoriToast.error("Invalid game state — local progress cleared.");
           return;
         }
 
-        setError(response.error);
+        omoriToast.error(response.error);
         return;
       }
 
@@ -222,11 +218,11 @@ const useGameState = ({
         });
 
         if (!saveResult.ok) {
-          setError(saveResult.error);
+          omoriToast.error(saveResult.error);
         }
       }
     } catch {
-      setError("Unable to submit guess right now. Please try again.");
+      omoriToast.error("Unable to submit guess right now. Please try again.");
     } finally {
       isSubmittingRef.current = false;
       setIsSubmitting(false);
@@ -243,7 +239,7 @@ const useGameState = ({
     const guesses = getGuessWords(snapshot.submittedGuesses);
 
     if (guesses.length < MIN_ATTEMPTS_FOR_HINT) {
-      setError(
+      omoriToast.info(
         `Make at least ${MIN_ATTEMPTS_FOR_HINT} guesses before using a hint.`,
       );
       return null;
@@ -257,7 +253,7 @@ const useGameState = ({
       });
 
       if (!response.ok) {
-        setError(response.error);
+        omoriToast.error(response.error);
         return null;
       }
 
@@ -269,7 +265,7 @@ const useGameState = ({
 
       return response.hint;
     } catch {
-      setError("Unable to load hint right now. Please try again.");
+      omoriToast.error("Unable to load hint right now. Please try again.");
       return null;
     }
   };
@@ -294,7 +290,6 @@ const useGameState = ({
     removeLetter,
     submitGuess,
     requestHint,
-    error,
     isSubmitting,
   };
 };
