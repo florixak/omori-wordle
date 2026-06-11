@@ -5,6 +5,7 @@ import { db } from "@/db/drizzle";
 import { friendship, gameResult, user } from "@/db/schema";
 import { getDailyDate } from "@/lib/daily-word";
 import { rankLeaderboard, toUserPreview } from "@/lib/friend-utils";
+import { AppError, ErrorCode } from "@/lib/errors";
 import type {
   FriendUserPreview,
   FriendsLeaderboard,
@@ -16,7 +17,7 @@ export const getFriendsLeaderboard = async (): Promise<FriendsLeaderboard> => {
   const session = await auth.api.getSession({ headers: await headers() });
 
   if (!session) {
-    throw new Error("Unauthorized");
+    throw new AppError(ErrorCode.UNAUTHORIZED);
   }
 
   const userId = session.user.id;

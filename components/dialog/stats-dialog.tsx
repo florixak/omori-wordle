@@ -15,6 +15,7 @@ import type { UserStats } from "@/db/schema";
 import { createStatsQueryOptions } from "@/hooks/query-options";
 import { authClient } from "@/lib/auth-client";
 import { getAvatarSrc } from "@/lib/friend-utils";
+import { resolveErrorMessage } from "@/lib/errors";
 import { computeWinRate, formatGuessDistribution } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
 import Image from "next/image";
@@ -142,7 +143,7 @@ const StatsDialog = ({ open, onOpenChange, userId }: StatsDialogProps) => {
           {session && !isStatsPending && statsError ? (
             <div className="flex flex-col items-center gap-3 py-2 text-center">
               <p className="text-[0.625rem] text-destructive sm:text-xs">
-                {statsError.message}
+                {resolveErrorMessage(statsError)}
               </p>
               <WordleButton
                 className="w-full"

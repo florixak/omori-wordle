@@ -3,6 +3,7 @@
 import { db } from "@/db/drizzle";
 import { user } from "@/db/schema";
 import { getAvatarById } from "@/lib/friend-utils";
+import { AppError, ErrorCode } from "@/lib/errors";
 import { eq } from "drizzle-orm";
 import { requireSession } from "@/actions/friends-actions";
 
@@ -16,13 +17,13 @@ export const updateAvatar = async (avatarId: string): Promise<string> => {
     .limit(1);
 
   if (existing.length === 0) {
-    throw new Error("User not found");
+    throw new AppError(ErrorCode.USER_NOT_FOUND);
   }
 
   const avatar = getAvatarById(avatarId);
 
   if (!avatar) {
-    throw new Error("Avatar not found");
+    throw new AppError(ErrorCode.AVATAR_NOT_FOUND);
   }
 
   await db

@@ -11,6 +11,7 @@ import type {
   PendingFriendRequest,
 } from "@/types/friends-types";
 import { toUserPreview } from "@/lib/friend-utils";
+import { AppError, ErrorCode } from "@/lib/errors";
 import { and, eq, inArray, ne, or, sql } from "drizzle-orm";
 import { headers } from "next/headers";
 
@@ -18,7 +19,7 @@ export const requireSession = async () => {
   const session = await auth.api.getSession({ headers: await headers() });
 
   if (!session) {
-    throw new Error("Unauthorized");
+    throw new AppError(ErrorCode.UNAUTHORIZED);
   }
 
   return session;
@@ -148,12 +149,16 @@ export const sendFriendRequest = async (
   const session = await requireSession();
 
   if (!username.trim()) {
-    return { ok: false, error: "Enter a username." };
+    return { ok: false, error: ErrorCode.USERNAME_REQUIRED };
   }
 
   const foundUser = await searchUser(username);
   if (!foundUser) {
-    return { ok: false, error: `No user found with username "${username}".` };
+    return {
+      ok: false,
+      error: ErrorCode.USER_NOT_FOUND_BY_USERNAME,
+      params: { username },
+    };
   }
 
   const existing = await db
@@ -173,7 +178,7 @@ export const sendFriendRequest = async (
     );
 
   if (existing.some((row) => row.status === "accepted")) {
-    return { ok: false, error: "You are already friends." };
+    return { ok: false, error: ErrorCode.ALREADY_FRIENDS };
   }
 
   if (
@@ -181,7 +186,7 @@ export const sendFriendRequest = async (
       (row) => row.status === "pending" && row.requesterId === session.user.id,
     )
   ) {
-    return { ok: false, error: "You already sent a request to this user." };
+    return { ok: false, error: ErrorCode.REQUEST_ALREADY_SENT };
   }
 
   if (
@@ -191,7 +196,7 @@ export const sendFriendRequest = async (
   ) {
     return {
       ok: false,
-      error: "This user already sent you a request. Accept it instead.",
+      error: ErrorCode.INCOMING_REQUEST_EXISTS,
     };
   }
 
@@ -217,17 +222,17 @@ export const respondToFriendRequest = async (
     .limit(1);
 
   if (request.length === 0) {
-    return { ok: false, error: "Request not found." };
+    return { ok: false, error: ErrorCode.REQUEST_NOT_FOUND };
   }
 
   const [requestRow] = request;
 
   if (requestRow.status !== "pending") {
-    return { ok: false, error: "Request is not pending." };
+    return { ok: false, error: ErrorCode.REQUEST_NOT_PENDING };
   }
 
   if (requestRow.addresseeId !== session.user.id) {
-    return { ok: false, error: "You cannot respond to this request." };
+    return { ok: false, error: ErrorCode.CANNOT_RESPOND_TO_REQUEST };
   }
 
   if (action === "decline") {
@@ -264,17 +269,17 @@ export const cancelOutgoingRequest = async (
     .limit(1);
 
   if (request.length === 0) {
-    return { ok: false, error: "Request not found." };
+    return { ok: false, error: ErrorCode.REQUEST_NOT_FOUND };
   }
 
   const [requestRow] = request;
 
   if (requestRow.status !== "pending") {
-    return { ok: false, error: "Request is not pending." };
+    return { ok: false, error: ErrorCode.REQUEST_NOT_PENDING };
   }
 
   if (requestRow.requesterId !== session.user.id) {
-    return { ok: false, error: "You are not the requester." };
+    return { ok: false, error: ErrorCode.NOT_REQUESTER };
   }
 
   await db
@@ -308,7 +313,7 @@ export const removeFriend = async (
     .limit(1);
 
   if (existing.length === 0) {
-    return { ok: false, error: "Friend not found." };
+    return { ok: false, error: ErrorCode.FRIEND_NOT_FOUND };
   }
 
   await db
@@ -335,7 +340,7 @@ export const isFriend = async (userId: string): Promise<boolean> => {
   const session = await requireSession();
 
   if (!session) {
-    throw new Error("Unauthorized");
+    throw new AppError(ErrorCode.UNAUTHORIZED);
   }
 
   const isFriend = await db
@@ -367,13 +372,13 @@ export const getFriendProfileByUsername = async (
   const session = await requireSession();
 
   if (!session) {
-    throw new Error("Unauthorized");
+    throw new AppError(ErrorCode.UNAUTHORIZED);
   }
 
   const normalized = username.trim().toLowerCase();
 
   if (!normalized) {
-    throw new Error("User not found");
+    throw new AppError(ErrorCode.USER_NOT_FOUND);
   }
 
   const userRows = await db
@@ -383,13 +388,13 @@ export const getFriendProfileByUsername = async (
     .limit(1);
 
   if (userRows.length === 0) {
-    throw new Error("User not found");
+    throw new AppError(ErrorCode.USER_NOT_FOUND);
   }
   const [userRow] = userRows;
   const isFriendResult = await isFriend(userRow.id);
 
   if (!isFriendResult) {
-    throw new Error("User is not a friend");
+    throw new AppError(ErrorCode.USER_IS_NOT_FRIEND);
   }
 
   return toUserPreview(userRow);

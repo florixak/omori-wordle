@@ -3,6 +3,7 @@
 import { updateAvatar } from "@/actions/profile-actions";
 import { authClient } from "@/lib/auth-client";
 import { getAvatarByImage } from "@/lib/friend-utils";
+import { resolveErrorMessage } from "@/lib/errors";
 import { omoriToast } from "@/lib/omori-toast";
 import { useMutation } from "@tanstack/react-query";
 
@@ -20,7 +21,7 @@ const useProfile = () => {
         omoriToast.success("Avatar updated");
       },
       onError: (error: Error) => {
-        omoriToast.error(error.message);
+        omoriToast.error(resolveErrorMessage(error));
       },
     });
 

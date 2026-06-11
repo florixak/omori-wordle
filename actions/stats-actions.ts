@@ -4,6 +4,7 @@ import { auth } from "@/auth";
 import { db } from "@/db/drizzle";
 import { user, UserStats, userStats } from "@/db/schema";
 import { createEmptyStats } from "@/lib/utils";
+import { AppError, ErrorCode } from "@/lib/errors";
 import { eq } from "drizzle-orm";
 import { headers } from "next/headers";
 import { isFriend } from "./friends-actions";
@@ -23,13 +24,13 @@ export const getStats = async (
   const session = await auth.api.getSession({ headers: await headers() });
 
   if (!session) {
-    throw new Error("Unauthorized");
+    throw new AppError(ErrorCode.UNAUTHORIZED);
   }
 
   if (targetUserId !== session.user.id) {
     const isFriendResult = await isFriend(targetUserId);
     if (!isFriendResult) {
-      throw new Error("User is not a friend");
+      throw new AppError(ErrorCode.USER_IS_NOT_FRIEND);
     }
   }
 
@@ -43,7 +44,7 @@ export const getStats = async (
   ]);
 
   if (userRows.length === 0) {
-    throw new Error("User not found");
+    throw new AppError(ErrorCode.USER_NOT_FOUND);
   }
 
   const [userRow] = userRows;
