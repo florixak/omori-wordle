@@ -15,8 +15,8 @@ const useProfile = () => {
       onMutate: () => {
         omoriToast.loading("Updating avatar...");
       },
-      onSuccess: () => {
-        void refetchSession();
+      onSuccess: async () => {
+        await refetchSession();
         omoriToast.success("Avatar updated");
       },
       onError: (error: Error) => {
