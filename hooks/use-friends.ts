@@ -12,6 +12,7 @@ import { authClient } from "@/lib/auth-client";
 import { assertFriendActionResult } from "@/lib/friend-utils";
 import { omoriToast } from "@/lib/omori-toast";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import toast from "react-hot-toast";
 
 type UseFriendsProps = {
   open: boolean;
@@ -51,18 +52,23 @@ const useFriends = ({ open, onOpenChange }: UseFriendsProps) => {
   const createFriendMutationOptions = (
     successMessage: string,
     loadingMessage: string,
-  ) => ({
-    onMutate: () => {
-      omoriToast.loading(loadingMessage);
-    },
-    onSuccess: () => {
-      invalidateOverview();
-      omoriToast.success(successMessage);
-    },
-    onError: (mutationError: Error) => {
-      omoriToast.error(mutationError.message);
-    },
-  });
+  ) => {
+    let loadingToastId: string | undefined;
+    return {
+      onMutate: () => {
+        loadingToastId = omoriToast.loading(loadingMessage);
+      },
+      onSuccess: () => {
+        if (loadingToastId) toast.dismiss(loadingToastId);
+        invalidateOverview();
+        omoriToast.success(successMessage);
+      },
+      onError: (mutationError: Error) => {
+        if (loadingToastId) toast.dismiss(loadingToastId);
+        omoriToast.error(mutationError.message);
+      },
+    };
+  };
 
   const { mutate: sendRequest, isPending: isSendPending } = useMutation({
     mutationFn: async (username: string) => {
