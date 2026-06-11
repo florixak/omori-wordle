@@ -12,6 +12,9 @@ const useProfile = () => {
   const { mutate: updateAvatarMutation, isPending: isUpdatingAvatar } =
     useMutation({
       mutationFn: updateAvatar,
+      onMutate: () => {
+        omoriToast.loading("Updating avatar...");
+      },
       onSuccess: () => {
         void refetchSession();
         omoriToast.success("Avatar updated");
