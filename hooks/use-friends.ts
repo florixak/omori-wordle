@@ -48,7 +48,13 @@ const useFriends = ({ open, onOpenChange }: UseFriendsProps) => {
     });
   };
 
-  const createFriendMutationOptions = (successMessage: string) => ({
+  const createFriendMutationOptions = (
+    successMessage: string,
+    loadingMessage: string,
+  ) => ({
+    onMutate: () => {
+      omoriToast.loading(loadingMessage);
+    },
     onSuccess: () => {
       invalidateOverview();
       omoriToast.success(successMessage);
@@ -63,7 +69,7 @@ const useFriends = ({ open, onOpenChange }: UseFriendsProps) => {
       const result = await sendFriendRequest(username);
       assertFriendActionResult(result);
     },
-    ...createFriendMutationOptions("Request sent"),
+    ...createFriendMutationOptions("Request sent", "Sending friend request..."),
   });
 
   const { mutate: respondToRequest, isPending: isRespondPending } = useMutation(
@@ -96,7 +102,10 @@ const useFriends = ({ open, onOpenChange }: UseFriendsProps) => {
         const result = await cancelOutgoingRequest(requestId);
         assertFriendActionResult(result);
       },
-      ...createFriendMutationOptions("Request cancelled"),
+      ...createFriendMutationOptions(
+        "Request cancelled",
+        "Cancelling request...",
+      ),
     });
 
   const { mutate: removeFriendAction, isPending: isRemovePending } =
@@ -105,7 +114,7 @@ const useFriends = ({ open, onOpenChange }: UseFriendsProps) => {
         const result = await removeFriend(friendUserId);
         assertFriendActionResult(result);
       },
-      ...createFriendMutationOptions("Friend removed"),
+      ...createFriendMutationOptions("Friend removed", "Removing friend..."),
     });
 
   const isMutating =
