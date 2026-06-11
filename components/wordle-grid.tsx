@@ -7,11 +7,10 @@ import WordleTile from "./wordle-tile";
 
 type WordleGridProps = {
   gridRows: GridTile[][];
-  error: string | null;
   wordLength: number;
 };
 
-const WordleGrid = ({ gridRows, error, wordLength }: WordleGridProps) => {
+const WordleGrid = ({ gridRows, wordLength }: WordleGridProps) => {
   const tileGapRem = 0.375;
   const prefersReducedMotion = useReducedMotion();
 
@@ -49,9 +48,6 @@ const WordleGrid = ({ gridRows, error, wordLength }: WordleGridProps) => {
           </div>
         ))}
       </div>
-      {error ? (
-        <p className="text-center text-xs text-red-600 sm:text-sm">{error}</p>
-      ) : null}
     </div>
   );
 };

@@ -1,3 +1,5 @@
+"use client";
+
 import WordleButton from "@/components/wordle-button";
 import { FriendListEntry } from "@/types/friends-types";
 import { SectionTitle } from "@/components/dialog/friends-dialog";

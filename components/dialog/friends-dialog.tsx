@@ -53,7 +53,6 @@ const FriendsDialog = ({ open, onOpenChange }: FriendsDialogProps) => {
     isOverviewPending,
     isBusy,
     error,
-    actionMessage,
     refetch,
   } = useFriends({ open, onOpenChange });
 
@@ -141,12 +140,6 @@ const FriendsDialog = ({ open, onOpenChange }: FriendsDialogProps) => {
                   onSendRequest={(username) => handleSendRequest(username)}
                 />
               </>
-            ) : null}
-
-            {actionMessage ? (
-              <p className="text-center text-[0.625rem] text-muted-foreground sm:text-xs">
-                {actionMessage}
-              </p>
             ) : null}
           </div>
 

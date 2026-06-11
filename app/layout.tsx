@@ -7,6 +7,7 @@ import type { Metadata, Viewport } from "next";
 import { Silkscreen } from "next/font/google";
 import { Suspense } from "react";
 import "./globals.css";
+import { Toaster } from "react-hot-toast";
 
 const pixelFont = Silkscreen({
   subsets: ["latin"],
@@ -37,6 +38,18 @@ export default function RootLayout({
           <Suspense fallback={<div>Loading...</div>}>
             <Footer />
           </Suspense>
+          <Toaster
+            position="bottom-right"
+            containerStyle={{ bottom: 16, right: 16 }}
+            toastOptions={{
+              style: {
+                background: "transparent",
+                boxShadow: "none",
+                padding: 0,
+                margin: 0,
+              },
+            }}
+          />
         </Providers>
       </body>
     </html>
