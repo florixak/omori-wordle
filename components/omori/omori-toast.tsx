@@ -1,5 +1,3 @@
-"use client";
-
 import { cn } from "@/lib/utils";
 import type { Toast as HotToast } from "react-hot-toast";
 
