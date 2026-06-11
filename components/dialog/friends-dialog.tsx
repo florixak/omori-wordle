@@ -17,6 +17,7 @@ import {
   OmoriDialogHeader,
   OmoriDialogTitle,
 } from "../omori/omori-dialog";
+import ConfirmDialog from "./confirm-dialog";
 
 type FriendsDialogProps = {
   open: boolean;
@@ -40,6 +41,7 @@ const SkeletonBlock = ({ className }: { className?: string }) => (
 
 const FriendsDialog = ({ open, onOpenChange }: FriendsDialogProps) => {
   const [statsUserId, setStatsUserId] = useState<string | null>(null);
+  const [confirmUserId, setConfirmUserId] = useState<string | null>(null);
 
   const {
     session,
@@ -133,7 +135,7 @@ const FriendsDialog = ({ open, onOpenChange }: FriendsDialogProps) => {
                 <FriendsListSection
                   friends={overview.friends}
                   isBusy={isBusy}
-                  onRemove={(userId) => handleRemoveFriend(userId)}
+                  onRemove={(userId) => setConfirmUserId(userId)}
                   onViewStats={(userId) => setStatsUserId(userId)}
                 />
                 <AddFriendSection
@@ -162,6 +164,19 @@ const FriendsDialog = ({ open, onOpenChange }: FriendsDialogProps) => {
           }
         }}
         userId={statsUserId ?? undefined}
+      />
+      <ConfirmDialog
+        open={open && confirmUserId !== null}
+        onOpenChange={(isOpen) => {
+          if (!isOpen) {
+            setConfirmUserId(null);
+          }
+        }}
+        title="Remove friend"
+        description="Are you sure you want to remove this friend?"
+        onConfirm={() => handleRemoveFriend(confirmUserId ?? "")}
+        onCancel={() => setConfirmUserId(null)}
+        isLoading={isBusy && confirmUserId !== null}
       />
     </>
   );
