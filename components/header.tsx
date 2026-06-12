@@ -9,7 +9,7 @@ import { getAvatarSrc } from "@/lib/friend-utils";
 import { BarChart, Lightbulb, LogOut, Trophy, User, Users } from "lucide-react";
 import Image from "next/image";
 import { useState } from "react";
-import AvatarsDialog from "./dialog/avatars-dialog";
+import ProfileDialog from "./dialog/profile-dialog";
 import OmoriLoginDialog from "./dialog/login-dialog";
 import OmoriButton from "./omori/omori-button";
 import { resolveErrorMessage } from "@/lib/errors";
@@ -22,7 +22,7 @@ const Header = () => {
   const [showStatsDialog, setShowStatsDialog] = useState(false);
   const [showFriendsDialog, setShowFriendsDialog] = useState(false);
   const [showLeaderboardDialog, setShowLeaderboardDialog] = useState(false);
-  const [showAvatarsDialog, setShowAvatarsDialog] = useState(false);
+  const [showProfileDialog, setShowProfileDialog] = useState(false);
 
   const handleLogout = async () => {
     try {
@@ -74,7 +74,7 @@ const Header = () => {
               {session.user.name}
             </span>
             <button
-              onClick={() => setShowAvatarsDialog(true)}
+              onClick={() => setShowProfileDialog(true)}
               className="p-0 cursor-pointer"
             >
               <Image
@@ -128,9 +128,9 @@ const Header = () => {
         open={showLeaderboardDialog}
         onOpenChange={setShowLeaderboardDialog}
       />
-      <AvatarsDialog
-        open={showAvatarsDialog}
-        onOpenChange={setShowAvatarsDialog}
+      <ProfileDialog
+        open={showProfileDialog}
+        onOpenChange={setShowProfileDialog}
       />
     </header>
   );
