@@ -12,7 +12,7 @@ import {
   OmoriDialogHeader,
   OmoriDialogTitle,
 } from "@/components/omori/omori-dialog";
-import WordleButton from "@/components/wordle-button";
+import OmoriButton from "@/components/omori/omori-button";
 
 type HintDialogProps = {
   open: boolean;
@@ -64,7 +64,7 @@ const HintDialog = ({ open, onOpenChange }: HintDialogProps) => {
         </OmoriDialogHeader>
         <OmoriDialogFooter>
           {!isRevealed ? (
-            <WordleButton
+            <OmoriButton
               className="w-full gap-2"
               onClick={handleRevealHint}
               disabled={isHintLoading || !canRequestHint || !gameActions}
@@ -74,14 +74,14 @@ const HintDialog = ({ open, onOpenChange }: HintDialogProps) => {
                 : !canRequestHint
                   ? `${guessesRemaining} ${guessLabel} left`
                   : "Reveal hint"}
-            </WordleButton>
+            </OmoriButton>
           ) : (
-            <WordleButton
+            <OmoriButton
               className="w-full gap-2"
               onClick={() => onOpenChange(false)}
             >
               Got it!
-            </WordleButton>
+            </OmoriButton>
           )}
         </OmoriDialogFooter>
       </OmoriDialogContent>

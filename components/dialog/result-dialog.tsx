@@ -9,7 +9,7 @@ import {
   OmoriDialogHeader,
   OmoriDialogTitle,
 } from "@/components/omori/omori-dialog";
-import WordleButton from "@/components/wordle-button";
+import OmoriButton from "@/components/omori/omori-button";
 import { cn } from "@/lib/utils";
 
 type ResultDialogProps = {
@@ -49,12 +49,12 @@ const ResultDialog = ({
           <span className="text-sm sm:text-base">{hint}</span>{" "}
         </div>
         <OmoriDialogFooter>
-          <WordleButton
+          <OmoriButton
             className={cn("w-full gap-2", "omori-button-default")}
             onClick={() => onOpenChange(false)}
           >
             Share result
-          </WordleButton>
+          </OmoriButton>
         </OmoriDialogFooter>
       </OmoriDialogContent>
     </OmoriDialog>

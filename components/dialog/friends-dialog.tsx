@@ -4,7 +4,7 @@ import StatsDialog from "@/components/dialog/stats-dialog";
 import AddFriendSection from "@/components/friends/add-friend-section";
 import FriendsListSection from "@/components/friends/friends-list-section";
 import PendingRequestsSection from "@/components/friends/pending-requests-section";
-import WordleButton from "@/components/wordle-button";
+import OmoriButton from "@/components/omori/omori-button";
 import useFriends from "@/hooks/use-friends";
 import { resolveErrorMessage } from "@/lib/errors";
 import { cn } from "@/lib/utils";
@@ -90,9 +90,9 @@ const FriendsDialog = ({ open, onOpenChange }: FriendsDialogProps) => {
                 <p className="text-[0.625rem] leading-relaxed sm:text-xs">
                   Sign in with Discord to add friends and manage requests.
                 </p>
-                <WordleButton className="w-full" onClick={handleLogin}>
+                <OmoriButton className="w-full" onClick={handleLogin}>
                   Continue with Discord
-                </WordleButton>
+                </OmoriButton>
               </div>
             ) : null}
 
@@ -109,13 +109,13 @@ const FriendsDialog = ({ open, onOpenChange }: FriendsDialogProps) => {
                 <p className="text-[0.625rem] text-destructive sm:text-xs">
                   {resolveErrorMessage(error)}
                 </p>
-                <WordleButton
+                <OmoriButton
                   className="w-full"
                   onClick={() => void refetch()}
                   disabled={isBusy}
                 >
                   {isBusy ? "Retrying…" : "Try again"}
-                </WordleButton>
+                </OmoriButton>
               </div>
             ) : null}
 
@@ -147,12 +147,12 @@ const FriendsDialog = ({ open, onOpenChange }: FriendsDialogProps) => {
           </div>
 
           <OmoriDialogFooter className="gap-3 pt-2">
-            <WordleButton
+            <OmoriButton
               className="w-full"
               onClick={() => handleOpenChange(false)}
             >
               Close
-            </WordleButton>
+            </OmoriButton>
           </OmoriDialogFooter>
         </OmoriDialogContent>
       </OmoriDialog>

@@ -1,6 +1,6 @@
 import { searchUser } from "@/actions/friends-actions";
 import { useState } from "react";
-import WordleButton from "../wordle-button";
+import OmoriButton from "../omori/omori-button";
 import { SectionTitle } from "../dialog/friends-dialog";
 
 const AddFriendSection = ({
@@ -47,21 +47,21 @@ const AddFriendSection = ({
           className="omori-border h-10 w-full bg-[var(--omori-empty)] px-3 font-pixel text-[0.625rem] uppercase outline-none placeholder:normal-case placeholder:text-muted-foreground sm:text-xs"
         />
         <div className="grid grid-cols-2 gap-2">
-          <WordleButton
+          <OmoriButton
             type="button"
             className="w-full text-[0.625rem] sm:text-xs"
             disabled={isBusy || username.trim().length === 0}
             onClick={() => void handleSearch()}
           >
             Search
-          </WordleButton>
-          <WordleButton
+          </OmoriButton>
+          <OmoriButton
             type="submit"
             className="w-full text-[0.625rem] sm:text-xs"
             disabled={isBusy || username.trim().length === 0}
           >
             Send request
-          </WordleButton>
+          </OmoriButton>
         </div>
       </form>
       {searchResult ? (
