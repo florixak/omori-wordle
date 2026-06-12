@@ -1,13 +1,17 @@
 "use client";
 
-import { updateAvatar } from "@/actions/profile-actions";
+import { deleteAccount, updateAvatar } from "@/actions/profile-actions";
 import { authClient } from "@/lib/auth-client";
-import { getAvatarByImage } from "@/lib/friend-utils";
 import { resolveErrorMessage } from "@/lib/errors";
+import { getAvatarByImage } from "@/lib/friend-utils";
 import { omoriToast } from "@/lib/omori-toast";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useRouter } from "next/navigation";
+import toast from "react-hot-toast";
 
 const useProfile = () => {
+  const queryClient = useQueryClient();
+  const router = useRouter();
   const { data: session, refetch: refetchSession } = authClient.useSession();
 
   const { mutate: updateAvatarMutation, isPending: isUpdatingAvatar } =
@@ -25,6 +29,31 @@ const useProfile = () => {
       },
     });
 
+  const { mutateAsync: deleteAccountMutation, isPending: isDeletingAccount } =
+    useMutation({
+      mutationFn: deleteAccount,
+      onMutate: () => {
+        return omoriToast.loading("Deleting account...");
+      },
+      onSuccess: async (_, __, loadingToastId) => {
+        if (typeof loadingToastId === "string") {
+          toast.dismiss(loadingToastId);
+        }
+
+        queryClient.clear();
+        await authClient.signOut();
+        router.refresh();
+        omoriToast.success("Account deleted");
+      },
+      onError: (error: Error, _, loadingToastId) => {
+        if (typeof loadingToastId === "string") {
+          toast.dismiss(loadingToastId);
+        }
+
+        omoriToast.error(resolveErrorMessage(error));
+      },
+    });
+
   const selectedAvatarId =
     getAvatarByImage(session?.user.image ?? null)?.id ?? undefined;
 
@@ -32,6 +61,8 @@ const useProfile = () => {
     updateAvatarMutation,
     isUpdatingAvatar,
     selectedAvatarId,
+    deleteAccountMutation,
+    isDeletingAccount,
   };
 };
 

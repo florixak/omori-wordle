@@ -20,5 +20,10 @@ export const auth = betterAuth({
       clientSecret: process.env.DISCORD_CLIENT_SECRET as string,
     },
   },
+  user: {
+    deleteUser: {
+      enabled: true,
+    },
+  },
   plugins: [nextCookies()],
 });

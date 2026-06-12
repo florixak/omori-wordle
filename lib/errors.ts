@@ -29,6 +29,8 @@ export const ErrorCode = {
   FRIEND_NOT_FOUND: "FRIEND_NOT_FOUND",
   USER_IS_NOT_FRIEND: "USER_IS_NOT_FRIEND",
   AVATAR_NOT_FOUND: "AVATAR_NOT_FOUND",
+  DELETE_ACCOUNT_FAILED: "DELETE_ACCOUNT_FAILED",
+  DELETE_ACCOUNT_SESSION_EXPIRED: "DELETE_ACCOUNT_SESSION_EXPIRED",
 } as const;
 
 export type ErrorCode = (typeof ErrorCode)[keyof typeof ErrorCode];
@@ -67,7 +69,10 @@ export const ERROR_MESSAGES: Record<ErrorCode, string> = {
   FRIEND_NOT_FOUND: "Friend not found.",
   USER_IS_NOT_FRIEND: "User is not a friend",
   AVATAR_NOT_FOUND: "Avatar not found",
-};
+  DELETE_ACCOUNT_FAILED: "Unable to delete account. Please try again.",
+  DELETE_ACCOUNT_SESSION_EXPIRED:
+    "Please sign out and sign in again before deleting your account.",
+} as const;
 
 export type ErrorResult = { ok: false; error: ErrorCode; params?: ErrorParams };
 
