@@ -27,6 +27,8 @@ import {
 import { GameState, GridTile, TileEvaluation } from "@/types/game-types";
 import { useHotkey } from "@tanstack/react-hotkeys";
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
+import { invalidateUserStats } from "./query-options";
+import { useQueryClient } from "@tanstack/react-query";
 
 type UseGameProps = {
   date: string;
@@ -50,6 +52,7 @@ const useGameState = ({
 }: UseGameProps): UseGameStateReturn => {
   const { data: session } = authClient.useSession();
   const storage = useLocalStorage<GameState>(GAME_STORAGE_KEY);
+  const queryClient = useQueryClient();
 
   const state = useSyncExternalStore(
     subscribeToGameStorage,
@@ -221,6 +224,8 @@ const useGameState = ({
         if (!saveResult.ok) {
           omoriToast.error(getErrorMessage(saveResult.error));
         }
+
+        invalidateUserStats(queryClient, session.user.id);
       }
     } catch {
       omoriToast.error(getErrorMessage(ErrorCode.SUBMIT_GUESS_FAILED));
@@ -261,6 +266,8 @@ const useGameState = ({
         hintUsed: true,
         hint: response.hint,
       }));
+
+      invalidateUserStats(queryClient, session?.user.id ?? "");
 
       return response.hint;
     } catch {
