@@ -14,7 +14,7 @@ import {
   OmoriDialogHeader,
   OmoriDialogTitle,
 } from "@/components/omori/omori-dialog";
-import WordleButton from "@/components/wordle-button";
+import OmoriButton from "@/components/omori/omori-button";
 
 type AvatarsDialogProps = {
   open: boolean;
@@ -81,7 +81,7 @@ const AvatarsDialog = ({ open, onOpenChange }: AvatarsDialogProps) => {
           ))}
         </div>
         <OmoriDialogFooter>
-          <WordleButton
+          <OmoriButton
             onClick={handleSubmit}
             disabled={
               isUpdatingAvatar ||
@@ -90,7 +90,7 @@ const AvatarsDialog = ({ open, onOpenChange }: AvatarsDialogProps) => {
             }
           >
             {isUpdatingAvatar ? "Updating..." : "Update Avatar"}
-          </WordleButton>
+          </OmoriButton>
         </OmoriDialogFooter>
       </OmoriDialogContent>
     </OmoriDialog>

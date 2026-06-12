@@ -1,6 +1,6 @@
 "use client";
 
-import WordleButton from "@/components/wordle-button";
+import OmoriButton from "@/components/omori/omori-button";
 import { FriendListEntry } from "@/types/friends-types";
 import { SectionTitle } from "@/components/dialog/friends-dialog";
 import UserRow from "./user-row";
@@ -31,22 +31,22 @@ const FriendsListSection = ({
             user={user}
             trailing={
               <>
-                <WordleButton
+                <OmoriButton
                   disabled={isBusy}
                   onClick={() => onViewStats(user.id)}
                   aria-label={`View stats for ${user.name}`}
                   title={`View stats for ${user.name}`}
                 >
                   <BarChart size={24} />
-                </WordleButton>
-                <WordleButton
+                </OmoriButton>
+                <OmoriButton
                   disabled={isBusy}
                   onClick={() => onRemove(user.id)}
                   aria-label={`Remove ${user.name} from friends`}
                   title={`Remove ${user.name} from friends`}
                 >
                   <X size={24} />
-                </WordleButton>
+                </OmoriButton>
               </>
             }
           />

@@ -11,7 +11,7 @@ import Image from "next/image";
 import { useState } from "react";
 import AvatarsDialog from "./dialog/avatars-dialog";
 import OmoriLoginDialog from "./dialog/login-dialog";
-import WordleButton from "./wordle-button";
+import OmoriButton from "./omori/omori-button";
 import { resolveErrorMessage } from "@/lib/errors";
 import { omoriToast } from "@/lib/omori-toast";
 
@@ -42,29 +42,29 @@ const Header = () => {
   return (
     <header className="absolute top-0 left-0 right-0 flex justify-between items-center p-4 gap-2 md:gap-4">
       <div className="flex items-center gap-2 flex-wrap justify-start">
-        <WordleButton
+        <OmoriButton
           className="py-0"
           aria-label="Stats"
           onClick={() => setShowStatsDialog(true)}
         >
           <BarChart size={24} />
-        </WordleButton>
+        </OmoriButton>
         {session ? (
-          <WordleButton
+          <OmoriButton
             className="py-0"
             aria-label="Friends leaderboard"
             onClick={() => setShowLeaderboardDialog(true)}
           >
             <Trophy size={24} />
-          </WordleButton>
+          </OmoriButton>
         ) : null}
-        <WordleButton
+        <OmoriButton
           className="py-0"
           aria-label="Hint"
           onClick={() => setShowHintDialog(true)}
         >
           <Lightbulb size={24} />
-        </WordleButton>
+        </OmoriButton>
       </div>
       <div className="flex-1"></div>
       <div className="flex items-center gap-2 flex-wrap justify-end">
@@ -86,30 +86,30 @@ const Header = () => {
                 className="size-10 shrink-0 rounded border border-black"
               />
             </button>
-            <WordleButton
+            <OmoriButton
               className="py-0"
               aria-label="Logout"
               onClick={handleLogout}
             >
               <LogOut size={24} />
-            </WordleButton>
+            </OmoriButton>
 
-            <WordleButton
+            <OmoriButton
               className="py-0"
               aria-label="Friends"
               onClick={() => setShowFriendsDialog(true)}
             >
               <Users size={24} />
-            </WordleButton>
+            </OmoriButton>
           </>
         ) : (
-          <WordleButton
+          <OmoriButton
             className="py-0"
             aria-label="Login"
             onClick={() => setShowLoginDialog(true)}
           >
             <User size={24} />
-          </WordleButton>
+          </OmoriButton>
         )}
       </div>
       <OmoriLoginDialog

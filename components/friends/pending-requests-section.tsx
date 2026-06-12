@@ -1,7 +1,7 @@
 import { PendingFriendRequest } from "@/types/friends-types";
 import { SectionTitle } from "@/components/dialog/friends-dialog";
 import UserRow from "./user-row";
-import WordleButton from "@/components/wordle-button";
+import OmoriButton from "@/components/omori/omori-button";
 import { Check, X } from "lucide-react";
 
 const PendingRequestsSection = ({
@@ -30,32 +30,32 @@ const PendingRequestsSection = ({
             trailing={
               request.direction === "incoming" ? (
                 <>
-                  <WordleButton
+                  <OmoriButton
                     disabled={isBusy}
                     onClick={() => onRespond(request.id, "accept")}
                     aria-label={`Accept request from ${request.user.name}`}
                     title={`Accept request from ${request.user.name}`}
                   >
                     <Check size={24} />
-                  </WordleButton>
-                  <WordleButton
+                  </OmoriButton>
+                  <OmoriButton
                     disabled={isBusy}
                     onClick={() => onRespond(request.id, "decline")}
                     aria-label={`Decline request from ${request.user.name}`}
                     title={`Decline request from ${request.user.name}`}
                   >
                     <X size={24} />
-                  </WordleButton>
+                  </OmoriButton>
                 </>
               ) : (
-                <WordleButton
+                <OmoriButton
                   disabled={isBusy}
                   onClick={() => onCancel(request.id)}
                   aria-label={`Cancel request to ${request.user.name}`}
                   title={`Cancel request to ${request.user.name}`}
                 >
                   <X size={24} />
-                </WordleButton>
+                </OmoriButton>
               )
             }
           />

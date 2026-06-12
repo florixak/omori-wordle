@@ -1,7 +1,7 @@
 "use client";
 
 import LeaderboardSection from "@/components/friends/leaderboard-section";
-import WordleButton from "@/components/wordle-button";
+import OmoriButton from "@/components/omori/omori-button";
 import useLeaderboard from "@/hooks/use-leaderboard";
 import { resolveErrorMessage } from "@/lib/errors";
 import { cn } from "@/lib/utils";
@@ -12,7 +12,7 @@ import {
   OmoriDialogFooter,
   OmoriDialogHeader,
   OmoriDialogTitle,
-} from "../omori/omori-dialog";
+} from "@/components/omori/omori-dialog";
 
 type LeaderboardDialogProps = {
   open: boolean;
@@ -62,9 +62,9 @@ const LeaderboardDialog = ({ open, onOpenChange }: LeaderboardDialogProps) => {
               <p className="text-[0.625rem] leading-relaxed sm:text-xs">
                 Sign in with Discord to view the friends-only daily leaderboard.
               </p>
-              <WordleButton className="w-full" onClick={handleLogin}>
+              <OmoriButton className="w-full" onClick={handleLogin}>
                 Continue with Discord
-              </WordleButton>
+              </OmoriButton>
             </div>
           ) : null}
 
@@ -80,9 +80,9 @@ const LeaderboardDialog = ({ open, onOpenChange }: LeaderboardDialogProps) => {
               <p className="text-[0.625rem] text-destructive sm:text-xs">
                 {resolveErrorMessage(error)}
               </p>
-              <WordleButton className="w-full" onClick={() => void refetch()}>
+              <OmoriButton className="w-full" onClick={() => void refetch()}>
                 Try again
-              </WordleButton>
+              </OmoriButton>
             </div>
           ) : null}
 
@@ -95,12 +95,12 @@ const LeaderboardDialog = ({ open, onOpenChange }: LeaderboardDialogProps) => {
         </div>
 
         <OmoriDialogFooter className="gap-3 pt-2">
-          <WordleButton
+          <OmoriButton
             className="w-full"
             onClick={() => handleOpenChange(false)}
           >
             Close
-          </WordleButton>
+          </OmoriButton>
         </OmoriDialogFooter>
       </OmoriDialogContent>
     </OmoriDialog>

@@ -7,7 +7,7 @@ import {
   TileDisplayState,
   TileEvaluation,
 } from "@/types/game-types";
-import WordleButton from "./wordle-button";
+import OmoriButton from "./omori/omori-button";
 
 type WordleKeyboardProps = {
   keyboardState: Record<string, TileEvaluation>;
@@ -72,15 +72,15 @@ const WordleKeyboard = ({
           >
             {isBottomRow ? (
               <>
-                <WordleButton
+                <OmoriButton
                   onClick={handleSubmitGuess}
                   disabled={isLocked}
                   className="min-w-0 px-0.5 sm:px-1"
                 >
                   ENTER
-                </WordleButton>
+                </OmoriButton>
                 {row.map((letter) => (
-                  <WordleButton
+                  <OmoriButton
                     key={letter}
                     onClick={() => handleAddLetter(letter)}
                     disabled={isLocked}
@@ -90,19 +90,19 @@ const WordleKeyboard = ({
                     )}
                   >
                     {letter}
-                  </WordleButton>
+                  </OmoriButton>
                 ))}
-                <WordleButton
+                <OmoriButton
                   onClick={handleRemoveLetter}
                   disabled={isLocked}
                   className="min-w-7 sm:min-w-0 px-0.5 flex-1 sm:px-1"
                 >
                   ⌫
-                </WordleButton>
+                </OmoriButton>
               </>
             ) : (
               row.map((letter) => (
-                <WordleButton
+                <OmoriButton
                   key={letter}
                   onClick={() => handleAddLetter(letter)}
                   disabled={isLocked}
@@ -112,7 +112,7 @@ const WordleKeyboard = ({
                   )}
                 >
                   {letter}
-                </WordleButton>
+                </OmoriButton>
               ))
             )}
           </div>

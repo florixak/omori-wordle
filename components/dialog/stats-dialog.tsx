@@ -10,7 +10,7 @@ import {
   OmoriDialogTitle,
 } from "@/components/omori/omori-dialog";
 import StatCell from "@/components/stat-cell";
-import WordleButton from "@/components/wordle-button";
+import OmoriButton from "@/components/omori/omori-button";
 import type { UserStats } from "@/db/schema";
 import { createStatsQueryOptions } from "@/hooks/query-options";
 import { authClient } from "@/lib/auth-client";
@@ -113,9 +113,9 @@ const StatsDialog = ({ open, onOpenChange, userId }: StatsDialogProps) => {
                 Sign in with Discord to track wins, streaks, and guess
                 distribution.
               </p>
-              <WordleButton className="w-full" onClick={handleLogin}>
+              <OmoriButton className="w-full" onClick={handleLogin}>
                 Continue with Discord
-              </WordleButton>
+              </OmoriButton>
             </div>
           ) : null}
 
@@ -145,12 +145,12 @@ const StatsDialog = ({ open, onOpenChange, userId }: StatsDialogProps) => {
               <p className="text-[0.625rem] text-destructive sm:text-xs">
                 {resolveErrorMessage(statsError)}
               </p>
-              <WordleButton
+              <OmoriButton
                 className="w-full"
                 onClick={() => void refetchStats()}
               >
                 Try again
-              </WordleButton>
+              </OmoriButton>
             </div>
           ) : null}
 
@@ -179,9 +179,9 @@ const StatsDialog = ({ open, onOpenChange, userId }: StatsDialogProps) => {
           <p className="text-center text-[0.625rem] leading-relaxed text-muted-foreground sm:text-xs">
             Every day you return, HEADSPACE grows stronger…
           </p>
-          <WordleButton className="w-full" onClick={() => onOpenChange(false)}>
+          <OmoriButton className="w-full" onClick={() => onOpenChange(false)}>
             Close
-          </WordleButton>
+          </OmoriButton>
         </OmoriDialogFooter>
       </OmoriDialogContent>
     </OmoriDialog>

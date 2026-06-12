@@ -1,4 +1,4 @@
-import React from "react";
+import OmoriButton from "@/components/omori/omori-button";
 import {
   OmoriDialog,
   OmoriDialogContent,
@@ -6,8 +6,7 @@ import {
   OmoriDialogFooter,
   OmoriDialogHeader,
   OmoriDialogTitle,
-} from "../omori/omori-dialog";
-import WordleButton from "../wordle-button";
+} from "@/components/omori/omori-dialog";
 import { cn } from "@/lib/utils";
 
 type ConfirmDialogProps = {
@@ -37,22 +36,22 @@ const ConfirmDialog = ({
         </OmoriDialogHeader>
         <OmoriDialogDescription>{description}</OmoriDialogDescription>
         <OmoriDialogFooter>
-          <WordleButton
+          <OmoriButton
             className="w-full gap-2"
             onClick={onCancel}
             tabIndex={0}
             disabled={isLoading}
           >
             Cancel
-          </WordleButton>
-          <WordleButton
+          </OmoriButton>
+          <OmoriButton
             className={cn("w-full gap-2", "omori-button-default")}
             onClick={onConfirm}
             tabIndex={0}
             disabled={isLoading}
           >
             Confirm
-          </WordleButton>
+          </OmoriButton>
         </OmoriDialogFooter>
       </OmoriDialogContent>
     </OmoriDialog>

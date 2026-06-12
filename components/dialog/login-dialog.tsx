@@ -6,7 +6,7 @@ import {
   OmoriDialogHeader,
   OmoriDialogTitle,
 } from "@/components/omori/omori-dialog";
-import WordleButton from "@/components/wordle-button";
+import OmoriButton from "@/components/omori/omori-button";
 
 type OmoriLoginDialogProps = {
   open: boolean;
@@ -36,13 +36,13 @@ const OmoriLoginDialog = ({
           </OmoriDialogDescription>
         </OmoriDialogHeader>
         <OmoriDialogFooter>
-          <WordleButton
+          <OmoriButton
             className="w-full gap-2"
             onClick={handleLogin}
             disabled={isLoading}
           >
             Continue with Discord
-          </WordleButton>
+          </OmoriButton>
         </OmoriDialogFooter>
       </OmoriDialogContent>
     </OmoriDialog>
