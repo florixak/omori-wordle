@@ -2,13 +2,13 @@
 
 import { cn } from "@/lib/utils";
 import React from "react";
-import { Button } from "../ui/button";
+import { Button } from "@/components/ui/button";
 
-type WordleButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> & {
+type OmoriButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> & {
   children: React.ReactNode;
 };
 
-const OmoriButton = ({ children, className, ...props }: WordleButtonProps) => {
+const OmoriButton = ({ children, className, ...props }: OmoriButtonProps) => {
   return (
     <Button
       {...props}

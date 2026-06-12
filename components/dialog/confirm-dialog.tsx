@@ -1,4 +1,4 @@
-import React from "react";
+import OmoriButton from "@/components/omori/omori-button";
 import {
   OmoriDialog,
   OmoriDialogContent,
@@ -6,8 +6,7 @@ import {
   OmoriDialogFooter,
   OmoriDialogHeader,
   OmoriDialogTitle,
-} from "../omori/omori-dialog";
-import OmoriButton from "../omori/omori-button";
+} from "@/components/omori/omori-dialog";
 import { cn } from "@/lib/utils";
 
 type ConfirmDialogProps = {

@@ -16,7 +16,7 @@ import {
   OmoriDialogFooter,
   OmoriDialogHeader,
   OmoriDialogTitle,
-} from "../omori/omori-dialog";
+} from "@/components/omori/omori-dialog";
 import ConfirmDialog from "./confirm-dialog";
 
 type FriendsDialogProps = {

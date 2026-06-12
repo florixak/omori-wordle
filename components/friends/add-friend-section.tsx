@@ -1,7 +1,7 @@
 import { searchUser } from "@/actions/friends-actions";
 import { useState } from "react";
-import OmoriButton from "../omori/omori-button";
-import { SectionTitle } from "../dialog/friends-dialog";
+import OmoriButton from "@/components/omori/omori-button";
+import { SectionTitle } from "@/components/dialog/friends-dialog";
 
 const AddFriendSection = ({
   onSendRequest,
