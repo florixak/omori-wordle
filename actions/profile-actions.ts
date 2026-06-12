@@ -58,14 +58,10 @@ export const deleteAccount = async (): Promise<void> => {
         );
     });
 
-    const result = await auth.api.deleteUser({
+    await auth.api.deleteUser({
       headers: await headers(),
       body: {},
     });
-
-    if (!result.success) {
-      throw new AppError(ErrorCode.DELETE_ACCOUNT_FAILED);
-    }
   } catch (error) {
     if (error instanceof AppError) {
       throw error;
