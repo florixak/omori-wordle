@@ -53,6 +53,16 @@ const AVATARS: Avatar[] = [
     name: "Basil",
     image: "/avatars/basil.png",
   },
+  {
+    id: "5",
+    name: "Mari",
+    image: "/avatars/mari.png",
+  },
+  {
+    id: "6",
+    name: "Hector",
+    image: "/avatars/hector.png",
+  },
 ] as const;
 
 export {
