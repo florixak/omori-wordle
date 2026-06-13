@@ -75,7 +75,7 @@ const ProfileDialog = ({ open, onOpenChange }: ProfileDialogProps) => {
               Select an avatar to update your profile.
             </OmoriDialogDescription>
           </OmoriDialogHeader>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-3 gap-4">
             {AVATARS.map((avatar) => (
               <button
                 key={avatar.id}
