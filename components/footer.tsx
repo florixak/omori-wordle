@@ -9,19 +9,12 @@ const Footer = async () => {
     <footer className="flex flex-col items-center justify-center gap-2 p-4 bg-(--omori-empty)">
       <p className="font-pixel text-xs">
         © {year} Omori Wordle · Fan-made project · Not affiliated with OMOCAT
-        LLC
-      </p>
-      <p className="font-pixel text-xs">
-        Created with ❤️ for OMORI community by{" "}
-        <Link
-          href="https://github.com/florixak"
-          target="_blank"
-          className="underline"
-          rel="noopener noreferrer"
-        >
-          Ondrej Ptak
+        LLC ·{" "}
+        <Link href="/privacy" className="underline">
+          Privacy Policy
         </Link>
       </p>
+      <p className="font-pixel text-xs">Created with 💜 for OMORI community</p>
     </footer>
   );
 };
