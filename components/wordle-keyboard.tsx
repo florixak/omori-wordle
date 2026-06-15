@@ -1,6 +1,6 @@
 "use client";
 
-import { KEYBOARD_LAYOUT } from "@/constants";
+import { ALLOWED_KEYS, KEYBOARD_LAYOUT } from "@/constants";
 import { cn } from "@/lib/utils";
 import {
   GameStatus,
@@ -8,6 +8,11 @@ import {
   TileEvaluation,
 } from "@/types/game-types";
 import OmoriButton from "./omori/omori-button";
+import {
+  RegisterableHotkey,
+  UseHotkeyDefinition,
+  useHotkeys,
+} from "@tanstack/react-hotkeys";
 
 type WordleKeyboardProps = {
   keyboardState: Record<string, TileEvaluation>;
@@ -41,6 +46,24 @@ const WordleKeyboard = ({
 }: WordleKeyboardProps) => {
   const isGameOver = status === "won" || status === "lost";
   const isLocked = isGameOver || isSubmitting;
+
+  useHotkeys(
+    ALLOWED_KEYS.map((key) => ({
+      hotkey: key as RegisterableHotkey,
+      callback: () => {
+        if (key === "Enter") void submitGuess();
+        else if (key === "Backspace") removeLetter();
+        else addLetter(key);
+      },
+      options: {
+        preventDefault: key === "Backspace" || key === "Enter",
+      },
+    })),
+    {
+      enabled: !isLocked,
+      ignoreInputs: true,
+    },
+  );
 
   const handleAddLetter = (letter: string) => {
     if (isLocked) return;
@@ -76,6 +99,8 @@ const WordleKeyboard = ({
                   onClick={handleSubmitGuess}
                   disabled={isLocked}
                   className="min-w-0 px-0.5 sm:px-1"
+                  tabIndex={-1}
+                  onPointerDown={(e) => e.preventDefault()}
                 >
                   ENTER
                 </OmoriButton>
@@ -88,6 +113,8 @@ const WordleKeyboard = ({
                       "min-w-0 flex-1",
                       getKeyClasses(keyboardState[letter]),
                     )}
+                    tabIndex={-1}
+                    onPointerDown={(e) => e.preventDefault()}
                   >
                     {letter}
                   </OmoriButton>
@@ -96,6 +123,8 @@ const WordleKeyboard = ({
                   onClick={handleRemoveLetter}
                   disabled={isLocked}
                   className="min-w-7 sm:min-w-0 px-0.5 flex-1 sm:px-1"
+                  tabIndex={-1}
+                  onPointerDown={(e) => e.preventDefault()}
                 >
                   ⌫
                 </OmoriButton>
@@ -110,6 +139,8 @@ const WordleKeyboard = ({
                     "min-w-0 flex-1",
                     getKeyClasses(keyboardState[letter]),
                   )}
+                  tabIndex={-1}
+                  onPointerDown={(e) => e.preventDefault()}
                 >
                   {letter}
                 </OmoriButton>
