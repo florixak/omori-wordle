@@ -57,6 +57,7 @@ export const toUserPreview = (row: User): FriendUserPreview => ({
 export const rankLeaderboard = (
   results: { userId: string; attempts: number; won: boolean }[],
   getPreview: (id: string) => FriendUserPreview,
+  hintedUserIds: Set<string> = new Set(),
 ): FriendsLeaderboardEntry[] => {
   const sorted = [...results].sort((a, b) => {
     if (a.won !== b.won) {
@@ -75,5 +76,6 @@ export const rankLeaderboard = (
     attempts: result.attempts,
     won: result.won,
     rank: index + 1,
+    isHinted: hintedUserIds.has(result.userId),
   }));
 };

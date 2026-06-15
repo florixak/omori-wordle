@@ -2,6 +2,7 @@ import { formatAttempts, getAvatarSrc } from "@/lib/friend-utils";
 import { FriendsLeaderboardEntry } from "@/types/friends-types";
 import Image from "next/image";
 import { SectionTitle } from "@/components/dialog/friends-dialog";
+import OmoriBadge from "@/components/omori/omori-badge";
 
 const LeaderboardSection = ({
   entries,
@@ -39,9 +40,14 @@ const LeaderboardSection = ({
                 {entry.user.name}
               </p>
             </div>
-            <span className="font-pixel w-6 text-center text-[0.625rem] sm:text-xs">
-              {formatAttempts(entry.attempts, entry.won)}
-            </span>
+            <div className="flex items-center justify-end gap-2">
+              {entry.isHinted ? (
+                <OmoriBadge variant="hint">Hint used</OmoriBadge>
+              ) : null}
+              <span className="font-pixel w-6 text-center text-[0.625rem] sm:text-xs">
+                {formatAttempts(entry.attempts, entry.won)}
+              </span>
+            </div>
           </div>
         ))}
       </div>

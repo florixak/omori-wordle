@@ -20,6 +20,7 @@ export type FriendsLeaderboardEntry = {
   attempts: number | null;
   won: boolean;
   rank: number;
+  isHinted: boolean;
 };
 
 export type FriendsLeaderboard = {

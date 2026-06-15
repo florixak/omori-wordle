@@ -2,7 +2,7 @@
 
 import { auth } from "@/auth";
 import { db } from "@/db/drizzle";
-import { friendship, gameResult, user } from "@/db/schema";
+import { friendship, gameResult, user, userStats } from "@/db/schema";
 import { getDailyDate } from "@/lib/daily-word";
 import { rankLeaderboard, toUserPreview } from "@/lib/friend-utils";
 import { AppError, ErrorCode } from "@/lib/errors";
@@ -36,7 +36,7 @@ export const getFriendsLeaderboard = async (): Promise<FriendsLeaderboard> => {
   const friendIds = acceptedFriendRows.map((row) => row.addresseeId);
   const leaderboardUserIds = [userId, ...friendIds];
 
-  const [todayResults, userRows] = await Promise.all([
+  const [todayResults, userRows, hintedStatsRows] = await Promise.all([
     db
       .select({
         userId: gameResult.userId,
@@ -50,13 +50,20 @@ export const getFriendsLeaderboard = async (): Promise<FriendsLeaderboard> => {
           inArray(gameResult.userId, leaderboardUserIds),
         ),
       ),
+    db.select().from(user).where(inArray(user.id, leaderboardUserIds)),
     db
-      .select()
-      .from(user)
-      .where(inArray(user.id, leaderboardUserIds)),
+      .select({ userId: userStats.userId })
+      .from(userStats)
+      .where(
+        and(
+          inArray(userStats.userId, leaderboardUserIds),
+          eq(userStats.lastHintDate, today),
+        ),
+      ),
   ]);
 
   const userById = new Map(userRows.map((row) => [row.id, row]));
+  const hintedUserIds = new Set(hintedStatsRows.map((row) => row.userId));
 
   const getPreview = (id: string): FriendUserPreview => {
     const row = userById.get(id);
@@ -69,6 +76,6 @@ export const getFriendsLeaderboard = async (): Promise<FriendsLeaderboard> => {
 
   return {
     date: today,
-    entries: rankLeaderboard(todayResults, getPreview),
+    entries: rankLeaderboard(todayResults, getPreview, hintedUserIds),
   };
 };
