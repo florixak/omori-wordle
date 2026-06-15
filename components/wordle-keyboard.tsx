@@ -7,12 +7,8 @@ import {
   TileDisplayState,
   TileEvaluation,
 } from "@/types/game-types";
+import { RegisterableHotkey, useHotkeys } from "@tanstack/react-hotkeys";
 import OmoriButton from "./omori/omori-button";
-import {
-  RegisterableHotkey,
-  UseHotkeyDefinition,
-  useHotkeys,
-} from "@tanstack/react-hotkeys";
 
 type WordleKeyboardProps = {
   keyboardState: Record<string, TileEvaluation>;
