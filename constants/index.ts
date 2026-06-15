@@ -10,6 +10,8 @@ const KEYBOARD_LAYOUT = [
   ["Z", "X", "C", "V", "B", "N", "M"],
 ];
 
+const ALLOWED_KEYS = [...KEYBOARD_LAYOUT.flat(), "Enter", "Backspace"] as const;
+
 const GUESS_DISTRIBUTION_KEYS = ["1", "2", "3", "4", "5", "6", "0"] as const;
 
 const DEFAULT_AVATAR = "/avatars/sunny.png";
@@ -70,6 +72,7 @@ export {
   MIN_ATTEMPTS_FOR_HINT,
   RESULT_DIALOG_DELAY_MS,
   KEYBOARD_LAYOUT,
+  ALLOWED_KEYS,
   GAME_STORAGE_KEY,
   GUESS_DISTRIBUTION_KEYS,
   DEFAULT_AVATAR,
