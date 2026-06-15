@@ -90,6 +90,7 @@ const LeaderboardDialog = ({ open, onOpenChange }: LeaderboardDialogProps) => {
             <LeaderboardSection
               entries={leaderboard.entries}
               date={leaderboard.date}
+              isHinted={leaderboard.isHinted}
             />
           ) : null}
         </div>

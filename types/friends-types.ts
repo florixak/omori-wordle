@@ -25,6 +25,7 @@ export type FriendsLeaderboardEntry = {
 export type FriendsLeaderboard = {
   date: string;
   entries: FriendsLeaderboardEntry[];
+  isHinted: boolean;
 };
 
 export type FriendsOverview = {
