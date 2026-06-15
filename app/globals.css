@@ -134,6 +134,7 @@
   --color-sidebar-ring: var(--sidebar-ring);
 
   --font-pixel: var(--font-pixel);
+  --animate-slide-in-from-top: slide-in-from-top 1.5s ease-in-out forwards;
 }
 
 @layer base {
@@ -227,6 +228,16 @@
 
     100% {
       transform: translateY(0) scale(1);
+    }
+  }
+
+  @keyframes slide-in-from-top {
+    0% {
+      transform: translateY(-100%);
+    }
+
+    100% {
+      transform: translateY(0);
     }
   }
 

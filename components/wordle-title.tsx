@@ -8,7 +8,10 @@ type WordleTitleProps = {
 const WordleTitle = ({ streak, isLoggedIn }: WordleTitleProps) => {
   return (
     <div className="flex flex-col items-center gap-1 text-center relative">
-      <div className="absolute left-1/2 -translate-x-1/2 -top-76 overflow-hidden">
+      <div
+        className="absolute left-1/2 -translate-x-1/2 -top-76 overflow-hidden animate-slide-in-from-top"
+        style={{ imageRendering: "pixelated" }}
+      >
         <Image
           src="/hanging-light-bulb.gif"
           alt="Light bulb"
