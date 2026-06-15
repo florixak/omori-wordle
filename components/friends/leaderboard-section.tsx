@@ -7,11 +7,9 @@ import OmoriBadge from "@/components/omori/omori-badge";
 const LeaderboardSection = ({
   entries,
   date,
-  isHinted,
 }: {
   entries: FriendsLeaderboardEntry[];
   date: string;
-  isHinted: boolean;
 }) => (
   <section className="flex flex-col gap-2">
     <SectionTitle>Today&apos;s leaderboard</SectionTitle>
@@ -43,7 +41,7 @@ const LeaderboardSection = ({
               </p>
             </div>
             <div className="flex items-center justify-end gap-2">
-              {isHinted ? (
+              {entry.isHinted ? (
                 <OmoriBadge variant="hint">Hint used</OmoriBadge>
               ) : null}
               <span className="font-pixel w-6 text-center text-[0.625rem] sm:text-xs">

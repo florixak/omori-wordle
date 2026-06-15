@@ -36,7 +36,7 @@ export const getFriendsLeaderboard = async (): Promise<FriendsLeaderboard> => {
   const friendIds = acceptedFriendRows.map((row) => row.addresseeId);
   const leaderboardUserIds = [userId, ...friendIds];
 
-  const [todayResults, userRows, isHintedToday] = await Promise.all([
+  const [todayResults, userRows, hintedStatsRows] = await Promise.all([
     db
       .select({
         userId: gameResult.userId,
@@ -52,15 +52,18 @@ export const getFriendsLeaderboard = async (): Promise<FriendsLeaderboard> => {
       ),
     db.select().from(user).where(inArray(user.id, leaderboardUserIds)),
     db
-      .select()
+      .select({ userId: userStats.userId })
       .from(userStats)
       .where(
-        and(eq(userStats.userId, userId), eq(userStats.lastHintDate, today)),
+        and(
+          inArray(userStats.userId, leaderboardUserIds),
+          eq(userStats.lastHintDate, today),
+        ),
       ),
   ]);
 
   const userById = new Map(userRows.map((row) => [row.id, row]));
-  const isHinted = isHintedToday.length > 0;
+  const hintedUserIds = new Set(hintedStatsRows.map((row) => row.userId));
 
   const getPreview = (id: string): FriendUserPreview => {
     const row = userById.get(id);
@@ -73,7 +76,6 @@ export const getFriendsLeaderboard = async (): Promise<FriendsLeaderboard> => {
 
   return {
     date: today,
-    entries: rankLeaderboard(todayResults, getPreview),
-    isHinted: isHinted,
+    entries: rankLeaderboard(todayResults, getPreview, hintedUserIds),
   };
 };
