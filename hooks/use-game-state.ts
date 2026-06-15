@@ -25,7 +25,6 @@ import {
   subscribeToGameStorage,
 } from "@/lib/local-game-state";
 import { GameState, GridTile, TileEvaluation } from "@/types/game-types";
-import { useHotkey } from "@tanstack/react-hotkeys";
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { invalidateUserStats } from "./query-options";
 import { useQueryClient } from "@tanstack/react-query";
@@ -275,10 +274,6 @@ const useGameState = ({
       return null;
     }
   };
-
-  useHotkey("Enter", () => {
-    void submitGuess();
-  });
 
   const gridRows = buildGridRows(
     state.submittedGuesses,
