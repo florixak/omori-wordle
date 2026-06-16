@@ -63,6 +63,7 @@ const useGameState = ({
   const stateRef = useRef(state);
   const isSubmittingRef = useRef(false);
 
+  // This effect is used to update the state ref when the state changes.
   useEffect(() => {
     stateRef.current = state;
   }, [state]);
@@ -73,6 +74,7 @@ const useGameState = ({
     notifyGameStorageChange();
   };
 
+  // This effect is used to reveal the word and hint for a completed game.
   useEffect(() => {
     if (state.status !== "won" && state.status !== "lost") {
       return;
@@ -266,7 +268,9 @@ const useGameState = ({
         hint: response.hint,
       }));
 
-      invalidateUserStats(queryClient, session?.user.id ?? "");
+      if (session) {
+        invalidateUserStats(queryClient, session.user.id);
+      }
 
       return response.hint;
     } catch {
