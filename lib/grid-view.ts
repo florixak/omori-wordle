@@ -1,5 +1,15 @@
 import { GridTile, SubmittedGuess } from "@/types/game-types";
 
+export const submittedGuessesToGridRows = (
+  submittedGuesses: SubmittedGuess[],
+): GridTile[][] =>
+  submittedGuesses.map((guess) =>
+    guess.word.split("").map((letter, index) => ({
+      letter,
+      display: guess.evaluations[index],
+    })),
+  );
+
 export const buildGridRows = (
   submittedGuesses: SubmittedGuess[],
   currentInput: string,
