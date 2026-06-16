@@ -1,36 +1,57 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# OMORI Wordle
 
-## Getting Started
+> **Non-commercial fan project** — not affiliated with or endorsed by OMOCAT or the official *OMORI* game.
 
-First, run the development server:
+A daily word-guessing game for fans of *OMORI*. Same rules as Wordle, same universe — characters, locations, items, emotions, and lore terms only. One puzzle per day, shared by everyone. No account required to play.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+---
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## How to play
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Type a valid OMORI word and press **Enter**. The grid adjusts to the day's word length (4–7 letters).
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| Tile | Meaning |
+|------|---------|
+| ⬜ | Correct letter, correct position |
+| 🟨 | Correct letter, wrong position |
+| ⬛ | Letter not in the word |
 
-## Learn More
+You have **6 attempts**. A new word is available every day at midnight.
 
-To learn more about Next.js, take a look at the following resources:
+Stuck? After a few guesses, you can unlock **one hint per day** — a lore-based clue about the answer.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+---
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Features
 
-## Deploy on Vercel
+- **Daily puzzle** — one word, same for all players
+- **Variable word length** — the grid grows or shrinks with each day's answer
+- **Play as a guest** — full game with no sign-in required
+- **Discord sign-in** — save results, track streaks, view stats, and compete on a friends-only leaderboard
+- **Hint system** — one lore clue per puzzle, earned after you've made some progress
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+---
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## What I built
+
+This started as a fan project and grew into a portfolio piece — a full-stack app with real auth, persistence, and social features, not just a static clone.
+
+- **Server-side word protection** — the daily answer never ships to the client; guesses are validated on the server, and the word is only revealed after win or loss
+- **Deterministic daily selection** — the puzzle is picked from a curated pool by days since a fixed epoch, so every player gets the same word without an API call
+- **Hybrid state management** — in-progress games live in `localStorage` for guests; completed results sync to Postgres, with retroactive submission if you sign in after playing
+- **Discord OAuth via BetterAuth** — optional auth that unlocks stats and social features without gating the core game loop
+- **Bidirectional friendships** — friend requests and accepted friendships are stored as mirrored rows, keeping queries simple and deletes consistent
+
+---
+
+## Tech stack
+
+Next.js 16 · TypeScript · Tailwind CSS · BetterAuth (Discord OAuth) · Neon Postgres · Drizzle ORM · Vercel
+
+---
+
+## Disclaimer
+
+*OMORI* and all related characters, names, and imagery are the property of OMOCAT. This project is an unofficial fan work made out of appreciation for the game. It is free, non-commercial, and not connected to OMOCAT in any way.
+
+If you are OMOCAT or a rights holder and have concerns, please reach out.
