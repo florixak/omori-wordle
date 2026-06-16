@@ -1,6 +1,6 @@
 import { GUESS_DISTRIBUTION_KEYS } from "@/constants";
 import { UserStats } from "@/db/schema";
-import { GridTile, GuessDistributionRow } from "@/types/game-types";
+import { GuessDistributionRow } from "@/types/game-types";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 
@@ -45,28 +45,3 @@ export const createEmptyStats = (userId: string): UserStats => ({
   hintsUsed: 0,
   lastHintDate: null,
 });
-
-export const generateShareText = (
-  dayNumber: number,
-  attempts: number,
-  results: GridTile[][],
-  hintUsed: boolean,
-): string => {
-  const score = attempts === 0 ? "X" : `${attempts}/6`;
-
-  const grid = results
-    .map((row) =>
-      row
-        .map((tile) => {
-          if (tile.display === "correct") return "⬜";
-          if (tile.display === "present") return "🟨";
-          return "⬛";
-        })
-        .join(""),
-    )
-    .join("\n");
-
-  const hint = hintUsed ? "\n💡 Hint used" : "";
-
-  return `OMORI Wordle #${dayNumber} ${score}\n\n${grid}${hint}\n\nomori-wordle.com`;
-};
