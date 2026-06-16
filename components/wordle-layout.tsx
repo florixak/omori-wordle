@@ -13,6 +13,7 @@ import WordleTitle from "./wordle-title";
 type WordleLayoutProps = {
   date: string;
   wordLength: number;
+  dayNumber: number;
   streak: number;
   isLoggedIn: boolean;
 };
@@ -20,6 +21,7 @@ type WordleLayoutProps = {
 const WordleLayout = ({
   date,
   wordLength,
+  dayNumber,
   streak,
   isLoggedIn,
 }: WordleLayoutProps) => {
@@ -68,6 +70,9 @@ const WordleLayout = ({
           hint={state.answerHint}
           guesses={isWon ? guesses.length : 0}
           isWon={isWon}
+          dayNumber={dayNumber}
+          submittedGuesses={state.submittedGuesses}
+          hintUsed={state.hintUsed}
         />
       ) : null}
     </div>

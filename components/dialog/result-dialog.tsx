@@ -10,7 +10,12 @@ import {
   OmoriDialogTitle,
 } from "@/components/omori/omori-dialog";
 import OmoriButton from "@/components/omori/omori-button";
+import { submittedGuessesToGridRows } from "@/lib/grid-view";
+import { omoriToast } from "@/lib/omori-toast";
+import { generateShareText, shareGameResult } from "@/lib/share-result";
 import { cn } from "@/lib/utils";
+import { SubmittedGuess } from "@/types/game-types";
+import { useState } from "react";
 
 type ResultDialogProps = {
   open: boolean;
@@ -19,6 +24,9 @@ type ResultDialogProps = {
   hint: string;
   guesses: number;
   isWon: boolean;
+  dayNumber: number;
+  submittedGuesses: SubmittedGuess[];
+  hintUsed: boolean;
 };
 
 const ResultDialog = ({
@@ -28,7 +36,43 @@ const ResultDialog = ({
   hint,
   guesses,
   isWon,
+  dayNumber,
+  submittedGuesses,
+  hintUsed,
 }: ResultDialogProps) => {
+  const [isSharing, setIsSharing] = useState(false);
+
+  const handleShare = async () => {
+    if (isSharing) {
+      return;
+    }
+
+    const shareText = generateShareText(
+      dayNumber,
+      guesses,
+      submittedGuessesToGridRows(submittedGuesses),
+      hintUsed,
+    );
+
+    setIsSharing(true);
+
+    try {
+      const method = await shareGameResult(shareText);
+
+      if (method === "copied") {
+        omoriToast.success("Copied to clipboard");
+      }
+    } catch (error) {
+      if (error instanceof DOMException && error.name === "AbortError") {
+        return;
+      }
+
+      omoriToast.error("Unable to share result");
+    } finally {
+      setIsSharing(false);
+    }
+  };
+
   return (
     <OmoriDialog open={open} onOpenChange={onOpenChange}>
       <OmoriDialogContent>
@@ -51,9 +95,10 @@ const ResultDialog = ({
         <OmoriDialogFooter>
           <OmoriButton
             className={cn("w-full gap-2", "omori-button-default")}
-            onClick={() => onOpenChange(false)}
+            disabled={isSharing}
+            onClick={() => void handleShare()}
           >
-            Share result
+            {isSharing ? "Sharing..." : "Share result"}
           </OmoriButton>
         </OmoriDialogFooter>
       </OmoriDialogContent>
