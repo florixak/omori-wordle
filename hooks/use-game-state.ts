@@ -3,6 +3,7 @@
 import {
   getCompletedGameReveal,
   getHint,
+  getTodayCompletedGame,
   processGuess,
   submitGame,
 } from "@/actions/game-actions";
@@ -16,7 +17,10 @@ import { authClient } from "@/lib/auth-client";
 import { ErrorCode, getErrorMessage } from "@/lib/errors";
 import { omoriToast } from "@/lib/omori-toast";
 import { getKeyboardStateFromGuesses } from "@/lib/game-logic";
-import { getGuessWords } from "@/lib/game-state-utils";
+import {
+  getGuessWords,
+  shouldRestoreGameFromServer,
+} from "@/lib/game-state-utils";
 import { buildGridRows } from "@/lib/grid-view";
 import {
   getServerGameSnapshot,
@@ -32,6 +36,7 @@ import { useQueryClient } from "@tanstack/react-query";
 type UseGameProps = {
   date: string;
   wordLength: number;
+  savedGame?: GameState | null;
 };
 
 type UseGameStateReturn = {
@@ -48,10 +53,12 @@ type UseGameStateReturn = {
 const useGameState = ({
   date,
   wordLength,
+  savedGame,
 }: UseGameProps): UseGameStateReturn => {
   const { data: session } = authClient.useSession();
   const storage = useLocalStorage<GameState>(GAME_STORAGE_KEY);
   const queryClient = useQueryClient();
+  const hasHydratedFromServerRef = useRef(false);
 
   const state = useSyncExternalStore(
     subscribeToGameStorage,
@@ -74,7 +81,46 @@ const useGameState = ({
     notifyGameStorageChange();
   };
 
-  // This effect is used to reveal the word and hint for a completed game.
+  const restoreSavedGame = (gameState: GameState) => {
+    if (hasHydratedFromServerRef.current) {
+      return;
+    }
+
+    const local = readStoredGameState(date, wordLength);
+    if (!shouldRestoreGameFromServer(local, date, wordLength)) {
+      return;
+    }
+
+    hasHydratedFromServerRef.current = true;
+    storage.setItem(gameState);
+    notifyGameStorageChange();
+  };
+
+  // Seed localStorage from the server when a logged-in user already played today
+  useEffect(() => {
+    if (!savedGame) {
+      return;
+    }
+
+    restoreSavedGame(savedGame);
+  }, [savedGame, date, wordLength]);
+
+  // Handle sign-in after page load (guest played elsewhere or fresh session)
+  useEffect(() => {
+    if (!session || savedGame !== undefined) {
+      return;
+    }
+
+    void getTodayCompletedGame().then((result) => {
+      if (!result?.ok) {
+        return;
+      }
+
+      restoreSavedGame(result.gameState);
+    });
+  }, [session, savedGame, date, wordLength]);
+
+  // Reveal the word and hint for a completed game
   useEffect(() => {
     if (state.status !== "won" && state.status !== "lost") {
       return;
@@ -166,6 +212,19 @@ const useGameState = ({
       );
 
       if (!response.ok) {
+        if (response.error === ErrorCode.ALREADY_PLAYED_TODAY) {
+          const saved = await getTodayCompletedGame();
+          if (saved?.ok) {
+            hasHydratedFromServerRef.current = true;
+            storage.setItem(saved.gameState);
+            notifyGameStorageChange();
+            return;
+          }
+
+          omoriToast.error(getErrorMessage(response.error));
+          return;
+        }
+
         if (response.error === ErrorCode.PROGRESS_OUT_OF_SYNC) {
           storage.removeItem();
           notifyGameStorageChange();
