@@ -1,3 +1,5 @@
+import { GameResult } from "@/db/schema";
+import { evaluateGuess } from "@/lib/game-logic";
 import {
   GameState,
   SubmittedGuess,
@@ -6,6 +8,52 @@ import {
 
 export const getGuessWords = (submitted: SubmittedGuess[]): string[] =>
   submitted.map((guess) => guess.word);
+
+export const shouldRestoreGameFromServer = (
+  local: GameState,
+  date: string,
+  wordLength: number,
+): boolean => {
+  if (local.date !== date || local.wordLength !== wordLength) {
+    return true;
+  }
+
+  if (local.status === "won" || local.status === "lost") {
+    return false;
+  }
+
+  if (local.status === "playing" && local.submittedGuesses.length > 0) {
+    return false;
+  }
+
+  return true;
+};
+
+type GameResultHydrationOptions = {
+  answerHint: string;
+  hintUsed: boolean;
+  historySignature?: string;
+};
+
+export const gameResultToGameState = (
+  row: GameResult,
+  options: GameResultHydrationOptions,
+): GameState => ({
+  date: row.date,
+  wordLength: row.wordLength,
+  submittedGuesses: row.guesses.map((word) => ({
+    word,
+    evaluations: evaluateGuess(word, row.word),
+  })),
+  currentInput: "",
+  status: row.won ? "won" : "lost",
+  startedAt: null,
+  hintUsed: options.hintUsed,
+  hint: options.hintUsed ? options.answerHint : null,
+  revealedWord: row.word,
+  answerHint: options.answerHint,
+  historySignature: options.historySignature,
+});
 
 const TILE_EVALUATIONS = new Set<TileEvaluation>([
   "correct",
