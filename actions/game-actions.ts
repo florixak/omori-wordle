@@ -334,6 +334,12 @@ export async function submitGame(
 export const loadTodayCompletedGameState = async (
   userId: string,
 ): Promise<GameState | null> => {
+  const session = await auth.api.getSession({ headers: await headers() });
+
+  if (!session || session.user.id !== userId) {
+    return null;
+  }
+
   const today = getDailyDate();
   const dailyWord = getDailyWord();
 
@@ -343,7 +349,7 @@ export const loadTodayCompletedGameState = async (
     .where(and(eq(gameResult.userId, userId), eq(gameResult.date, today)))
     .limit(1);
 
-  if (!row || row.word !== dailyWord.word) {
+  if (!row || row.word.toUpperCase() !== dailyWord.word.toUpperCase()) {
     return null;
   }
 
