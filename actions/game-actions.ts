@@ -10,9 +10,11 @@ import {
   getDailyWordLength,
   isValidGuess,
 } from "@/lib/daily-word";
+import { gameResultToGameState } from "@/lib/game-state-utils";
 import {
   ProcessGuessResult,
   processGuessSubmission,
+  signGuessHistory,
   verifyGuessHistory,
 } from "@/lib/guess-submission";
 import { getGameStatus } from "@/lib/game-logic";
@@ -24,6 +26,7 @@ import {
 import { AppError, ErrorCode, type ErrorResult } from "@/lib/errors";
 import { and, eq, sql } from "drizzle-orm";
 import { headers } from "next/headers";
+import { GameState } from "@/types/game-types";
 
 export type SubmitGamePayload = {
   date: string;
@@ -326,4 +329,54 @@ export async function submitGame(
   }
 
   return { ok: true };
+}
+
+export const loadTodayCompletedGameState = async (
+  userId: string,
+): Promise<GameState | null> => {
+  const today = getDailyDate();
+  const dailyWord = getDailyWord();
+
+  const [row] = await db
+    .select()
+    .from(gameResult)
+    .where(and(eq(gameResult.userId, userId), eq(gameResult.date, today)))
+    .limit(1);
+
+  if (!row || row.word !== dailyWord.word) {
+    return null;
+  }
+
+  const [statsRow] = await db
+    .select({ lastHintDate: userStats.lastHintDate })
+    .from(userStats)
+    .where(eq(userStats.userId, userId))
+    .limit(1);
+
+  const hintUsed = statsRow?.lastHintDate === today;
+
+  return gameResultToGameState(row, {
+    answerHint: dailyWord.hint,
+    hintUsed,
+    historySignature: signGuessHistory(today, row.guesses),
+  });
+};
+
+export async function getTodayCompletedGame(): Promise<{
+  ok: true;
+  gameState: GameState;
+} | null> {
+  const session = await auth.api.getSession({ headers: await headers() });
+
+  if (!session) {
+    return null;
+  }
+
+  const gameState = await loadTodayCompletedGameState(session.user.id);
+
+  if (!gameState) {
+    return null;
+  }
+
+  return { ok: true, gameState };
 }

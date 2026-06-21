@@ -15,6 +15,21 @@ const signHistory = (date: string, guesses: string[]): string => {
     .digest("hex");
 };
 
+export const signGuessHistory = (
+  date: string,
+  guesses: string[],
+): string | undefined => {
+  if (!isHistorySigningEnabled()) {
+    return undefined;
+  }
+
+  try {
+    return signHistory(date, guesses);
+  } catch {
+    return undefined;
+  }
+};
+
 const isHistorySigned = (
   date: string,
   guesses: string[],
@@ -94,14 +109,8 @@ export const processGuessSubmission = (
   const evaluations = evaluateGuess(upper, answer);
   const status = getGameStatus(allGuesses, answer, maxAttempts);
 
-  let newSignature: string | undefined;
-  try {
-    if (date && process.env.GAME_HISTORY_SECRET) {
-      newSignature = signHistory(date, allGuesses);
-    }
-  } catch {
-    newSignature = undefined;
-  }
+  const newSignature =
+    date !== undefined ? signGuessHistory(date, allGuesses) : undefined;
 
   return {
     ok: true,
