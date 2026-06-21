@@ -6,6 +6,7 @@ import useGameState from "@/hooks/use-game-state";
 import { useGameLostTheme } from "@/hooks/use-game-lost-theme";
 import { useResultDialog } from "@/hooks/use-result-dialog";
 import { getGuessWords } from "@/lib/game-state-utils";
+import { GameState } from "@/types/game-types";
 import WordleGrid from "./wordle-grid";
 import WordleKeyboard from "./wordle-keyboard";
 import WordleTitle from "./wordle-title";
@@ -16,6 +17,7 @@ type WordleLayoutProps = {
   dayNumber: number;
   streak: number;
   isLoggedIn: boolean;
+  savedGame?: GameState | null;
 };
 
 const WordleLayout = ({
@@ -24,6 +26,7 @@ const WordleLayout = ({
   dayNumber,
   streak,
   isLoggedIn,
+  savedGame,
 }: WordleLayoutProps) => {
   const {
     state,
@@ -37,6 +40,7 @@ const WordleLayout = ({
   } = useGameState({
     date,
     wordLength,
+    savedGame,
   });
 
   const { open: showResultDialog, setOpen: setShowResultDialog } =

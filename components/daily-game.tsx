@@ -1,4 +1,5 @@
 import { getStreak } from "@/actions/stats-actions";
+import { loadTodayCompletedGameState } from "@/actions/game-actions";
 import { auth } from "@/auth";
 import {
   getDailyDate,
@@ -18,6 +19,9 @@ const DailyGame = async () => {
   const session = await auth.api.getSession({ headers: await headers() });
   const isLoggedIn = Boolean(session);
   const streak = isLoggedIn ? await getStreak() : 0;
+  const savedGame = session
+    ? await loadTodayCompletedGameState(session.user.id)
+    : undefined;
 
   return (
     <WordleLayout
@@ -26,6 +30,7 @@ const DailyGame = async () => {
       dayNumber={dayNumber}
       streak={streak}
       isLoggedIn={isLoggedIn}
+      savedGame={savedGame}
     />
   );
 };
