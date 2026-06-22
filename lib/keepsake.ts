@@ -89,7 +89,7 @@ export const resolveStatsWithKeepsake = (
     kind: "reset",
     stats: {
       ...baseStats,
-      currentStreak: 1,
+      currentStreak: won ? 1 : 0,
       maxStreak: previous?.maxStreak ?? 1,
     },
   };
