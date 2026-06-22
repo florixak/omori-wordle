@@ -3,7 +3,7 @@ import {
   computeStatsAfterGame,
   type SubmitGameStatsUpdate,
 } from "@/lib/submit-game";
-import { getPreviousDate } from "./utils";
+import { getPreviousDate } from "@/lib/utils";
 
 export const getMostRecentMonday = (date: string): string => {
   const parsed = new Date(`${date}T00:00:00.000Z`);
