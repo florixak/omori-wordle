@@ -39,17 +39,21 @@ export const useKeepsakeDialog = ({
 
     let cancelled = false;
 
-    void getPendingKeepsakeOffer().then((result) => {
-      if (cancelled) {
-        return;
-      }
+    void getPendingKeepsakeOffer()
+      .then((result) => {
+        if (cancelled) {
+          return;
+        }
 
-      if (result?.pending) {
-        setOpen(true);
-      }
-
-      setPendingFetchDone(true);
-    });
+        if (result?.pending) {
+          setOpen(true);
+        }
+      })
+      .finally(() => {
+        if (!cancelled) {
+          setPendingFetchDone(true);
+        }
+      });
 
     return () => {
       cancelled = true;
@@ -57,7 +61,8 @@ export const useKeepsakeDialog = ({
   }, [checkPendingOnMount, isSessionPending, session]);
 
   const pendingCheckDone =
-    !checkPendingOnMount || isSessionPending || !session || pendingFetchDone;
+    !checkPendingOnMount ||
+    (!isSessionPending && (!session || pendingFetchDone));
 
   const refreshStreak = () => {
     if (session) {
