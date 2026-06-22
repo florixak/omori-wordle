@@ -8,7 +8,6 @@ import { useKeepsakeDialog } from "@/hooks/use-keepsake-dialog";
 import { useResultDialog } from "@/hooks/use-result-dialog";
 import { getGuessWords } from "@/lib/game-state-utils";
 import { GameState } from "@/types/game-types";
-import { useCallback } from "react";
 import WordleGrid from "./wordle-grid";
 import WordleKeyboard from "./wordle-keyboard";
 import WordleTitle from "./wordle-title";
@@ -37,13 +36,6 @@ const WordleLayout = ({
     pendingCheckDone,
   } = useKeepsakeDialog({ checkPendingOnMount: true });
 
-  const onGameSubmitted = useCallback(
-    (result: Parameters<typeof handleSubmitResult>[0]) => {
-      handleSubmitResult(result);
-    },
-    [handleSubmitResult],
-  );
-
   const {
     state,
     gridRows,
@@ -57,7 +49,7 @@ const WordleLayout = ({
     date,
     wordLength,
     savedGame,
-    onGameSubmitted,
+    onGameSubmitted: handleSubmitResult,
   });
 
   const { open: showResultDialog, setOpen: setShowResultDialog } =

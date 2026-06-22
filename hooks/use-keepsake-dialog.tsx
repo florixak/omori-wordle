@@ -10,9 +10,9 @@ import { invalidateUserStats } from "@/hooks/query-options";
 import { authClient } from "@/lib/auth-client";
 import { ErrorCode, getErrorMessage } from "@/lib/errors";
 import { omoriToast } from "@/lib/omori-toast";
-import { useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 
 type KeepsakeOutcome = "used" | "declined" | "reset";
 
@@ -29,8 +29,7 @@ export const useKeepsakeDialog = ({
     authClient.useSession();
   const queryClient = useQueryClient();
   const router = useRouter();
-  const [open, setOpen] = useState(true);
-  const [isLoading, setIsLoading] = useState(false);
+  const [open, setOpen] = useState(false);
   const [pendingFetchDone, setPendingFetchDone] = useState(false);
 
   useEffect(() => {
@@ -60,95 +59,77 @@ export const useKeepsakeDialog = ({
   const pendingCheckDone =
     !checkPendingOnMount || isSessionPending || !session || pendingFetchDone;
 
-  const showOffer = useCallback(() => {
-    setOpen(true);
-  }, []);
-
-  const refreshStreak = useCallback(() => {
+  const refreshStreak = () => {
     if (session) {
       invalidateUserStats(queryClient, session.user.id);
     }
 
     router.refresh();
-  }, [queryClient, router, session]);
+  };
 
-  const showStreakResetMessage = useCallback(() => {
-    omoriToast.info("This memory slips away... Day 1 begins again.");
-    refreshStreak();
-    onResolved?.("reset");
-  }, [onResolved, refreshStreak]);
-
-  const handleSubmitResult = useCallback(
-    (result: { keepsakeOffer?: true; streakReset?: true }) => {
-      if (result.keepsakeOffer) {
-        showOffer();
-        return;
-      }
-
-      if (result.streakReset) {
-        showStreakResetMessage();
+  const applyMutation = useMutation({
+    mutationFn: async () => {
+      const result = await applyKeepsake();
+      if (!result.ok) {
+        throw new Error(getErrorMessage(result.error));
       }
     },
-    [showOffer, showStreakResetMessage],
-  );
-
-  const handleUseKeepsake = async () => {
-    if (isLoading) {
-      return;
-    }
-
-    setIsLoading(true);
-
-    try {
-      const result = await applyKeepsake();
-
-      if (!result.ok) {
-        omoriToast.error(getErrorMessage(result.error));
-        return;
-      }
-
+    onSuccess: () => {
       refreshStreak();
       setOpen(false);
       omoriToast.success("Your Keepsake fades, but your streak remains.");
       onResolved?.("used");
-    } catch {
-      omoriToast.error(getErrorMessage(ErrorCode.UNKNOWN_ERROR));
-    } finally {
-      setIsLoading(false);
-    }
-  };
+    },
+    onError: (error: Error) => {
+      omoriToast.error(
+        error.message || getErrorMessage(ErrorCode.UNKNOWN_ERROR),
+      );
+    },
+  });
 
-  const handleDecline = async () => {
-    if (isLoading) {
-      return;
-    }
-
-    setIsLoading(true);
-
-    try {
+  const declineMutation = useMutation({
+    mutationFn: async () => {
       const result = await declineKeepsake();
-
       if (!result.ok) {
-        omoriToast.error(getErrorMessage(result.error));
-        return;
+        throw new Error(getErrorMessage(result.error));
       }
-
+    },
+    onSuccess: () => {
       refreshStreak();
       setOpen(false);
       omoriToast.info("This memory slips away... Day 1 begins again.");
       onResolved?.("declined");
-    } catch {
-      omoriToast.error(getErrorMessage(ErrorCode.UNKNOWN_ERROR));
-    } finally {
-      setIsLoading(false);
+    },
+    onError: (error: Error) => {
+      omoriToast.error(
+        error.message || getErrorMessage(ErrorCode.UNKNOWN_ERROR),
+      );
+    },
+  });
+
+  const isLoading = applyMutation.isPending || declineMutation.isPending;
+
+  const handleSubmitResult = (result: {
+    keepsakeOffer?: true;
+    streakReset?: true;
+  }) => {
+    if (result.keepsakeOffer) {
+      setOpen(true);
+      return;
+    }
+
+    if (result.streakReset) {
+      omoriToast.info("This memory slips away... Day 1 begins again.");
+      refreshStreak();
+      onResolved?.("reset");
     }
   };
 
   const dialog = (
     <KeepsakeDialog
       open={open}
-      onUseKeepsake={() => void handleUseKeepsake()}
-      onDecline={() => void handleDecline()}
+      onUseKeepsake={() => applyMutation.mutate()}
+      onDecline={() => declineMutation.mutate()}
       isLoading={isLoading}
     />
   );
