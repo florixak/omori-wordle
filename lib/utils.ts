@@ -44,4 +44,13 @@ export const createEmptyStats = (userId: string): UserStats => ({
   lastPlayedDate: null,
   hintsUsed: 0,
   lastHintDate: null,
+  keepsakesAvailable: 1,
+  lastKeepsakeRefillDate: null,
+  keepsakeOfferDate: null,
 });
+
+export const getPreviousDate = (date: string): string => {
+  const parsed = new Date(`${date}T00:00:00.000Z`);
+  parsed.setUTCDate(parsed.getUTCDate() - 1);
+  return parsed.toISOString().slice(0, 10);
+};
