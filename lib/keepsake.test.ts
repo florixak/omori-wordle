@@ -106,7 +106,7 @@ describe("resolveStatsWithKeepsake", () => {
     );
 
     expect(resolution.kind).toBe("reset");
-    expect(resolution.stats.currentStreak).toBe(1);
+    expect(resolution.stats.currentStreak).toBe(0);
   });
 });
 
