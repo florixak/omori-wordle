@@ -54,7 +54,7 @@ const WordleLayout = ({
 
   const { open: showResultDialog, setOpen: setShowResultDialog } =
     useResultDialog(state, {
-      blocked: isKeepsakeOpen || !pendingCheckDone,
+      blocked: isSubmitting || isKeepsakeOpen || !pendingCheckDone,
     });
 
   useRegisterRequestHint(requestHint);
