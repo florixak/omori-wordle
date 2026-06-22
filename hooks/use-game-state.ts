@@ -6,6 +6,7 @@ import {
   getTodayCompletedGame,
   processGuess,
   submitGame,
+  type SubmitGameResult,
 } from "@/actions/game-actions";
 import {
   GAME_STORAGE_KEY,
@@ -37,6 +38,7 @@ type UseGameProps = {
   date: string;
   wordLength: number;
   savedGame?: GameState | null;
+  onGameSubmitted?: (result: Extract<SubmitGameResult, { ok: true }>) => void;
 };
 
 type UseGameStateReturn = {
@@ -54,6 +56,7 @@ const useGameState = ({
   date,
   wordLength,
   savedGame,
+  onGameSubmitted,
 }: UseGameProps): UseGameStateReturn => {
   const { data: session } = authClient.useSession();
   const storage = useLocalStorage<GameState>(GAME_STORAGE_KEY);
@@ -283,6 +286,8 @@ const useGameState = ({
 
         if (!saveResult.ok) {
           omoriToast.error(getErrorMessage(saveResult.error));
+        } else {
+          onGameSubmitted?.(saveResult);
         }
 
         invalidateUserStats(queryClient, session.user.id);
