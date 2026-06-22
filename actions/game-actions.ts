@@ -20,12 +20,11 @@ import {
 import { getGameStatus } from "@/lib/game-logic";
 import {
   computeKeepsakeRefill,
-  isKeepsakeOfferPending,
   resolveStatsWithKeepsake,
 } from "@/lib/keepsake";
 import { AppError, ErrorCode, type ErrorResult } from "@/lib/errors";
 import { computeTimeSeconds, validateCompletedGame } from "@/lib/submit-game";
-import { and, eq, sql } from "drizzle-orm";
+import { and, eq, gt, sql } from "drizzle-orm";
 import { headers } from "next/headers";
 import { GameState } from "@/types/game-types";
 
@@ -368,23 +367,24 @@ export async function applyKeepsake(): Promise<KeepsakeActionResult> {
   const today = getDailyDate();
 
   try {
-    const [statsRow] = await db
-      .select()
-      .from(userStats)
-      .where(eq(userStats.userId, session.user.id))
-      .limit(1);
-
-    if (!statsRow || !isKeepsakeOfferPending(statsRow, today)) {
-      return { ok: false, error: ErrorCode.INVALID_GAME_STATE };
-    }
-
-    await db
+    const updated = await db
       .update(userStats)
       .set({
-        keepsakesAvailable: statsRow.keepsakesAvailable - 1,
+        keepsakesAvailable: sql`${userStats.keepsakesAvailable} - 1`,
         keepsakeOfferDate: null,
       })
-      .where(eq(userStats.userId, session.user.id));
+      .where(
+        and(
+          eq(userStats.userId, session.user.id),
+          eq(userStats.keepsakeOfferDate, today),
+          gt(userStats.keepsakesAvailable, 0),
+        ),
+      )
+      .returning({ userId: userStats.userId });
+
+    if (updated.length !== 1) {
+      return { ok: false, error: ErrorCode.INVALID_GAME_STATE };
+    }
 
     return { ok: true };
   } catch (error) {
@@ -406,23 +406,23 @@ export async function declineKeepsake(): Promise<KeepsakeActionResult> {
   const today = getDailyDate();
 
   try {
-    const [statsRow] = await db
-      .select()
-      .from(userStats)
-      .where(eq(userStats.userId, session.user.id))
-      .limit(1);
-
-    if (!statsRow || !isKeepsakeOfferPending(statsRow, today)) {
-      return { ok: false, error: ErrorCode.INVALID_GAME_STATE };
-    }
-
-    await db
+    const updated = await db
       .update(userStats)
       .set({
         currentStreak: 1,
         keepsakeOfferDate: null,
       })
-      .where(eq(userStats.userId, session.user.id));
+      .where(
+        and(
+          eq(userStats.userId, session.user.id),
+          eq(userStats.keepsakeOfferDate, today),
+        ),
+      )
+      .returning({ userId: userStats.userId });
+
+    if (updated.length !== 1) {
+      return { ok: false, error: ErrorCode.INVALID_GAME_STATE };
+    }
 
     return { ok: true };
   } catch (error) {
