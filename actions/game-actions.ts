@@ -64,60 +64,55 @@ const persistCompletedGame = async (
     throw new AppError(ErrorCode.ALREADY_PLAYED_TODAY);
   }
 
-  return db.transaction(async (tx) => {
-    await tx.insert(gameResult).values({
-      userId,
-      date: payload.date,
-      word: answer,
-      wordLength: answer.length,
-      attempts: validation.attempts,
-      won: validation.won,
-      guesses: validation.guesses,
-      timeSeconds,
-      completedAt: new Date(completedAtMs),
-    });
-
-    const [statsRow] = await tx
-      .select()
-      .from(userStats)
-      .where(eq(userStats.userId, userId))
-      .limit(1);
-
-    const keepsakeRefill = computeKeepsakeRefill(
-      statsRow ?? null,
-      payload.date,
-    );
-    const resolution = resolveStatsWithKeepsake(
-      statsRow ?? null,
-      payload.date,
-      validation.won,
-      validation.attempts,
-      keepsakeRefill.keepsakesAvailable,
-    );
-
-    const nextStats = {
-      ...resolution.stats,
-      ...keepsakeRefill,
-      keepsakeOfferDate: resolution.kind === "offer" ? payload.date : null,
-    };
-
-    if (statsRow) {
-      await tx
-        .update(userStats)
-        .set(nextStats)
-        .where(eq(userStats.userId, userId));
-    } else {
-      await tx.insert(userStats).values({
-        userId,
-        ...nextStats,
-      });
-    }
-
-    return {
-      keepsakeOffer: resolution.kind === "offer",
-      streakReset: resolution.kind === "reset",
-    };
+  await db.insert(gameResult).values({
+    userId,
+    date: payload.date,
+    word: answer,
+    wordLength: answer.length,
+    attempts: validation.attempts,
+    won: validation.won,
+    guesses: validation.guesses,
+    timeSeconds,
+    completedAt: new Date(completedAtMs),
   });
+
+  const [statsRow] = await db
+    .select()
+    .from(userStats)
+    .where(eq(userStats.userId, userId))
+    .limit(1);
+
+  const keepsakeRefill = computeKeepsakeRefill(statsRow ?? null, payload.date);
+  const resolution = resolveStatsWithKeepsake(
+    statsRow ?? null,
+    payload.date,
+    validation.won,
+    validation.attempts,
+    keepsakeRefill.keepsakesAvailable,
+  );
+
+  const nextStats = {
+    ...resolution.stats,
+    ...keepsakeRefill,
+    keepsakeOfferDate: resolution.kind === "offer" ? payload.date : null,
+  };
+
+  if (statsRow) {
+    await db
+      .update(userStats)
+      .set(nextStats)
+      .where(eq(userStats.userId, userId));
+  } else {
+    await db.insert(userStats).values({
+      userId,
+      ...nextStats,
+    });
+  }
+
+  return {
+    keepsakeOffer: resolution.kind === "offer",
+    streakReset: resolution.kind === "reset",
+  };
 };
 
 export type ProcessGuessActionResult =
