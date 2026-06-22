@@ -1,0 +1,2 @@
+ALTER TABLE "user_stats" ADD COLUMN "keepsake_offer_date" text;--> statement-breakpoint
+ALTER TABLE "user_stats" ADD CONSTRAINT "user_stats_keepsake_offer_date_format_check" CHECK (("user_stats"."keepsake_offer_date" IS NULL OR "user_stats"."keepsake_offer_date" ~ '^[0-9]{4}-[0-9]{2}-[0-9]{2}$'));

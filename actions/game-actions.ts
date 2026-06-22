@@ -19,12 +19,12 @@ import {
 } from "@/lib/guess-submission";
 import { getGameStatus } from "@/lib/game-logic";
 import {
-  computeStatsAfterGame,
-  computeTimeSeconds,
-  validateCompletedGame,
-} from "@/lib/submit-game";
+  computeKeepsakeRefill,
+  resolveStatsWithKeepsake,
+} from "@/lib/keepsake";
 import { AppError, ErrorCode, type ErrorResult } from "@/lib/errors";
-import { and, eq, sql } from "drizzle-orm";
+import { computeTimeSeconds, validateCompletedGame } from "@/lib/submit-game";
+import { and, eq, gt, sql } from "drizzle-orm";
 import { headers } from "next/headers";
 import { GameState } from "@/types/game-types";
 
@@ -35,7 +35,9 @@ export type SubmitGamePayload = {
   historySignature?: string;
 };
 
-export type SubmitGameResult = { ok: true } | ErrorResult;
+export type SubmitGameResult =
+  | { ok: true; keepsakeOffer?: true; streakReset?: true }
+  | ErrorResult;
 
 type CompletedGameValidation = Extract<
   ReturnType<typeof validateCompletedGame>,
@@ -49,7 +51,7 @@ const persistCompletedGame = async (
   answer: string,
   timeSeconds: number | null,
   completedAtMs: number,
-): Promise<void> => {
+): Promise<{ keepsakeOffer: boolean; streakReset: boolean }> => {
   const existing = await db
     .select({ id: gameResult.id })
     .from(gameResult)
@@ -62,42 +64,60 @@ const persistCompletedGame = async (
     throw new AppError(ErrorCode.ALREADY_PLAYED_TODAY);
   }
 
-  await db.insert(gameResult).values({
-    userId,
-    date: payload.date,
-    word: answer,
-    wordLength: answer.length,
-    attempts: validation.attempts,
-    won: validation.won,
-    guesses: validation.guesses,
-    timeSeconds,
-    completedAt: new Date(completedAtMs),
-  });
-
-  const [statsRow] = await db
-    .select()
-    .from(userStats)
-    .where(eq(userStats.userId, userId))
-    .limit(1);
-
-  const nextStats = computeStatsAfterGame(
-    statsRow ?? null,
-    payload.date,
-    validation.won,
-    validation.attempts,
-  );
-
-  if (statsRow) {
-    await db
-      .update(userStats)
-      .set(nextStats)
-      .where(eq(userStats.userId, userId));
-  } else {
-    await db.insert(userStats).values({
+  return db.transaction(async (tx) => {
+    await tx.insert(gameResult).values({
       userId,
-      ...nextStats,
+      date: payload.date,
+      word: answer,
+      wordLength: answer.length,
+      attempts: validation.attempts,
+      won: validation.won,
+      guesses: validation.guesses,
+      timeSeconds,
+      completedAt: new Date(completedAtMs),
     });
-  }
+
+    const [statsRow] = await tx
+      .select()
+      .from(userStats)
+      .where(eq(userStats.userId, userId))
+      .limit(1);
+
+    const keepsakeRefill = computeKeepsakeRefill(
+      statsRow ?? null,
+      payload.date,
+    );
+    const resolution = resolveStatsWithKeepsake(
+      statsRow ?? null,
+      payload.date,
+      validation.won,
+      validation.attempts,
+      keepsakeRefill.keepsakesAvailable,
+    );
+
+    const nextStats = {
+      ...resolution.stats,
+      ...keepsakeRefill,
+      keepsakeOfferDate: resolution.kind === "offer" ? payload.date : null,
+    };
+
+    if (statsRow) {
+      await tx
+        .update(userStats)
+        .set(nextStats)
+        .where(eq(userStats.userId, userId));
+    } else {
+      await tx.insert(userStats).values({
+        userId,
+        ...nextStats,
+      });
+    }
+
+    return {
+      keepsakeOffer: resolution.kind === "offer",
+      streakReset: resolution.kind === "reset",
+    };
+  });
 };
 
 export type ProcessGuessActionResult =
@@ -312,7 +332,7 @@ export async function submitGame(
   const timeSeconds = computeTimeSeconds(payload.startedAt, completedAtMs);
 
   try {
-    await persistCompletedGame(
+    const { keepsakeOffer, streakReset } = await persistCompletedGame(
       session.user.id,
       payload,
       validation,
@@ -320,6 +340,12 @@ export async function submitGame(
       timeSeconds,
       completedAtMs,
     );
+
+    return {
+      ok: true,
+      ...(keepsakeOffer ? { keepsakeOffer: true } : {}),
+      ...(streakReset ? { streakReset: true } : {}),
+    };
   } catch (error) {
     if (error instanceof AppError) {
       return { ok: false, error: error.code };
@@ -327,8 +353,108 @@ export async function submitGame(
 
     return { ok: false, error: ErrorCode.UNKNOWN_ERROR };
   }
+}
 
-  return { ok: true };
+export type KeepsakeActionResult = { ok: true } | ErrorResult;
+
+export async function applyKeepsake(): Promise<KeepsakeActionResult> {
+  const session = await auth.api.getSession({ headers: await headers() });
+
+  if (!session) {
+    return { ok: false, error: ErrorCode.UNAUTHORIZED };
+  }
+
+  const today = getDailyDate();
+
+  try {
+    const updated = await db
+      .update(userStats)
+      .set({
+        keepsakesAvailable: sql`${userStats.keepsakesAvailable} - 1`,
+        keepsakeOfferDate: null,
+      })
+      .where(
+        and(
+          eq(userStats.userId, session.user.id),
+          eq(userStats.keepsakeOfferDate, today),
+          gt(userStats.keepsakesAvailable, 0),
+        ),
+      )
+      .returning({ userId: userStats.userId });
+
+    if (updated.length !== 1) {
+      return { ok: false, error: ErrorCode.INVALID_GAME_STATE };
+    }
+
+    return { ok: true };
+  } catch (error) {
+    if (error instanceof AppError) {
+      return { ok: false, error: error.code };
+    }
+
+    return { ok: false, error: ErrorCode.UNKNOWN_ERROR };
+  }
+}
+
+export async function declineKeepsake(): Promise<KeepsakeActionResult> {
+  const session = await auth.api.getSession({ headers: await headers() });
+
+  if (!session) {
+    return { ok: false, error: ErrorCode.UNAUTHORIZED };
+  }
+
+  const today = getDailyDate();
+
+  try {
+    const updated = await db
+      .update(userStats)
+      .set({
+        currentStreak: 1,
+        keepsakeOfferDate: null,
+      })
+      .where(
+        and(
+          eq(userStats.userId, session.user.id),
+          eq(userStats.keepsakeOfferDate, today),
+        ),
+      )
+      .returning({ userId: userStats.userId });
+
+    if (updated.length !== 1) {
+      return { ok: false, error: ErrorCode.INVALID_GAME_STATE };
+    }
+
+    return { ok: true };
+  } catch (error) {
+    if (error instanceof AppError) {
+      return { ok: false, error: error.code };
+    }
+
+    return { ok: false, error: ErrorCode.UNKNOWN_ERROR };
+  }
+}
+
+export async function getPendingKeepsakeOffer(): Promise<{
+  ok: true;
+  pending: boolean;
+} | null> {
+  const session = await auth.api.getSession({ headers: await headers() });
+
+  if (!session) {
+    return null;
+  }
+
+  const today = getDailyDate();
+  const [statsRow] = await db
+    .select({ keepsakeOfferDate: userStats.keepsakeOfferDate })
+    .from(userStats)
+    .where(eq(userStats.userId, session.user.id))
+    .limit(1);
+
+  return {
+    ok: true,
+    pending: statsRow?.keepsakeOfferDate === today,
+  };
 }
 
 export const loadTodayCompletedGameState = async (

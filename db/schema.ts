@@ -170,6 +170,9 @@ export const userStats = pgTable(
     lastPlayedDate: text("last_played_date"),
     lastHintDate: text("last_hint_date"),
     hintsUsed: integer("hints_used").default(0).notNull(),
+    keepsakesAvailable: integer("keepsakes_available").default(1).notNull(),
+    lastKeepsakeRefillDate: text("last_keepsake_refill_date"),
+    keepsakeOfferDate: text("keepsake_offer_date"),
   },
   (t) => [
     check(
@@ -179,6 +182,14 @@ export const userStats = pgTable(
     check(
       "user_stats_last_hint_date_format_check",
       sql`(${t.lastHintDate} IS NULL OR ${t.lastHintDate} ~ '^[0-9]{4}-[0-9]{2}-[0-9]{2}$')`,
+    ),
+    check(
+      "user_stats_last_keepsake_refill_date_format_check",
+      sql`(${t.lastKeepsakeRefillDate} IS NULL OR ${t.lastKeepsakeRefillDate} ~ '^[0-9]{4}-[0-9]{2}-[0-9]{2}$')`,
+    ),
+    check(
+      "user_stats_keepsake_offer_date_format_check",
+      sql`(${t.keepsakeOfferDate} IS NULL OR ${t.keepsakeOfferDate} ~ '^[0-9]{4}-[0-9]{2}-[0-9]{2}$')`,
     ),
   ],
 );

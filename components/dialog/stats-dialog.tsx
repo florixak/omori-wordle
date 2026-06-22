@@ -30,9 +30,15 @@ type SummaryGridProps = {
   stats: UserStats;
   userAvatar: string;
   userName: string;
+  isViewingSelf: boolean;
 };
 
-const SummaryGrid = ({ stats, userAvatar, userName }: SummaryGridProps) => (
+const SummaryGrid = ({
+  stats,
+  userAvatar,
+  userName,
+  isViewingSelf,
+}: SummaryGridProps) => (
   <div className="flex flex-col gap-4">
     <div className="flex justify-center items-center gap-2 ">
       <Image
@@ -58,6 +64,11 @@ const SummaryGrid = ({ stats, userAvatar, userName }: SummaryGridProps) => (
       <StatCell value={stats.maxStreak} label="Max streak" />
       <StatCell value={stats.hintsUsed} label="Hints used" />
     </div>
+    {isViewingSelf ? (
+      <p className="text-center text-[0.625rem] sm:text-xs">
+        KEEPSAKES: {stats.keepsakesAvailable} available
+      </p>
+    ) : null}
   </div>
 );
 
@@ -167,6 +178,7 @@ const StatsDialog = ({ open, onOpenChange, userId }: StatsDialogProps) => {
                 stats={statsView.stats}
                 userAvatar={getAvatarSrc(statsView.user.image)}
                 userName={statsView.user.name}
+                isViewingSelf={isViewingSelf}
               />
               <div className="border-t-2 border-black pt-4">
                 <GuessDistributionChart rows={rows} />
