@@ -7,13 +7,21 @@ import { useEffect, useRef, useState } from "react";
 const isGameComplete = (status: GameState["status"]): boolean =>
   status === "won" || status === "lost";
 
-export const useResultDialog = (state: GameState) => {
+export const useResultDialog = (
+  state: GameState,
+  options?: { blocked?: boolean },
+) => {
+  const blocked = options?.blocked ?? false;
   const [open, setOpen] = useState(false);
   const previousStatusRef = useRef(state.status);
   const hasRevealData =
     state.revealedWord !== null && state.answerHint !== null;
 
   useEffect(() => {
+    if (blocked) {
+      return;
+    }
+
     if (!isGameComplete(state.status) || !hasRevealData) {
       previousStatusRef.current = state.status;
       return;
@@ -33,7 +41,7 @@ export const useResultDialog = (state: GameState) => {
     }
 
     setOpen(true);
-  }, [state.status, hasRevealData, state.revealedWord, state.answerHint]);
+  }, [state.status, hasRevealData, state.revealedWord, state.answerHint, blocked]);
 
   return {
     open,
