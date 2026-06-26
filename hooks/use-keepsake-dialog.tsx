@@ -82,7 +82,9 @@ export const useKeepsakeDialog = ({
     onSuccess: () => {
       refreshStreak();
       setOpen(false);
-      omoriToast.success("Your Keepsake fades, but your streak remains.");
+      omoriToast.success(
+        "Your Keepsake holds the line — your streak is safe, but today won't extend it.",
+      );
       onResolved?.("used");
     },
     onError: (error: Error) => {

@@ -38,7 +38,8 @@ const KeepsakeDialog = ({
           <OmoriDialogTitle>Keepsake</OmoriDialogTitle>
         </OmoriDialogHeader>
         <OmoriDialogDescription>
-          A Keepsake can keep this day from fading away.
+          A Keepsake can keep this day from fading away. Your streak stays safe
+          — but the day you missed won&apos;t count toward it.
         </OmoriDialogDescription>
         <OmoriDialogFooter>
           <OmoriButton
